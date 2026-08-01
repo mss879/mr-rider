@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MR.RIDER
 
-## Getting Started
+A members-only cycling club: one shop floor, daily listings, an auction, a
+clearance market and an international coaching pool — all behind a membership
+gate approved by the club admin.
 
-First, run the development server:
+Built with **Next.js 16** (App Router) · **React 19** · **Tailwind CSS v4** ·
+**TypeScript** · **Supabase**.
+
+## Getting started
+
+```bash
+npm install
+```
+
+Copy `.env.example` to `.env.local` and fill in your Supabase URL and anon key,
+then:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Run the database migrations next — see [supabase/README.md](supabase/README.md).
+Until they are run the site serves built-in mock data, so every page still works.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Route | What it is |
+|-------|-----------|
+| `/` | Home — hero, category index, featured stock, today's drop, coaching, auction + clearance |
+| `/shop` | The whole catalog in one place: 12 categories with search, brand, price and condition filters plus sorting |
+| `/daily-listings` | Today's and yesterday's drops (09:00 daily) |
+| `/coaching` | Training programs + the international coaching pool |
+| `/auction` | Live lots with current bids and countdowns |
+| `/clearance` | MR.Rider Clearance Market, sorted by biggest discount |
+| `/apply` | Membership application form (name, email, phone, interest, why) |
+| `/about` · `/contact` | The club story · enquiries form |
+| `/admin` | Back office — applications, clients, enquiries and content management |
 
-## Learn More
+## The membership gate
 
-To learn more about Next.js, take a look at the following resources:
+Visitors can browse the whole site, but prices, buying and bidding render
+**locked** until the club approves them:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. A rider applies at `/apply`.
+2. The admin reviews every answer in the Applications tab at `/admin`.
+3. Approving creates a **client profile** and unlocks the floor.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The gate is driven by a single function in
+[`src/lib/membership.ts`](src/lib/membership.ts) — the member-login phase swaps
+its body for a Supabase auth check and every locked element unlocks at once.
 
-## Deploy on Vercel
+## Admin
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`/admin` — sign in as the superadmin (`admin@mrrider.lk`, created in the
+Supabase dashboard). Tabs:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Applications** — full review cards with every answer; approving creates the client profile
+- **Clients** — approved client profiles, suspend / reactivate
+- **Enquiries** — messages from the contact page
+- **Products** — add / edit / delete stock; drives Shop, Daily Listings and Clearance
+- **Coaching** — training programs and the coaching pool
+- **Auction** — lots, bids and countdown end times
+- **Accounts** — auth accounts and membership status
+
+All writes are enforced server-side by row-level security: only the superadmin
+session can change anything.
+
+## Design
+
+Black / grey / white with a single energetic accent, condensed italic display
+type and hairline grid rules. The accent is one token in
+[`src/app/tokens.css`](src/app/tokens.css) — change that value to re-skin every
+CTA and sale badge.
+
+Product images are hatched placeholders; drop in real photography when it is
+ready and the cards are already shaped for it.

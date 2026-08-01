@@ -1,26 +1,93 @@
+/* Hallmark · macrostructure: Marquee Hero · theme: studied-DNA (see tokens.css stamp) */
 @import "tailwindcss";
+@import "./tokens.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  overflow-x: clip;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-chalk);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Display voice — heavy condensed italic uppercase, the signature of the reference DNA.
+   Reserved for hero + section headlines; card titles stay roman. */
+.headline {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.92;
+  letter-spacing: 0.005em;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* Honest image placeholders — diagonal hatch, no invented stock photography */
+.hatch-dark {
+  background-color: var(--color-carbon);
+  background-image: repeating-linear-gradient(
+    135deg,
+    oklch(100% 0 0 / 0.05) 0 1px,
+    transparent 1px 12px
+  );
+}
+
+.hatch-light {
+  background-color: oklch(93% 0.003 95);
+  background-image: repeating-linear-gradient(
+    135deg,
+    oklch(20% 0.006 270 / 0.07) 0 1px,
+    transparent 1px 12px
+  );
+}
+
+/* Oversized ghost type (outline-only) — the shop-reference DNA */
+.ghost {
+  -webkit-text-stroke: 1px oklch(20% 0.006 270 / 0.22);
+  color: transparent;
+}
+
+.ghost-dark {
+  -webkit-text-stroke: 1px oklch(100% 0 0 / 0.16);
+  color: transparent;
+}
+
+/* Ticker marquee */
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  animation: ticker 30s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

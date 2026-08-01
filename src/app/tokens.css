@@ -1,0 +1,35 @@
+/* Hallmark · macrostructure: Marquee Hero · theme: studied-DNA (source: user reference images — fitness-editorial + cycling-shop)
+ * paper: oklch(87% 0.004 95) · ink: oklch(17% 0.006 270) · accent: oklch(63% 0.21 33) warm signal-orange
+ * display: Barlow Condensed 700–900 italic UC · body: Archivo · mono: IBM Plex Mono
+ * nav: N6 masthead · footer: Ft5 statement · enrichment: hatch placeholders (no stock photos)
+ * studied: yes · DNA-source: image (user reference) · genre: editorial (sport)
+ */
+@theme inline {
+  /* paper + ink */
+  --color-paper: oklch(87% 0.004 95);
+  --color-paper-2: oklch(91% 0.003 95);
+  --color-chalk: oklch(97.5% 0.002 95);
+  --color-ink: oklch(17% 0.006 270);
+  --color-ink-soft: oklch(40% 0.006 270);
+
+  /* dark panels */
+  --color-carbon: oklch(20% 0.006 270);
+  --color-carbon-2: oklch(26% 0.007 270);
+
+  /* rules + hairlines */
+  --color-line: oklch(76% 0.005 95);
+  --color-line-dark: oklch(34% 0.006 270);
+
+  /* the single energetic accent — swap this one value to re-skin CTAs site-wide */
+  --color-accent: oklch(63% 0.21 33);
+  --color-accent-deep: oklch(52% 0.19 33);
+
+  /* type roles */
+  --font-display: var(--font-barlow), "Arial Narrow", sans-serif;
+  --font-body: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-plex), ui-monospace, monospace;
+
+  /* motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
