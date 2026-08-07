@@ -22,6 +22,8 @@ type ProductRow = {
   name: string;
   brand: string;
   category: string;
+  subcategory: string | null;
+  collections: string[] | null;
   price: number;
   compare_at: number | null;
   condition: "new" | "pre-owned";
@@ -85,6 +87,8 @@ const toProduct = (r: ProductRow): Product => ({
   name: r.name,
   brand: r.brand,
   category: r.category,
+  subcategory: r.subcategory ?? "",
+  collections: r.collections ?? undefined,
   price: Number(r.price),
   compareAt: r.compare_at == null ? undefined : Number(r.compare_at),
   condition: r.condition,
@@ -173,3 +177,31 @@ export const getPrograms = () =>
 /** AUCTION — /auction (migration 04) */
 export const getLots = () =>
   fromTable<LotRow, Lot>("auction_lots", toLot, mockLots, "lot_no");
+
+/** NAVIGATION — which menu entries actually carry stock.
+    Developer note from the client sheet: hide categories with no stock and
+    never render empty future-expansion sections. */
+export type NavAvailability = {
+  categories: string[];
+  subcategories: string[];
+  brands: string[];
+};
+
+export async function getNavAvailability(): Promise<NavAvailability> {
+  const products = await getProducts();
+  const categories = new Set<string>();
+  const subcategories = new Set<string>();
+  const brands = new Set<string>();
+  for (const p of products) {
+    if (p.stock <= 0) continue;
+    categories.add(p.category);
+    if (p.subcategory) subcategories.add(p.subcategory);
+    brands.add(p.brand);
+    for (const c of p.collections ?? []) brands.add(c);
+  }
+  return {
+    categories: [...categories],
+    subcategories: [...subcategories],
+    brands: [...brands],
+  };
+}

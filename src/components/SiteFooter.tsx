@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { categories } from "@/lib/taxonomy";
 
 const SHOP_LINKS = [
   { href: "/shop", label: "Shop All" },
+  { href: "/brands", label: "Brands" },
+  { href: "/sale", label: "Sale" },
   { href: "/daily-listings", label: "Daily Listings" },
   { href: "/auction", label: "Auction" },
   { href: "/clearance", label: "Clearance Market" },
@@ -21,6 +24,25 @@ export default function SiteFooter() {
         <p className="headline ghost-dark -mb-[0.16em] select-none whitespace-nowrap text-[clamp(4rem,16.5vw,15rem)] leading-none">
           MR.RIDER
         </p>
+      </div>
+      <div className="border-b border-line-dark">
+        <div className="mx-auto max-w-7xl px-6 py-8">
+          <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.22em] text-chalk/40">
+            Shop by Category
+          </p>
+          <ul className="flex flex-wrap gap-x-6 gap-y-3">
+            {categories.map((c) => (
+              <li key={c.slug}>
+                <Link
+                  href={`/shop?cat=${c.slug}`}
+                  className="font-mono text-xs uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-accent"
+                >
+                  {c.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-2 lg:grid-cols-4">
         <div>

@@ -8,12 +8,40 @@ export type RowData = Record<string, unknown>;
 export type FieldDef = {
   key: string;
   label: string;
-  type: "text" | "number" | "select" | "checkbox" | "date" | "datetime" | "textarea";
+  type:
+    | "text"
+    | "number"
+    | "select"
+    | "multiselect"
+    | "checkbox"
+    | "date"
+    | "datetime"
+    | "textarea";
   options?: { value: string; label: string }[];
+  /** Options that depend on other values in the row (e.g. product type follows category). */
+  optionsFor?: (row: RowData) => { value: string; label: string }[];
   required?: boolean;
   placeholder?: string;
   step?: string;
 };
+
+function optionsOf(f: FieldDef, row: RowData): { value: string; label: string }[] {
+  return f.optionsFor ? f.optionsFor(row) : (f.options ?? []);
+}
+
+/* Dependent selects (product type follows category) can hold a value that no
+   longer belongs to the parent — fall back to the first valid option so the
+   form never saves a value that breaks the foreign key. */
+function selectValue(f: FieldDef, row: RowData): string {
+  const current = String(row[f.key] ?? "");
+  if (!f.optionsFor) return current;
+  const opts = f.optionsFor(row);
+  return opts.some((o) => o.value === current) ? current : (opts[0]?.value ?? "");
+}
+
+function asArray(v: unknown): string[] {
+  return Array.isArray(v) ? (v as string[]) : [];
+}
 
 const fieldCls =
   "w-full border border-line bg-chalk px-3 py-2.5 text-sm placeholder:text-ink-soft/60";
@@ -67,6 +95,7 @@ export default function AdminCrud({
     load();
   }, [load]);
 
+
   function openEdit(r: RowData) {
     const v: RowData = { ...r };
     for (const f of fields) {
@@ -84,7 +113,12 @@ export default function AdminCrud({
     if (!editing) return;
     const payload: RowData = { id: editing.id };
     for (const f of fields) {
-      let v = editing[f.key];
+      if (f.type === "multiselect") {
+        payload[f.key] = asArray(editing[f.key]);
+        continue;
+      }
+      let v: unknown =
+        f.type === "select" ? selectValue(f, editing) : editing[f.key];
       if (typeof v === "string") v = v.trim();
       if (f.type === "number") {
         if (v === "" || v == null) v = null;
@@ -182,9 +216,43 @@ export default function AdminCrud({
             {fields.map((f) => (
               <div
                 key={f.key}
-                className={f.type === "textarea" ? "sm:col-span-2 lg:col-span-3" : ""}
+                className={
+                  f.type === "textarea" || f.type === "multiselect"
+                    ? "sm:col-span-2 lg:col-span-3"
+                    : ""
+                }
               >
-                {f.type === "checkbox" ? (
+                {f.type === "multiselect" ? (
+                  <fieldset>
+                    <legend className={labelCls}>{f.label}</legend>
+                    <div className="flex max-h-40 flex-wrap gap-x-5 gap-y-2 overflow-y-auto border border-line bg-chalk px-3 py-2.5">
+                      {optionsOf(f, editing).map((o) => {
+                        const selected = asArray(editing[f.key]);
+                        return (
+                          <label
+                            key={o.value}
+                            className="flex cursor-pointer items-center gap-2 text-sm"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selected.includes(o.value)}
+                              onChange={() =>
+                                setEditing({
+                                  ...editing,
+                                  [f.key]: selected.includes(o.value)
+                                    ? selected.filter((s) => s !== o.value)
+                                    : [...selected, o.value],
+                                })
+                              }
+                              className="size-4 accent-accent"
+                            />
+                            {o.label}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                ) : f.type === "checkbox" ? (
                   <label className="flex cursor-pointer items-center gap-2.5 pt-6 text-sm">
                     <input
                       type="checkbox"
@@ -216,13 +284,13 @@ export default function AdminCrud({
                     ) : f.type === "select" ? (
                       <select
                         id={`f-${table}-${f.key}`}
-                        value={String(editing[f.key] ?? "")}
+                        value={selectValue(f, editing)}
                         onChange={(e) =>
                           setEditing({ ...editing, [f.key]: e.target.value })
                         }
                         className={fieldCls}
                       >
-                        {(f.options ?? []).map((o) => (
+                        {optionsOf(f, editing).map((o) => (
                           <option key={o.value} value={o.value}>
                             {o.label}
                           </option>

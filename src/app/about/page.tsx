@@ -3,7 +3,8 @@ import ArrowCta from "@/components/ArrowCta";
 import Marquee from "@/components/Marquee";
 import PageHero from "@/components/PageHero";
 import SectionHead from "@/components/SectionHead";
-import { categories, coaches, products } from "@/lib/data";
+import { coaches, products } from "@/lib/data";
+import { categories, directoryBrands } from "@/lib/taxonomy";
 
 export const metadata: Metadata = {
   title: "About — MR.RIDER",
@@ -50,7 +51,7 @@ export default function AboutPage() {
           </div>
           <div className="flex flex-col gap-5 text-sm leading-relaxed text-ink-soft lg:col-span-5 lg:border-l lg:border-line lg:pl-8">
             <p>
-              The shop floor carries twelve categories — from bar tape to full
+              The shop floor carries ten categories — from bar tape to full
               race builds — and every item is chosen, checked and priced by
               people who ride. Fresh stock lands every morning at 09:00 in the
               daily listings. What doesn&apos;t move goes to the clearance
@@ -68,6 +69,7 @@ export default function AboutPage() {
       <Marquee
         items={[
           `${categories.length} categories`,
+          `${directoryBrands.length} brands`,
           `${products.length} items on the floor`,
           `${coaches.length} coaches worldwide`,
           "New stock daily — 09:00",

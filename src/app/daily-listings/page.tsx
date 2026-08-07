@@ -5,7 +5,8 @@ import PageHero from "@/components/PageHero";
 import SectionHead from "@/components/SectionHead";
 import Lock from "@/components/Lock";
 import LockedNotice from "@/components/LockedNotice";
-import { categoryName, type Product, usd } from "@/lib/data";
+import { type Product, usd } from "@/lib/data";
+import { brandName, categoryName, subcategoryName } from "@/lib/taxonomy";
 import { getDailyProducts } from "@/lib/db";
 import { getMembershipStatus, isApproved } from "@/lib/membership";
 
@@ -30,7 +31,7 @@ function ListingRows({
       {items.map((p, i) => (
         <Link
           key={p.id}
-          href={`/shop?cat=${p.category}`}
+          href={`/shop?cat=${p.category}&sub=${p.subcategory}`}
           className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-4 border-b border-line py-4 md:grid-cols-[2.5rem_minmax(0,1fr)_10rem_6rem_auto]"
         >
           <span className="font-mono text-[11px] text-ink-soft">
@@ -41,11 +42,11 @@ function ListingRows({
               {p.name}
             </span>
             <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-soft">
-              {p.brand}
+              {brandName(p.brand)}
             </span>
           </span>
           <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft md:block">
-            {categoryName(p.category)}
+            {subcategoryName(p.subcategory) || categoryName(p.category)}
           </span>
           <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft md:block">
             {p.condition === "new" ? "New" : "Pre-owned"}

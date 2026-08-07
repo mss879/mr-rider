@@ -4,7 +4,8 @@ import Marquee from "@/components/Marquee";
 import ProductCard from "@/components/ProductCard";
 import SectionHead from "@/components/SectionHead";
 import Lock from "@/components/Lock";
-import { categories, discountPct, usd } from "@/lib/data";
+import { discountPct, usd } from "@/lib/data";
+import { brandName, categories, directoryBrands } from "@/lib/taxonomy";
 import { getCoaches, getLots, getPrograms, getProducts } from "@/lib/db";
 import { getMembershipStatus, isApproved } from "@/lib/membership";
 
@@ -37,9 +38,9 @@ export default async function Home() {
               A members-only cycling club
             </p>
             <p className="max-w-sm text-sm leading-relaxed text-ink-soft">
-              One shop floor with twelve aisles, fresh listings every morning,
-              a live auction, a clearance market and coaches on four
-              continents. You don&apos;t browse MR.RIDER — you get let in.
+              One shop floor with ten aisles, fresh listings every morning, a
+              live auction, a clearance market and coaches on four continents.
+              You don&apos;t browse MR.RIDER — you get let in.
             </p>
             <div className="bg-carbon p-5 text-chalk">
               <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-accent">
@@ -114,7 +115,7 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-6 py-16 md:py-20">
         <SectionHead
           eyebrow="The shop"
-          title="Twelve aisles. One floor."
+          title="Ten aisles. One floor."
           link={{ href: "/shop", label: "Enter the shop" }}
         />
         <div className="grid grid-cols-2 border-l border-t border-line md:grid-cols-3 xl:grid-cols-4">
@@ -143,6 +144,25 @@ export default async function Home() {
               </span>
             </Link>
           ))}
+        </div>
+
+        {/* Brands stay out of the product aisles — they get their own door. */}
+        <div className="mt-10 flex flex-col gap-4 border border-line bg-chalk p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft">
+              {directoryBrands.length} brands on the floor
+            </p>
+            <p className="truncate font-mono text-xs uppercase tracking-[0.1em]">
+              {directoryBrands
+                .slice(0, 8)
+                .map((b) => b.name)
+                .join(" · ")}{" "}
+              …
+            </p>
+          </div>
+          <ArrowCta href="/brands" className="shrink-0">
+            Shop by brand
+          </ArrowCta>
         </div>
       </section>
 
@@ -175,7 +195,7 @@ export default async function Home() {
             {todaysListings.slice(0, 4).map((p, i) => (
               <Link
                 key={p.id}
-                href={`/shop?cat=${p.category}`}
+                href={`/shop?cat=${p.category}&sub=${p.subcategory}`}
                 className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-baseline gap-4 border-b border-line-dark py-4"
               >
                 <span className="font-mono text-[11px] text-chalk/40">
@@ -186,7 +206,7 @@ export default async function Home() {
                     {p.name}
                   </span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-chalk/50">
-                    {p.brand}
+                    {brandName(p.brand)}
                   </span>
                 </span>
                 {locked ? (

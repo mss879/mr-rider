@@ -2,19 +2,54 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import AdminCrud, { type FieldDef, type RowData } from "./AdminCrud";
-import { categories, usd } from "@/lib/data";
+import { usd } from "@/lib/data";
+import {
+  brandName,
+  brands,
+  categories,
+  subcategoriesOf,
+  subcategoryName,
+} from "@/lib/taxonomy";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
+const brandOptions = [...brands]
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map((b) => ({ value: b.slug, label: b.name }));
+
 const fields: FieldDef[] = [
   { key: "name", label: "Name", type: "text", required: true },
-  { key: "brand", label: "Brand", type: "text", required: true },
+  {
+    key: "brand",
+    label: "Brand",
+    type: "select",
+    required: true,
+    options: brandOptions,
+  },
   {
     key: "category",
     label: "Category",
     type: "select",
     required: true,
     options: categories.map((c) => ({ value: c.slug, label: c.name })),
+  },
+  {
+    key: "subcategory",
+    label: "Product type",
+    type: "select",
+    required: true,
+    // Product types follow the chosen category, future-expansion rows included
+    // so stock can be added before a section goes live.
+    optionsFor: (r: RowData) =>
+      subcategoriesOf(String(r.category ?? categories[0].slug), {
+        includeFuture: true,
+      }).map((s) => ({ value: s.slug, label: `${s.section} · ${s.name}` })),
+  },
+  {
+    key: "collections",
+    label: "Also show under (brand collections — no duplicate product record)",
+    type: "multiselect",
+    options: brandOptions,
   },
   { key: "price", label: "Price (USD)", type: "number", required: true, step: "0.01" },
   { key: "compare_at", label: "Compare-at price (sale strike-through)", type: "number", step: "0.01" },
@@ -30,7 +65,7 @@ const fields: FieldDef[] = [
   { key: "stock", label: "Stock", type: "number", required: true },
   { key: "listed_at", label: "Listed on (drives Daily Listings)", type: "date", required: true },
   { key: "featured", label: "Featured on homepage", type: "checkbox" },
-  { key: "clearance", label: "In the Clearance Market", type: "checkbox" },
+  { key: "clearance", label: "In the Clearance Market / Sale", type: "checkbox" },
 ];
 
 export default function AdminProducts({ sb }: { sb: SupabaseClient }) {
@@ -43,7 +78,10 @@ export default function AdminProducts({ sb }: { sb: SupabaseClient }) {
       fields={fields}
       newRow={() => ({
         id: `p-${Date.now().toString(36)}`,
+        brand: brandOptions[0].value,
         category: categories[0].slug,
+        subcategory: subcategoriesOf(categories[0].slug)[0]?.slug ?? "",
+        collections: [],
         condition: "new",
         stock: 0,
         featured: false,
@@ -52,7 +90,7 @@ export default function AdminProducts({ sb }: { sb: SupabaseClient }) {
       })}
       summary={(r: RowData) => ({
         title: String(r.name ?? ""),
-        meta: `${r.brand} · ${r.category} · ${usd(Number(r.price ?? 0))} · stock ${r.stock} · listed ${r.listed_at}`,
+        meta: `${brandName(String(r.brand ?? ""))} · ${subcategoryName(String(r.subcategory ?? ""))} · ${usd(Number(r.price ?? 0))} · stock ${r.stock} · listed ${r.listed_at}`,
         chips: [
           ...(r.featured ? ["FEATURED"] : []),
           ...(r.clearance ? ["CLEARANCE"] : []),

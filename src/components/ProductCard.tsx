@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Lock from "@/components/Lock";
 import Ph from "@/components/Ph";
-import { type Product, categoryName, discountPct, usd } from "@/lib/data";
+import { type Product, discountPct, usd } from "@/lib/data";
+import { brandName, categoryName, subcategoryName } from "@/lib/taxonomy";
 
 export default function ProductCard({
   p,
@@ -11,10 +12,14 @@ export default function ProductCard({
   locked?: boolean;
 }) {
   const off = discountPct(p);
+  const typeLabel = subcategoryName(p.subcategory) || categoryName(p.category);
+  const href = p.subcategory
+    ? `/shop?cat=${p.category}&sub=${p.subcategory}`
+    : `/shop?cat=${p.category}`;
 
   const media = (
     <>
-      <Ph label={categoryName(p.category)} className="absolute inset-0" />
+      <Ph label={typeLabel} className="absolute inset-0" />
       <span className="absolute left-0 top-3 flex gap-1">
         {off > 0 && (
           <span className="bg-accent px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-chalk">
@@ -49,16 +54,16 @@ export default function ProductCard({
         <div className="relative block aspect-[4/3]">{media}</div>
       ) : (
         <Link
-          href={`/shop?cat=${p.category}`}
+          href={href}
           className="relative block aspect-[4/3]"
-          aria-label={`${p.name} — browse ${categoryName(p.category)}`}
+          aria-label={`${p.name} — browse ${typeLabel}`}
         >
           {media}
         </Link>
       )}
       <div className="flex flex-1 flex-col gap-1 border-t border-line p-4">
         <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-          {p.brand}
+          {brandName(p.brand)}
         </span>
         <h3 className="font-display text-xl font-bold uppercase leading-tight tracking-wide">
           {p.name}
