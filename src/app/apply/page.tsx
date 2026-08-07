@@ -40,8 +40,10 @@ export default function ApplyPage() {
             {STEPS.map((s) => (
               <div key={s.n} className="border-b border-line py-6">
                 <div className="flex items-baseline gap-4">
-                  <span className="headline text-3xl text-accent">{s.n}</span>
-                  <div>
+                  <span className="headline shrink-0 whitespace-nowrap text-3xl text-accent">
+                    {s.n}
+                  </span>
+                  <div className="min-w-0">
                     <p className="font-display mb-1 text-xl font-bold uppercase tracking-wide">
                       {s.t}
                     </p>
