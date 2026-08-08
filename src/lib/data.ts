@@ -25,6 +25,8 @@ export type Product = {
   subcategory: string;
   /** Extra brand/collection slugs the product also belongs to (no duplicate records). */
   collections?: string[];
+  /** Up to five photos — storage paths or URLs. images[0] is the primary shot. */
+  images?: string[];
   price: number;
   compareAt?: number;
   condition: "new" | "pre-owned";

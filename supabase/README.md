@@ -22,6 +22,7 @@ Run them **in numeric order** in the Supabase dashboard → **SQL Editor**
 | 10 | `10_superadmin_repair.sql` | Repair: creates/promotes the admin profile if the user predates 07/08 | 07, 08 |
 | 11 | `11_membership_applications.sql` | /apply form → applications + client profiles on approval | 08 |
 | 12 | `12_category_restructure.sql` | Client-approved product navigation: 10 categories, 83 product types, 25 brands | 01, 09 |
+| 13 | `13_product_images.sql` | Product photography: `product-images` Storage bucket + `products.images` (max 5) | 01, 08 |
 
 Every file is idempotent (`if not exists` / `on conflict do nothing`), so
 re-running one is safe.
@@ -67,6 +68,12 @@ server console.
   `subcategories` and `brands`.
 - **One product, several brand collections**: set `collections` (e.g.
   `'{specialized}'` on an S-Works item) instead of duplicating the row.
+- **Product photos**: up to 5 per product, uploaded from /admin → Products →
+  Edit. `images[1]` is the card shot; `images[2]` swaps in on hover. Files live
+  in the public `product-images` bucket and are stored as object paths — an
+  absolute `https://` URL is also accepted if the image is hosted elsewhere.
+  Removing an image deletes the file on **Save**; **Cancel** discards anything
+  uploaded during that edit. Deleting a product deletes its files.
 - **Clearance / Sale**: set `clearance = true` and a `compare_at` price on any
   product — it appears on /clearance (and /sale) sorted by discount.
 - **Auction**: insert into `auction_lots`; countdowns render from `ends_at`.

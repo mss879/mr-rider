@@ -2,6 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  newImagePath,
+  productImageUrl,
+  rejectReason,
+  ALLOWED_IMAGE_TYPES,
+} from "@/lib/images";
 
 export type RowData = Record<string, unknown>;
 
@@ -13,6 +19,7 @@ export type FieldDef = {
     | "number"
     | "select"
     | "multiselect"
+    | "images"
     | "checkbox"
     | "date"
     | "datetime"
@@ -23,6 +30,9 @@ export type FieldDef = {
   required?: boolean;
   placeholder?: string;
   step?: string;
+  /** images only — Storage bucket to upload into, and how many are allowed. */
+  bucket?: string;
+  max?: number;
 };
 
 function optionsOf(f: FieldDef, row: RowData): { value: string; label: string }[] {
@@ -42,6 +52,8 @@ function selectValue(f: FieldDef, row: RowData): string {
 function asArray(v: unknown): string[] {
   return Array.isArray(v) ? (v as string[]) : [];
 }
+
+type StoredFile = { bucket: string; path: string };
 
 const fieldCls =
   "w-full border border-line bg-chalk px-3 py-2.5 text-sm placeholder:text-ink-soft/60";
@@ -83,7 +95,28 @@ export default function AdminCrud({
   const [editing, setEditing] = useState<RowData | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /* Uploads land in Storage immediately so the admin can see a thumbnail, but
+     nothing is destroyed until the form is resolved: saving deletes the files
+     the admin removed, cancelling deletes the files this session uploaded. */
+  const [sessionUploads, setSessionUploads] = useState<StoredFile[]>([]);
+  const [sessionRemovals, setSessionRemovals] = useState<StoredFile[]>([]);
+
+  const dropFiles = useCallback(
+    async (items: StoredFile[]) => {
+      const byBucket = new Map<string, string[]>();
+      for (const { bucket, path } of items) {
+        if (/^https?:\/\//i.test(path)) continue; // external URL, nothing of ours to delete
+        byBucket.set(bucket, [...(byBucket.get(bucket) ?? []), path]);
+      }
+      for (const [bucket, paths] of byBucket) {
+        await sb.storage.from(bucket).remove(paths);
+      }
+    },
+    [sb],
+  );
 
   const load = useCallback(async () => {
     const { data, error: err } = await sb.from(table).select("*").order(orderBy);
@@ -103,9 +136,85 @@ export default function AdminCrud({
         v[f.key] = toLocalInput(v[f.key] as string);
       }
     }
+    setSessionUploads([]);
+    setSessionRemovals([]);
     setEditing(v);
     setIsNew(false);
     setError(null);
+  }
+
+  /** Abandon the form — anything uploaded during it never made it to a row. */
+  async function cancelEdit() {
+    const orphans = sessionUploads;
+    setSessionUploads([]);
+    setSessionRemovals([]);
+    setEditing(null);
+    if (orphans.length > 0) await dropFiles(orphans);
+  }
+
+  async function uploadImages(f: FieldDef, fileList: FileList | null) {
+    if (!editing || !fileList || fileList.length === 0) return;
+    const bucket = f.bucket;
+    if (!bucket) return;
+    const max = f.max ?? 5;
+    const current = asArray(editing[f.key]);
+    const room = max - current.length;
+    if (room <= 0) {
+      setError(`${f.label}: ${max} is the maximum`);
+      return;
+    }
+
+    const files = Array.from(fileList).slice(0, room);
+    const skipped =
+      fileList.length > room
+        ? [`only ${room} more image${room === 1 ? "" : "s"} allowed — extras skipped`]
+        : [];
+
+    setUploading(true);
+    setError(null);
+    const added: string[] = [];
+    for (const file of files) {
+      const reason = rejectReason(file);
+      if (reason) {
+        skipped.push(reason);
+        continue;
+      }
+      const path = newImagePath(String(editing.id ?? "product"), file);
+      const { error: err } = await sb.storage
+        .from(bucket)
+        .upload(path, file, { cacheControl: "31536000", upsert: false });
+      if (err) {
+        skipped.push(`${file.name}: ${err.message}`);
+        continue;
+      }
+      setSessionUploads((prev) => [...prev, { bucket, path }]);
+      added.push(path);
+    }
+    setUploading(false);
+    if (added.length > 0) {
+      setEditing((prev) =>
+        prev ? { ...prev, [f.key]: [...asArray(prev[f.key]), ...added] } : prev,
+      );
+    }
+    if (skipped.length > 0) setError(skipped.join(" · "));
+  }
+
+  function removeImage(f: FieldDef, path: string) {
+    if (!editing) return;
+    setSessionRemovals((prev) => [...prev, { bucket: f.bucket ?? "", path }]);
+    setEditing({
+      ...editing,
+      [f.key]: asArray(editing[f.key]).filter((p) => p !== path),
+    });
+  }
+
+  function moveImage(f: FieldDef, from: number, to: number) {
+    if (!editing) return;
+    const list = [...asArray(editing[f.key])];
+    if (to < 0 || to >= list.length) return;
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    setEditing({ ...editing, [f.key]: list });
   }
 
   async function save(e: React.FormEvent) {
@@ -113,7 +222,7 @@ export default function AdminCrud({
     if (!editing) return;
     const payload: RowData = { id: editing.id };
     for (const f of fields) {
-      if (f.type === "multiselect") {
+      if (f.type === "multiselect" || f.type === "images") {
         payload[f.key] = asArray(editing[f.key]);
         continue;
       }
@@ -152,7 +261,12 @@ export default function AdminCrud({
       setError(err.message);
       return;
     }
+    // The row is saved — now bin the images the admin took off it.
+    const removed = sessionRemovals;
+    setSessionUploads([]);
+    setSessionRemovals([]);
     setEditing(null);
+    if (removed.length > 0) await dropFiles(removed);
     load();
   }
 
@@ -163,8 +277,17 @@ export default function AdminCrud({
       .from(table)
       .delete()
       .eq("id", r.id as string);
-    if (err) setError(err.message);
-    else load();
+    if (err) {
+      setError(err.message);
+      return;
+    }
+    // Take the product's photography with it.
+    for (const f of fields) {
+      if (f.type !== "images" || !f.bucket) continue;
+      const paths = asArray(r[f.key]).map((path) => ({ bucket: f.bucket!, path }));
+      if (paths.length > 0) await dropFiles(paths);
+    }
+    load();
   }
 
   async function applyQuick(r: RowData, patch: RowData) {
@@ -188,6 +311,8 @@ export default function AdminCrud({
         <button
           type="button"
           onClick={() => {
+            setSessionUploads([]);
+            setSessionRemovals([]);
             setEditing(newRow());
             setIsNew(true);
             setError(null);
@@ -217,12 +342,98 @@ export default function AdminCrud({
               <div
                 key={f.key}
                 className={
-                  f.type === "textarea" || f.type === "multiselect"
+                  f.type === "textarea" ||
+                  f.type === "multiselect" ||
+                  f.type === "images"
                     ? "sm:col-span-2 lg:col-span-3"
                     : ""
                 }
               >
-                {f.type === "multiselect" ? (
+                {f.type === "images" ? (
+                  (() => {
+                    const imgs = asArray(editing[f.key]);
+                    const max = f.max ?? 5;
+                    return (
+                      <fieldset>
+                        <legend className={labelCls}>
+                          {f.label} — {imgs.length}/{max}
+                        </legend>
+                        {imgs.length > 0 && (
+                          <ul className="mb-3 flex flex-wrap gap-3">
+                            {imgs.map((path, idx) => (
+                              <li
+                                key={path}
+                                className="w-32 border border-line bg-chalk p-1.5"
+                              >
+                                <span className="relative block aspect-square overflow-clip bg-paper-2">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={productImageUrl(path)}
+                                    alt={`${String(editing.name ?? "Product")} — photo ${idx + 1}`}
+                                    className="size-full object-cover"
+                                  />
+                                  {idx === 0 && (
+                                    <span className="absolute left-0 top-0 bg-accent px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-[0.12em] text-chalk">
+                                      MAIN
+                                    </span>
+                                  )}
+                                </span>
+                                <span className="mt-1.5 flex items-center justify-between gap-1">
+                                  <span className="flex gap-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => moveImage(f, idx, idx - 1)}
+                                      disabled={idx === 0}
+                                      aria-label="Move image earlier"
+                                      className="border border-line px-1.5 py-0.5 font-mono text-[10px] disabled:opacity-30"
+                                    >
+                                      ←
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => moveImage(f, idx, idx + 1)}
+                                      disabled={idx === imgs.length - 1}
+                                      aria-label="Move image later"
+                                      className="border border-line px-1.5 py-0.5 font-mono text-[10px] disabled:opacity-30"
+                                    >
+                                      →
+                                    </button>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeImage(f, path)}
+                                    className="font-mono text-[10px] uppercase tracking-[0.1em] text-accent-deep hover:underline"
+                                  >
+                                    Remove
+                                  </button>
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        <input
+                          id={`f-${table}-${f.key}`}
+                          type="file"
+                          accept={ALLOWED_IMAGE_TYPES.join(",")}
+                          multiple
+                          disabled={uploading || imgs.length >= max}
+                          onChange={(e) => {
+                            uploadImages(f, e.target.files);
+                            e.target.value = "";
+                          }}
+                          className="block w-full text-sm file:mr-3 file:border-0 file:bg-ink file:px-4 file:py-2 file:font-mono file:text-[10px] file:font-semibold file:uppercase file:tracking-[0.14em] file:text-chalk disabled:opacity-50"
+                        />
+                        <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">
+                          {uploading
+                            ? "Uploading…"
+                            : imgs.length >= max
+                              ? `Maximum ${max} images reached — remove one to add another`
+                              : "JPEG, PNG, WebP or AVIF · up to 5MB each · first image is the card shot"}
+                        </p>
+                      </fieldset>
+                    );
+                  })()
+                ) : f.type === "multiselect" ? (
                   <fieldset>
                     <legend className={labelCls}>{f.label}</legend>
                     <div className="flex max-h-40 flex-wrap gap-x-5 gap-y-2 overflow-y-auto border border-line bg-chalk px-3 py-2.5">
@@ -325,14 +536,14 @@ export default function AdminCrud({
           <div className="mt-6 flex gap-3">
             <button
               type="submit"
-              disabled={busy}
+              disabled={busy || uploading}
               className={`${btnSm} bg-ink px-5 py-2.5 text-chalk hover:bg-accent-deep disabled:opacity-60`}
             >
-              {busy ? "Saving…" : "Save"}
+              {busy ? "Saving…" : uploading ? "Uploading…" : "Save"}
             </button>
             <button
               type="button"
-              onClick={() => setEditing(null)}
+              onClick={cancelEdit}
               className={`${btnSm} border border-line px-5 py-2.5 text-ink-soft hover:border-ink hover:text-ink`}
             >
               Cancel
@@ -344,11 +555,29 @@ export default function AdminCrud({
       <div className="border-t border-line">
         {rows.map((r) => {
           const s = summary(r);
+          const imageField = fields.find((f) => f.type === "images");
+          const thumb = imageField ? asArray(r[imageField.key])[0] : undefined;
           return (
             <div
               key={String(r.id)}
               className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-line py-3.5"
             >
+              {imageField &&
+                (thumb ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={productImageUrl(thumb)}
+                    alt=""
+                    className="size-12 shrink-0 border border-line object-cover"
+                  />
+                ) : (
+                  <span
+                    aria-hidden
+                    className="grid size-12 shrink-0 place-items-center border border-dashed border-line font-mono text-[9px] uppercase tracking-[0.1em] text-ink-soft"
+                  >
+                    No img
+                  </span>
+                ))}
               <div className="min-w-0 flex-1 basis-56">
                 <p className="font-display text-lg font-bold uppercase leading-tight tracking-wide">
                   {s.title}

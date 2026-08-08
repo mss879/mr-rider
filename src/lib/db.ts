@@ -24,6 +24,7 @@ type ProductRow = {
   category: string;
   subcategory: string | null;
   collections: string[] | null;
+  images: string[] | null;
   price: number;
   compare_at: number | null;
   condition: "new" | "pre-owned";
@@ -89,6 +90,7 @@ const toProduct = (r: ProductRow): Product => ({
   category: r.category,
   subcategory: r.subcategory ?? "",
   collections: r.collections ?? undefined,
+  images: r.images ?? undefined,
   price: Number(r.price),
   compareAt: r.compare_at == null ? undefined : Number(r.compare_at),
   condition: r.condition,

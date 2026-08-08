@@ -3,6 +3,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import AdminCrud, { type FieldDef, type RowData } from "./AdminCrud";
 import { usd } from "@/lib/data";
+import { MAX_PRODUCT_IMAGES, PRODUCT_IMAGE_BUCKET } from "@/lib/images";
 import {
   brandName,
   brands,
@@ -51,6 +52,13 @@ const fields: FieldDef[] = [
     type: "multiselect",
     options: brandOptions,
   },
+  {
+    key: "images",
+    label: "Product images",
+    type: "images",
+    bucket: PRODUCT_IMAGE_BUCKET,
+    max: MAX_PRODUCT_IMAGES,
+  },
   { key: "price", label: "Price (USD)", type: "number", required: true, step: "0.01" },
   { key: "compare_at", label: "Compare-at price (sale strike-through)", type: "number", step: "0.01" },
   {
@@ -82,6 +90,7 @@ export default function AdminProducts({ sb }: { sb: SupabaseClient }) {
         category: categories[0].slug,
         subcategory: subcategoriesOf(categories[0].slug)[0]?.slug ?? "",
         collections: [],
+        images: [],
         condition: "new",
         stock: 0,
         featured: false,
