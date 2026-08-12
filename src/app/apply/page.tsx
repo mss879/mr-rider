@@ -22,7 +22,7 @@ const STEPS = [
   {
     n: "03",
     t: "Get approved",
-    d: "The admin opens your client profile and the whole floor unlocks: prices, bids, coaching.",
+    d: "The admin opens your client profile and the whole floor unlocks: bids, coaching, first call on the drop.",
   },
 ];
 

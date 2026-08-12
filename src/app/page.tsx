@@ -3,30 +3,22 @@ import ArrowCta from "@/components/ArrowCta";
 import Marquee from "@/components/Marquee";
 import ProductCard from "@/components/ProductCard";
 import SectionHead from "@/components/SectionHead";
-import Lock from "@/components/Lock";
-import { discountPct, usd } from "@/lib/data";
-import { brandName, categories, directoryBrands } from "@/lib/taxonomy";
+import { brandName, categories, directoryBrands, subcategoryName } from "@/lib/taxonomy";
 import { getCoaches, getLots, getPrograms, getProducts } from "@/lib/db";
-import { getMembershipStatus, isApproved } from "@/lib/membership";
 
 // Re-fetch backend data at most every 60s
 export const revalidate = 60;
 
 export default async function Home() {
-  const [products, coaches, programs, lots, status] = await Promise.all([
+  const [products, coaches, programs, lots] = await Promise.all([
     getProducts(),
     getCoaches(),
     getPrograms(),
     getLots(),
-    getMembershipStatus(),
   ]);
-  const locked = !isApproved(status);
   const featuredItems = products.filter((p) => p.featured);
   const todaysListings = products.filter((p) => p.addedDaysAgo === 0);
-  const clearanceItems = products.filter((p) => p.clearance && p.compareAt);
-  const maxOff = clearanceItems.length
-    ? Math.max(...clearanceItems.map(discountPct))
-    : 0;
+  const clearanceItems = products.filter((p) => p.clearance);
 
   return (
     <>
@@ -38,9 +30,9 @@ export default async function Home() {
               A members-only cycling club
             </p>
             <p className="max-w-sm text-sm leading-relaxed text-ink-soft">
-              One shop floor with ten aisles, fresh listings every morning, a
-              live auction, a clearance market and coaches on four continents.
-              You don&apos;t browse MR.RIDER — you get let in.
+              One shop floor with {categories.length} aisles, fresh listings
+              every morning, a live auction, a clearance market and coaches on
+              four continents. You don&apos;t browse MR.RIDER — you get let in.
             </p>
             <div className="bg-carbon p-5 text-chalk">
               <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-accent">
@@ -115,7 +107,7 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-6 py-16 md:py-20">
         <SectionHead
           eyebrow="The shop"
-          title="Ten aisles. One floor."
+          title={`${categories.length} aisles. One floor.`}
           link={{ href: "/shop", label: "Enter the shop" }}
         />
         <div className="grid grid-cols-2 border-l border-t border-line md:grid-cols-3 xl:grid-cols-4">
@@ -176,7 +168,7 @@ export default async function Home() {
           />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {featuredItems.map((p) => (
-              <ProductCard key={p.id} p={p} locked={locked} />
+              <ProductCard key={p.id} p={p} />
             ))}
           </div>
         </div>
@@ -209,15 +201,9 @@ export default async function Home() {
                     {brandName(p.brand)}
                   </span>
                 </span>
-                {locked ? (
-                  <span className="flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-chalk/60">
-                    <Lock /> Members
-                  </span>
-                ) : (
-                  <span className="font-mono text-sm font-semibold">
-                    {usd(p.price)}
-                  </span>
-                )}
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-chalk/50">
+                  {subcategoryName(p.subcategory)}
+                </span>
               </Link>
             ))}
           </div>
@@ -313,17 +299,17 @@ export default async function Home() {
             aria-hidden
             className="headline ghost pointer-events-none absolute right-5 top-4 select-none text-[clamp(2.5rem,5vw,4.25rem)] leading-none"
           >
-            −{maxOff}%
+            LAST CALL
           </span>
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent-deep">
-            {clearanceItems.length} items · up to −{maxOff}%
+            {clearanceItems.length} items · end of line
           </p>
           <h2 className="headline text-[clamp(2rem,4.5vw,3.2rem)]">
             Clearance market.
           </h2>
           <p className="max-w-sm text-sm leading-relaxed text-ink-soft">
-            End of line and race-used stock, priced to leave the building.
-            When it&apos;s gone, it&apos;s gone.
+            End of line, last sizes and race-used stock on its way out of the
+            building. When it&apos;s gone, it&apos;s gone.
           </p>
           <ArrowCta href="/clearance" className="mt-auto w-fit">
             Raid the market

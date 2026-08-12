@@ -14,17 +14,9 @@ import {
   subcategoryName,
 } from "@/lib/taxonomy";
 
-type PriceBand = "all" | "u50" | "50-200" | "200-1000" | "1000p";
 type Condition = "all" | "new" | "pre-owned";
-type Sort = "featured" | "new" | "asc" | "desc" | "availability";
-
-const PRICE_BANDS: { value: PriceBand; label: string }[] = [
-  { value: "all", label: "Any price" },
-  { value: "u50", label: "Under $50" },
-  { value: "50-200", label: "$50 – $200" },
-  { value: "200-1000", label: "$200 – $1,000" },
-  { value: "1000p", label: "$1,000 +" },
-];
+/* No price on the floor, so no price band and no price sort. */
+type Sort = "featured" | "new" | "availability";
 
 const CONDITIONS: { value: Condition; label: string }[] = [
   { value: "all", label: "All" },
@@ -32,26 +24,16 @@ const CONDITIONS: { value: Condition; label: string }[] = [
   { value: "pre-owned", label: "Pre-owned" },
 ];
 
-function inBand(price: number, band: PriceBand): boolean {
-  if (band === "u50") return price < 50;
-  if (band === "50-200") return price >= 50 && price <= 200;
-  if (band === "200-1000") return price > 200 && price <= 1000;
-  if (band === "1000p") return price > 1000;
-  return true;
-}
-
 export default function ShopBrowser({
   products,
   initialCategory,
   initialSubcategory,
   initialBrand,
-  locked = false,
 }: {
   products: Product[];
   initialCategory?: string;
   initialSubcategory?: string;
   initialBrand?: string;
-  locked?: boolean;
 }) {
   const [q, setQ] = useState("");
   const [cats, setCats] = useState<Set<string>>(
@@ -63,10 +45,9 @@ export default function ShopBrowser({
   const [brandSet, setBrandSet] = useState<Set<string>>(
     () => new Set(initialBrand ? [initialBrand] : []),
   );
-  const [band, setBand] = useState<PriceBand>("all");
   const [cond, setCond] = useState<Condition>("all");
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [saleOnly, setSaleOnly] = useState(false);
+  const [clearanceOnly, setClearanceOnly] = useState(false);
   const [sort, setSort] = useState<Sort>("featured");
   const [panelOpen, setPanelOpen] = useState(false);
 
@@ -101,10 +82,9 @@ export default function ShopBrowser({
     cats.size +
     subs.size +
     brandSet.size +
-    (band !== "all" ? 1 : 0) +
     (cond !== "all" ? 1 : 0) +
     (inStockOnly ? 1 : 0) +
-    (saleOnly ? 1 : 0) +
+    (clearanceOnly ? 1 : 0) +
     (q.trim() ? 1 : 0);
 
   const filtered = useMemo(() => {
@@ -120,15 +100,12 @@ export default function ShopBrowser({
       if (subs.size > 0 && !subs.has(p.subcategory)) return false;
       if (brandSet.size > 0 && ![...brandSet].some((b) => matchesBrand(p, b)))
         return false;
-      if (!inBand(p.price, band)) return false;
       if (cond !== "all" && p.condition !== cond) return false;
       if (inStockOnly && p.stock <= 0) return false;
-      if (saleOnly && !(p.clearance && p.compareAt)) return false;
+      if (clearanceOnly && !p.clearance) return false;
       return true;
     });
-    if (sort === "asc") list.sort((a, b) => a.price - b.price);
-    else if (sort === "desc") list.sort((a, b) => b.price - a.price);
-    else if (sort === "new") list.sort((a, b) => a.addedDaysAgo - b.addedDaysAgo);
+    if (sort === "new") list.sort((a, b) => a.addedDaysAgo - b.addedDaysAgo);
     else if (sort === "availability") list.sort((a, b) => b.stock - a.stock);
     else
       list.sort(
@@ -137,7 +114,7 @@ export default function ShopBrowser({
           a.addedDaysAgo - b.addedDaysAgo,
       );
     return list;
-  }, [products, q, cats, subs, brandSet, band, cond, inStockOnly, saleOnly, sort]);
+  }, [products, q, cats, subs, brandSet, cond, inStockOnly, clearanceOnly, sort]);
 
   const toggle = (set: Set<string>, value: string) => {
     const next = new Set(set);
@@ -166,10 +143,9 @@ export default function ShopBrowser({
     setCats(new Set());
     setSubs(new Set());
     setBrandSet(new Set());
-    setBand("all");
     setCond("all");
     setInStockOnly(false);
-    setSaleOnly(false);
+    setClearanceOnly(false);
   };
 
   const catCounts = useMemo(() => {
@@ -255,8 +231,6 @@ export default function ShopBrowser({
           >
             <option value="featured">Featured</option>
             <option value="new">Newest</option>
-            <option value="asc">Price ↑</option>
-            <option value="desc">Price ↓</option>
             <option value="availability">Availability</option>
           </select>
         </label>
@@ -355,29 +329,6 @@ export default function ShopBrowser({
 
         <fieldset className="mb-7">
           <legend className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
-            Price
-          </legend>
-          <div className="flex flex-col gap-2">
-            {PRICE_BANDS.map((pb) => (
-              <label
-                key={pb.value}
-                className="flex cursor-pointer items-center gap-2.5 text-sm"
-              >
-                <input
-                  type="radio"
-                  name="price"
-                  checked={band === pb.value}
-                  onChange={() => setBand(pb.value)}
-                  className="size-4 shrink-0 accent-accent"
-                />
-                {pb.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="mb-7">
-          <legend className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
             Condition
           </legend>
           <div className="flex flex-col gap-2">
@@ -416,11 +367,11 @@ export default function ShopBrowser({
             <label className="flex cursor-pointer items-center gap-2.5 text-sm">
               <input
                 type="checkbox"
-                checked={saleOnly}
-                onChange={() => setSaleOnly((v) => !v)}
+                checked={clearanceOnly}
+                onChange={() => setClearanceOnly((v) => !v)}
                 className="size-4 shrink-0 accent-accent"
               />
-              On sale
+              Clearance stock
             </label>
           </div>
         </fieldset>
@@ -445,7 +396,7 @@ export default function ShopBrowser({
         {filtered.length > 0 ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((p) => (
-              <ProductCard key={p.id} p={p} locked={locked} />
+              <ProductCard key={p.id} p={p} />
             ))}
           </div>
         ) : (

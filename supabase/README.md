@@ -23,9 +23,23 @@ Run them **in numeric order** in the Supabase dashboard → **SQL Editor**
 | 11 | `11_membership_applications.sql` | /apply form → applications + client profiles on approval | 08 |
 | 12 | `12_category_restructure.sql` | Client-approved product navigation: 10 categories, 83 product types, 25 brands | 01, 09 |
 | 13 | `13_product_images.sql` | Product photography: `product-images` Storage bucket + `products.images` (max 5) | 01, 08 |
+| 14 | `14_product_inquiries.sql` | Inquiry inbox: threads, chat messages, `inquiry-files` bucket, RLS + Realtime | 07, 08 |
+| 15 | `15_pricing_retired.sql` | No prices on the floor: `price` defaults to 0, Clearance follows the flag | 01 |
+| 16 | `16_road_bikes_framesets_split.sql` | Road Bikes and Framesets become two separate categories (10 → 11) | 12 |
 
 Every file is idempotent (`if not exists` / `on conflict do nothing`), so
-re-running one is safe.
+re-running one is safe on its own. Two ordering caveats:
+
+- **Re-running 12 → re-run 16 after it.** 12 recreates the combined
+  `road-bikes-framesets` category and re-parents both product types back
+  onto it.
+- **Re-running 05, 12 or 13 → re-run 15 after it.** All three create
+  `clearance_items` with the old `compare_at is not null` clause, which
+  empties the Clearance Market now that stock carries no prices.
+
+Run **15 before deploying the price-free build** — the admin product form
+stops sending a price, and `products.price` is NOT NULL with no default
+until 15 adds one.
 
 ## Migration 12 — read before running
 
@@ -74,8 +88,13 @@ server console.
   absolute `https://` URL is also accepted if the image is hosted elsewhere.
   Removing an image deletes the file on **Save**; **Cancel** discards anything
   uploaded during that edit. Deleting a product deletes its files.
-- **Clearance / Sale**: set `clearance = true` and a `compare_at` price on any
-  product — it appears on /clearance (and /sale) sorted by discount.
+- **Clearance / Sale**: set `clearance = true` on any product — it appears on
+  /clearance (and /sale). There are no prices, so no discount to sort by;
+  the rail is ordered newest first.
+- **Inquiries**: threads live in `inquiries` / `inquiry_messages` and are
+  answered from /admin → Inquiry Inbox. Attachments sit in the private
+  `inquiry-files` bucket, keyed `<inquiry-id>/<uuid>.<ext>`. Nothing here is
+  deleted by the app — the conversation is the record.
 - **Auction**: insert into `auction_lots`; countdowns render from `ends_at`.
 - **Contact messages**: read them in Table Editor → `contact_messages`
   (write-only from the site; no public read access).

@@ -12,6 +12,7 @@ import {
   type MenuSection,
 } from "@/lib/taxonomy";
 import type { NavAvailability } from "@/lib/db";
+import { useSession } from "@/lib/useSession";
 
 /* Club navigation — the product categories live in the Shop mega-menu,
    Brands and Sale are the two utility links from the client sheet. */
@@ -23,7 +24,7 @@ const CLUB_NAV = [
   { href: "/contact", label: "Contact" },
 ];
 
-const EMPTY: NavAvailability = { categories: [], subcategories: [], brands: [] };
+const EMPTY: NavAvailability = { categories: [], subcategories: [], brands: {} };
 
 type VisibleSection = MenuSection & { items: string[] };
 type VisibleCategory = Category & { sections: VisibleSection[] };
@@ -42,21 +43,24 @@ function visibleMenu(availability: NavAvailability): VisibleCategory[] {
 
   const hasCat = new Set(availability.categories);
   const hasSub = new Set(availability.subcategories);
-  const hasBrand = new Set(availability.brands);
 
   const menu = categories
     .filter((c) => hasCat.has(c.slug))
-    .map((c) => ({
-      ...c,
-      sections: c.sections
-        .map((s) => ({
-          ...s,
-          items: s.items.filter((slug) =>
-            s.kind === "brand" ? hasBrand.has(slug) : hasSub.has(slug),
-          ),
-        }))
-        .filter((s) => s.items.length > 0),
-    }))
+    .map((c) => {
+      // Brand links are checked against this aisle's stock, not the shop's.
+      const hasBrand = new Set(availability.brands[c.slug] ?? []);
+      return {
+        ...c,
+        sections: c.sections
+          .map((s) => ({
+            ...s,
+            items: s.items.filter((slug) =>
+              s.kind === "brand" ? hasBrand.has(slug) : hasSub.has(slug),
+            ),
+          }))
+          .filter((s) => s.items.length > 0),
+      };
+    })
     .filter((c) => c.sections.length > 0);
 
   // Catalog hasn't been migrated onto this taxonomy yet — show the structure
@@ -84,6 +88,7 @@ export default function SiteHeader({
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [openMobileCat, setOpenMobileCat] = useState<string | null>(null);
   const pathname = usePathname();
+  const { session } = useSession();
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const menu = useMemo(() => visibleMenu(availability), [availability]);
@@ -193,6 +198,12 @@ export default function SiteHeader({
           </nav>
 
           <div className="flex items-center gap-4">
+            <Link
+              href={session ? "/inquiries" : "/account"}
+              className="hidden whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-accent-deep md:inline-block"
+            >
+              {session ? "My inquiries" : "Sign in"}
+            </Link>
             <Link
               href="/apply"
               className="hidden whitespace-nowrap bg-accent px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep md:inline-block"
@@ -400,7 +411,13 @@ export default function SiteHeader({
               The Club
             </p>
             <ul>
-              {[...utilityNav, ...CLUB_NAV].map((l) => (
+              {[
+                ...utilityNav,
+                ...CLUB_NAV,
+                session
+                  ? { href: "/inquiries", label: "My inquiries" }
+                  : { href: "/account", label: "Sign in" },
+              ].map((l) => (
                 <li key={l.href} className="border-b border-line-dark">
                   <Link
                     href={l.href}

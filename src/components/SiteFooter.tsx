@@ -15,6 +15,8 @@ const CLUB_LINKS = [
   { href: "/coaching#programs", label: "Training Programs" },
   { href: "/coaching#coaches", label: "Coaching Pool" },
   { href: "/about", label: "About the Club" },
+  { href: "/account", label: "Rider Account" },
+  { href: "/inquiries", label: "My Inquiries" },
 ];
 
 export default function SiteFooter() {
@@ -93,7 +95,8 @@ export default function SiteFooter() {
           </p>
           <p className="mb-4 text-sm leading-relaxed text-chalk/60">
             Sign up, pay your dues, get approved by the club. Applications
-            reviewed weekly.
+            reviewed weekly. No prices on the floor — create a rider account
+            and ask us about anything.
           </p>
           <Link
             href="/apply"

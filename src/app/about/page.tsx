@@ -9,13 +9,13 @@ import { categories, directoryBrands } from "@/lib/taxonomy";
 export const metadata: Metadata = {
   title: "About — MR.RIDER",
   description:
-    "Why MR.RIDER is a members-only club: real stock, straight prices, riders first.",
+    "Why MR.RIDER is a members-only club: real stock, straight answers, riders first.",
 };
 
 const VALUES = [
   {
-    t: "Straight prices",
-    d: "No inflated RRP theatre. The price on the card is the price a rider should pay.",
+    t: "Straight answers",
+    d: "No RRP theatre and no price tags to argue with. Ask about anything on the floor and the club answers you directly.",
   },
   {
     t: "Real stock",
@@ -51,9 +51,9 @@ export default function AboutPage() {
           </div>
           <div className="flex flex-col gap-5 text-sm leading-relaxed text-ink-soft lg:col-span-5 lg:border-l lg:border-line lg:pl-8">
             <p>
-              The shop floor carries ten categories — from bar tape to full
-              race builds — and every item is chosen, checked and priced by
-              people who ride. Fresh stock lands every morning at 09:00 in the
+              The shop floor carries eleven categories — from bar tape to full
+              race builds — and every item is chosen and checked by people who
+              ride. Fresh stock lands every morning at 09:00 in the
               daily listings. What doesn&apos;t move goes to the clearance
               market; what&apos;s rare goes to the auction floor.
             </p>

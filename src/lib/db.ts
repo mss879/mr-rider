@@ -25,8 +25,6 @@ type ProductRow = {
   subcategory: string | null;
   collections: string[] | null;
   images: string[] | null;
-  price: number;
-  compare_at: number | null;
   condition: "new" | "pre-owned";
   stock: number;
   listed_at: string;
@@ -91,8 +89,6 @@ const toProduct = (r: ProductRow): Product => ({
   subcategory: r.subcategory ?? "",
   collections: r.collections ?? undefined,
   images: r.images ?? undefined,
-  price: Number(r.price),
-  compareAt: r.compare_at == null ? undefined : Number(r.compare_at),
   condition: r.condition,
   stock: r.stock,
   addedDaysAgo: daysAgo(r.listed_at),
@@ -141,11 +137,20 @@ async function fromTable<Row, T>(
   const sb = getSupabase();
   if (!sb) return fallback;
   const { data, error } = await sb.from(table).select("*").order(orderBy);
-  if (error || !data || data.length === 0) {
+  // Only an unreachable table means "not migrated yet". A live table that
+  // happens to be empty is answered honestly — a quiet drop day or an empty
+  // clearance rail must not resurrect the demo catalog.
+  if (error) {
     console.warn(
-      `[db] ${table}: ${error ? error.message : "no rows"} — serving local mock data (run supabase/migrations to go live)`,
+      `[db] ${table}: ${error.message} — serving local mock data (run supabase/migrations to go live)`,
     );
     return fallback;
+  }
+  if (!data || data.length === 0) {
+    // Not an error, but worth saying out loud: a members-only read policy
+    // also returns zero rows with no error, and looks exactly like this.
+    console.warn(`[db] ${table}: reachable but empty — nothing to render`);
+    return [];
   }
   return (data as Row[]).map(map);
 }
@@ -186,24 +191,32 @@ export const getLots = () =>
 export type NavAvailability = {
   categories: string[];
   subcategories: string[];
-  brands: string[];
+  /** In-stock brand slugs PER CATEGORY. Road Bikes and Framesets share one
+      client-approved brand list, so a global set would advertise Merida
+      under Framesets on the strength of a road bike. */
+  brands: Record<string, string[]>;
 };
 
 export async function getNavAvailability(): Promise<NavAvailability> {
   const products = await getProducts();
   const categories = new Set<string>();
   const subcategories = new Set<string>();
-  const brands = new Set<string>();
+  const brands = new Map<string, Set<string>>();
   for (const p of products) {
     if (p.stock <= 0) continue;
     categories.add(p.category);
     if (p.subcategory) subcategories.add(p.subcategory);
-    brands.add(p.brand);
-    for (const c of p.collections ?? []) brands.add(c);
+    let inCategory = brands.get(p.category);
+    if (!inCategory) {
+      inCategory = new Set<string>();
+      brands.set(p.category, inCategory);
+    }
+    inCategory.add(p.brand);
+    for (const c of p.collections ?? []) inCategory.add(c);
   }
   return {
     categories: [...categories],
     subcategories: [...subcategories],
-    brands: [...brands],
+    brands: Object.fromEntries([...brands].map(([cat, set]) => [cat, [...set]])),
   };
 }

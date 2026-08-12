@@ -7,10 +7,13 @@ import AdminApplications from "@/components/admin/AdminApplications";
 import AdminAuction from "@/components/admin/AdminAuction";
 import AdminClients from "@/components/admin/AdminClients";
 import AdminCoaching from "@/components/admin/AdminCoaching";
+import AdminInquiries from "@/components/admin/AdminInquiries";
 import AdminProducts from "@/components/admin/AdminProducts";
+import { hasUnread, type InquiryReadState } from "@/lib/inquiries";
 import { getSupabaseBrowser } from "@/lib/supabaseBrowser";
 
 type Tab =
+  | "inquiries"
   | "applications"
   | "clients"
   | "enquiries"
@@ -20,6 +23,7 @@ type Tab =
   | "accounts";
 
 const TABS: { id: Tab; label: string }[] = [
+  { id: "inquiries", label: "Inquiry Inbox" },
   { id: "applications", label: "Applications" },
   { id: "clients", label: "Clients" },
   { id: "enquiries", label: "Enquiries" },
@@ -84,8 +88,10 @@ export default function AdminPanel() {
   const [messages, setMessages] = useState<MessageRow[]>([]);
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("applications");
+  // The inbox is where the daily work is now, so the panel opens on it.
+  const [tab, setTab] = useState<Tab>("inquiries");
   const [appsNew, setAppsNew] = useState(0);
+  const [inquiriesNew, setInquiriesNew] = useState(0);
 
   useEffect(() => {
     if (!sb) {
@@ -144,6 +150,20 @@ export default function AdminPanel() {
       .select("id", { count: "exact", head: true })
       .eq("status", "new");
     if (!cntErr) setAppsNew(count ?? 0);
+
+    // "Unread" compares two columns, which PostgREST cannot filter on —
+    // read the bookkeeping columns and count in JS.
+    const { data: inq, error: inqErr } = await sb
+      .from("inquiries")
+      .select("last_message_at,last_sender_role,admin_read_at,member_read_at")
+      .order("last_message_at", { ascending: false })
+      .limit(500);
+    if (!inqErr) {
+      setInquiriesNew(
+        ((inq as InquiryReadState[]) ?? []).filter((r) => hasUnread(r, "admin"))
+          .length,
+      );
+    }
   }, [sb, session]);
 
   useEffect(() => {
@@ -337,6 +357,7 @@ export default function AdminPanel() {
             }`}
           >
             {t.label}
+            {t.id === "inquiries" && inquiriesNew > 0 ? ` (${inquiriesNew})` : ""}
             {t.id === "applications" && appsNew > 0 ? ` (${appsNew})` : ""}
             {t.id === "accounts" && pendingCount > 0
               ? ` (${pendingCount})`
@@ -345,6 +366,9 @@ export default function AdminPanel() {
         ))}
       </div>
 
+      {tab === "inquiries" && (
+        <AdminInquiries sb={sb} session={session} onChanged={loadData} />
+      )}
       {tab === "applications" && (
         <AdminApplications sb={sb} onChanged={loadData} />
       )}

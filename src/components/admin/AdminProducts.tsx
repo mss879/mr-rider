@@ -2,7 +2,6 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import AdminCrud, { type FieldDef, type RowData } from "./AdminCrud";
-import { usd } from "@/lib/data";
 import { MAX_PRODUCT_IMAGES, PRODUCT_IMAGE_BUCKET } from "@/lib/images";
 import {
   brandName,
@@ -59,8 +58,8 @@ const fields: FieldDef[] = [
     bucket: PRODUCT_IMAGE_BUCKET,
     max: MAX_PRODUCT_IMAGES,
   },
-  { key: "price", label: "Price (USD)", type: "number", required: true, step: "0.01" },
-  { key: "compare_at", label: "Compare-at price (sale strike-through)", type: "number", step: "0.01" },
+  // No price fields: the floor carries no pricing. Riders open an inquiry and
+  // the club quotes in the thread (Inquiry Inbox tab).
   {
     key: "condition",
     label: "Condition",
@@ -99,7 +98,7 @@ export default function AdminProducts({ sb }: { sb: SupabaseClient }) {
       })}
       summary={(r: RowData) => ({
         title: String(r.name ?? ""),
-        meta: `${brandName(String(r.brand ?? ""))} · ${subcategoryName(String(r.subcategory ?? ""))} · ${usd(Number(r.price ?? 0))} · stock ${r.stock} · listed ${r.listed_at}`,
+        meta: `${brandName(String(r.brand ?? ""))} · ${subcategoryName(String(r.subcategory ?? ""))} · stock ${r.stock} · listed ${r.listed_at}`,
         chips: [
           ...(r.featured ? ["FEATURED"] : []),
           ...(r.clearance ? ["CLEARANCE"] : []),

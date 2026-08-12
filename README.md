@@ -4,6 +4,9 @@ A members-only cycling club: one shop floor, daily listings, an auction, a
 clearance market and an international coaching pool — all behind a membership
 gate approved by the club admin.
 
+Nothing on the floor carries a price. Riders open an **inquiry** on a product
+and the club answers them in a chat thread.
+
 Built with **Next.js 16** (App Router) · **React 19** · **Tailwind CSS v4** ·
 **TypeScript** · **Supabase**.
 
@@ -28,19 +31,62 @@ Until they are run the site serves built-in mock data, so every page still works
 | Route | What it is |
 |-------|-----------|
 | `/` | Home — hero, category index, featured stock, today's drop, coaching, auction + clearance |
-| `/shop` | The whole catalog in one place: 12 categories with search, brand, price and condition filters plus sorting |
+| `/shop` | The whole catalog in one place: 11 categories with search, brand and condition filters plus sorting |
 | `/daily-listings` | Today's and yesterday's drops (09:00 daily) |
 | `/coaching` | Training programs + the international coaching pool |
 | `/auction` | Live lots with current bids and countdowns |
-| `/clearance` | MR.Rider Clearance Market, sorted by biggest discount |
+| `/clearance` | MR.Rider Clearance Market — end-of-line stock |
+| `/account` | Rider sign-up / sign-in — the door to inquiries |
+| `/inquiries` | The rider's own inquiry threads |
 | `/apply` | Membership application form (name, email, phone, interest, why) |
 | `/about` · `/contact` | The club story · enquiries form |
-| `/admin` | Back office — applications, clients, enquiries and content management |
+| `/admin` | Back office — inquiry inbox, applications, clients and content management |
+
+## No prices — inquiries instead
+
+The floor carries **no pricing**. Every product card has a **Request inquiry**
+button; the club quotes in the thread, where it can attach a spec sheet or a
+photo and answer questions about fit, condition and availability.
+
+1. A rider creates an account at `/account` (email + password, Supabase auth).
+   Only account holders can send an inquiry.
+2. Hitting **Request inquiry** opens a thread on that product — a snapshot of
+   the product travels with it, so retiring stock never erases the
+   conversation. Asking again about the same product reuses the open thread.
+3. The admin answers from `/admin` → **Inquiry Inbox**. Both sides can attach
+   images and PDFs (10MB each, five per message).
+4. Each new message emails the other side (see below). Threads are never
+   deleted; the admin can close and reopen them.
+
+Messages arrive over Supabase Realtime, with a 20-second poll as a fallback for
+projects where the publication is off. Attachments live in a **private**
+`inquiry-files` bucket and are served through short-lived signed URLs — only
+the rider on the thread and the admin can open them.
+
+Prices are not dropped from the database, only from the site and the admin
+form: `products.price` (now defaulting to 0) and `compare_at` (still nullable)
+are kept, so historic figures survive and the decision is reversible. They do
+stay readable through the public API for anyone holding the anon key — see the
+note at the end of
+[`15_pricing_retired.sql`](supabase/migrations/15_pricing_retired.sql) for the
+one-line purge if the client wants the numbers gone rather than hidden.
+
+### Email alerts (optional)
+
+New inquiries and rider replies are emailed to `INQUIRY_ADMIN_EMAIL`; the
+club's replies are emailed to the rider. Set `RESEND_API_KEY`, `RESEND_FROM`
+and `INQUIRY_ADMIN_EMAIL` in `.env.local` (see `.env.example`). Without them
+the inbox works exactly the same — only the email nudge is skipped.
+
+The endpoint is [`/api/inquiries/notify`](src/app/api/inquiries/notify/route.ts).
+It re-reads the message with the caller's own Supabase token, so it can only
+announce a message the caller wrote, on a thread they are part of, within five
+minutes of sending.
 
 ## The membership gate
 
-Visitors can browse the whole site, but prices, buying and bidding render
-**locked** until the club approves them:
+Visitors can browse the whole site, but bidding and coaching render **locked**
+until the club approves them:
 
 1. A rider applies at `/apply`.
 2. The admin reviews every answer in the Applications tab at `/admin`.
@@ -49,12 +95,15 @@ Visitors can browse the whole site, but prices, buying and bidding render
 The gate is driven by a single function in
 [`src/lib/membership.ts`](src/lib/membership.ts) — the member-login phase swaps
 its body for a Supabase auth check and every locked element unlocks at once.
+A rider *account* (for inquiries) and *membership* (dues + approval) are
+deliberately separate: anyone can ask, members get the floor.
 
 ## Admin
 
 `/admin` — sign in as the superadmin (`admin@mrrider.lk`, created in the
 Supabase dashboard). Tabs:
 
+- **Inquiry Inbox** — every product inquiry as a chat thread; reply with text, images or PDFs, close when it's done. The tab counts threads waiting on you
 - **Applications** — full review cards with every answer; approving creates the client profile
 - **Clients** — approved client profiles, suspend / reactivate
 - **Enquiries** — messages from the contact page

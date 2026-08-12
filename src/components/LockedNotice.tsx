@@ -14,7 +14,7 @@ export default function LockedNotice({
             <Lock />
           </span>
           {children ??
-            "Prices and buying are locked until your membership is approved"}
+            "Member actions are locked until your membership is approved"}
         </p>
         <Link
           href="/apply"

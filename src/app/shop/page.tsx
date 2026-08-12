@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import ShopBrowser from "@/components/ShopBrowser";
-import LockedNotice from "@/components/LockedNotice";
+import InquiryNotice from "@/components/inquiry/InquiryNotice";
 import { categories, getBrand, resolveCategoryParam } from "@/lib/taxonomy";
 import { getProducts } from "@/lib/db";
-import { getMembershipStatus, isApproved } from "@/lib/membership";
 
 export const metadata: Metadata = {
   title: "Shop — MR.RIDER",
   description:
-    "One shop floor, ten categories. Filter by category, product type, brand, price, condition and availability.",
+    "One shop floor, eleven categories. Filter by category, product type, brand and condition, then request an inquiry on anything.",
 };
 
 export default async function ShopPage({
@@ -17,12 +16,10 @@ export default async function ShopPage({
 }: {
   searchParams: Promise<{ cat?: string; sub?: string; brand?: string }>;
 }) {
-  const [{ cat, sub, brand }, products, status] = await Promise.all([
+  const [{ cat, sub, brand }, products] = await Promise.all([
     searchParams,
     getProducts(),
-    getMembershipStatus(),
   ]);
-  const locked = !isApproved(status);
   // Accepts both current and pre-restructure category slugs.
   const resolved = resolveCategoryParam(cat, sub);
   const initialBrand = getBrand(brand)?.slug;
@@ -32,15 +29,14 @@ export default async function ShopPage({
       <PageHero
         eyebrow={`${products.length} items · ${categories.length} categories · one floor`}
         title="The shop."
-        blurb="Everything sellable lives here — bar tape to full race builds. No aisle-hopping between menus: pick your filters and go."
+        blurb="Everything sellable lives here — bar tape to full race builds. No aisle-hopping between menus: pick your filters, then ask us about anything on the floor."
       />
-      {locked && <LockedNotice />}
+      <InquiryNotice />
       <ShopBrowser
         products={products}
         initialCategory={resolved.cat}
         initialSubcategory={resolved.sub}
         initialBrand={initialBrand}
-        locked={locked}
       />
     </>
   );

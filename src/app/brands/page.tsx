@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/PageHero";
 import SectionHead from "@/components/SectionHead";
-import { getProducts } from "@/lib/db";
+import { getNavAvailability, getProducts } from "@/lib/db";
 import { matchesBrand } from "@/lib/data";
 import {
   brands,
@@ -21,7 +21,10 @@ export const metadata: Metadata = {
 };
 
 export default async function BrandsPage() {
-  const products = await getProducts();
+  const [products, availability] = await Promise.all([
+    getProducts(),
+    getNavAvailability(),
+  ]);
 
   const countFor = (slug: string) =>
     products.filter((p) => matchesBrand(p, slug)).length;
@@ -64,10 +67,23 @@ export default async function BrandsPage() {
         />
         <div className="grid gap-px border border-line bg-line md:grid-cols-2 xl:grid-cols-3">
           {categories
-            .map((c) => ({
-              category: c,
-              list: directoryBrands.filter((b) => b.categories.includes(c.slug)),
-            }))
+            .map((c) => {
+              /* Every link here lands on /shop with both filters applied, so
+                 a brand with no stock in this aisle would land on "Nothing
+                 matches." Road Bikes and Framesets share one brand list, so
+                 without the stock check most of Framesets would be dead. */
+              const inStock = new Set(availability.brands[c.slug] ?? []);
+              const listed = directoryBrands.filter((b) =>
+                b.categories.includes(c.slug),
+              );
+              return {
+                category: c,
+                list:
+                  inStock.size > 0
+                    ? listed.filter((b) => inStock.has(b.slug))
+                    : listed,
+              };
+            })
             .filter(({ list }) => list.length > 0)
             .map(({ category, list }) => (
               <div key={category.slug} className="flex flex-col gap-4 bg-paper p-6">

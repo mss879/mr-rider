@@ -4,13 +4,18 @@
    Breakdown (Client Approved)" — sheets Hierarchy, Brand
    Placement, Naming Corrections and Developer Notes.
 
-   10 product categories + 2 utility links, 83 product types and
-   28 brand menu links (111 hierarchy entries total).
+   11 product categories + 2 utility links, 83 product types and
+   40 brand menu links.
 
    Navigation rule: product categories in the main menu; brands
    live in filters, brand landing pages or a "Shop by Brand"
-   column. Client-approved exception — Road Bikes & Framesets
-   shows Road Bikes and Framesets first, then direct brand links.
+   column.
+
+   Road Bikes and Framesets are TWO separate aisles (client
+   change): complete builds and bare frames are different
+   purchases, so they get their own menus. Both carry the same
+   client-approved bike brand list; a brand link only renders
+   where that aisle actually holds stock from it.
    ============================================================ */
 
 export type SectionKind = "product" | "brand" | "future";
@@ -59,36 +64,58 @@ export type Brand = {
    CATEGORIES — main navigation, in client-approved order
    --------------------------------------------------------------- */
 
+/* The bike brand list the client approved. Road Bikes and Framesets are
+   two aisles selling the same names, so both carry it; the menu hides any
+   brand an aisle holds no stock from (see getNavAvailability). */
+const BIKE_BRANDS = [
+  "cannondale",
+  "cervelo",
+  "s-works",
+  "specialized",
+  "pinarello",
+  "cube",
+  "trek",
+  "canyon",
+  "xlab",
+  "bmc",
+  "scott",
+  "merida",
+];
+
 export const categories: Category[] = [
   {
-    slug: "road-bikes-framesets",
-    name: "Road Bikes & Framesets",
-    blurb: "Complete race builds and bare framesets",
+    slug: "road-bikes",
+    name: "Road Bikes",
+    blurb: "Complete race builds, ready to ride",
     sections: [
       {
         title: "Shop by Product",
         kind: "product",
-        items: ["road-bikes", "framesets"],
-        note: "Keep Road Bikes and Framesets as separate links inside this client-approved category.",
+        items: ["road-bikes"],
       },
       {
         title: "Shop by Brand",
         kind: "brand",
-        items: [
-          "cannondale",
-          "cervelo",
-          "s-works",
-          "specialized",
-          "pinarello",
-          "cube",
-          "trek",
-          "canyon",
-          "xlab",
-          "bmc",
-          "scott",
-          "merida",
-        ],
-        note: "Client-approved direct brand placement.",
+        items: BIKE_BRANDS,
+        note: "Client-approved brand placement, shared with Framesets.",
+      },
+    ],
+  },
+  {
+    slug: "framesets",
+    name: "Framesets",
+    blurb: "Bare frames and forks, built your way",
+    sections: [
+      {
+        title: "Shop by Product",
+        kind: "product",
+        items: ["framesets"],
+      },
+      {
+        title: "Shop by Brand",
+        kind: "brand",
+        items: BIKE_BRANDS,
+        note: "Client-approved brand placement, shared with Road Bikes.",
       },
     ],
   },
@@ -289,7 +316,7 @@ export const categories: Category[] = [
         title: "Other Brands",
         kind: "brand",
         items: ["xlab"],
-        note: "XLAB also sits under accessories/hydration, not only Bikes & Framesets.",
+        note: "XLAB also sits under accessories/hydration, not only the bike aisles.",
       },
     ],
   },
@@ -347,8 +374,8 @@ export const categories: Category[] = [
    --------------------------------------------------------------- */
 
 const SUBCATEGORY_NAMES: Record<string, string> = {
-  // Road Bikes & Framesets
-  "road-bikes": "Road Bikes",
+  // Road Bikes · Framesets — two aisles, one product type each
+  "road-bikes": "Complete Road Bikes",
   framesets: "Framesets",
   // Components · Drivetrain
   groupsets: "Groupsets",
@@ -475,23 +502,23 @@ export const brands: Brand[] = [
     subcategory: "cycling-glasses",
     note: "Keep the official numeric brand styling.",
   },
-  { slug: "bmc", name: "BMC", treatment: "filter", categories: ["road-bikes-framesets"] },
+  { slug: "bmc", name: "BMC", treatment: "filter", categories: ["road-bikes", "framesets"] },
   { slug: "bont", name: "Bont", treatment: "filter", categories: ["shoes"] },
   {
     slug: "cannondale",
     name: "Cannondale",
     treatment: "filter",
-    categories: ["road-bikes-framesets"],
+    categories: ["road-bikes", "framesets"],
   },
-  { slug: "canyon", name: "Canyon", treatment: "filter", categories: ["road-bikes-framesets"] },
+  { slug: "canyon", name: "Canyon", treatment: "filter", categories: ["road-bikes", "framesets"] },
   {
     slug: "cervelo",
     name: "Cervélo",
     treatment: "filter",
-    categories: ["road-bikes-framesets"],
+    categories: ["road-bikes", "framesets"],
     note: "Use the accented spelling where supported.",
   },
-  { slug: "cube", name: "Cube", treatment: "filter", categories: ["road-bikes-framesets"] },
+  { slug: "cube", name: "Cube", treatment: "filter", categories: ["road-bikes", "framesets"] },
   { slug: "dmt", name: "DMT", treatment: "filter", categories: ["shoes"] },
   {
     slug: "dynamic-bike-care",
@@ -509,7 +536,7 @@ export const brands: Brand[] = [
     note: "Do not label the category 'Computer Garmin'.",
   },
   { slug: "giro", name: "Giro", treatment: "filter", categories: ["helmets"] },
-  { slug: "merida", name: "Merida", treatment: "filter", categories: ["road-bikes-framesets"] },
+  { slug: "merida", name: "Merida", treatment: "filter", categories: ["road-bikes", "framesets"] },
   {
     slug: "met",
     name: "MET",
@@ -528,7 +555,7 @@ export const brands: Brand[] = [
     slug: "pinarello",
     name: "Pinarello",
     treatment: "filter",
-    categories: ["road-bikes-framesets"],
+    categories: ["road-bikes", "framesets"],
   },
   {
     slug: "scicon",
@@ -537,7 +564,7 @@ export const brands: Brand[] = [
     categories: ["accessories"],
     subcategory: "cycling-glasses",
   },
-  { slug: "scott", name: "Scott", treatment: "filter", categories: ["road-bikes-framesets"] },
+  { slug: "scott", name: "Scott", treatment: "filter", categories: ["road-bikes", "framesets"] },
   {
     slug: "shimano",
     name: "Shimano",
@@ -549,14 +576,14 @@ export const brands: Brand[] = [
     slug: "specialized",
     name: "Specialized",
     treatment: "direct",
-    categories: ["road-bikes-framesets", "helmets", "shoes"],
-    note: "Client-approved placement under Road Bikes & Framesets; also relevant to helmets and shoes.",
+    categories: ["road-bikes", "framesets", "helmets", "shoes"],
+    note: "Client-approved placement under both bike aisles; also relevant to helmets and shoes.",
   },
   {
     slug: "s-works",
     name: "S-Works",
     treatment: "direct",
-    categories: ["road-bikes-framesets"],
+    categories: ["road-bikes", "framesets"],
     note: "Client-approved standalone link alongside Specialized. Elsewhere it stays a Specialized collection.",
   },
   {
@@ -565,13 +592,13 @@ export const brands: Brand[] = [
     treatment: "filter",
     categories: ["helmets"],
   },
-  { slug: "trek", name: "Trek", treatment: "filter", categories: ["road-bikes-framesets"] },
+  { slug: "trek", name: "Trek", treatment: "filter", categories: ["road-bikes", "framesets"] },
   {
     slug: "xlab",
     name: "XLAB",
     treatment: "direct",
-    categories: ["road-bikes-framesets", "accessories"],
-    note: "Client-approved under Road Bikes & Framesets; also listed under accessories/hydration.",
+    categories: ["road-bikes", "framesets", "accessories"],
+    note: "Client-approved under both bike aisles; also listed under accessories/hydration.",
   },
   {
     slug: "mr-rider",
@@ -680,7 +707,10 @@ export function breadcrumbs(
     if (sub.section !== "Shop by Product" && sub.section !== "Shop by Type") {
       trail.push({ label: sub.section });
     }
-    trail.push({ label: sub.name });
+    // An aisle with a single product type of the same name (Framesets ›
+    // Framesets) reads as a stutter — the category crumb already said it.
+    const parentName = (parent ?? category)?.name;
+    if (sub.name !== parentName) trail.push({ label: sub.name });
   }
   const brand = getBrand(brandSlug);
   if (brand) trail.push({ label: brand.name });
@@ -701,21 +731,33 @@ export const legacyCategorySlugs: Record<string, { cat: string; sub?: string }> 
   drivetrain: { cat: "components" },
   parts: { cat: "components" },
   tyres: { cat: "wheels-tyres-tubes" },
-  "road-bikes": { cat: "road-bikes-framesets", sub: "road-bikes" },
-  "frame-sets": { cat: "road-bikes-framesets", sub: "framesets" },
+  // The combined aisle, split into two. "road-bikes" needs no entry any
+  // more — it is a live category slug and resolves on its own.
+  "road-bikes-framesets": { cat: "road-bikes" },
+  "frame-sets": { cat: "framesets", sub: "framesets" },
   "bike-maintenance": { cat: "bike-care-maintenance" },
 };
 
-/** Resolve a ?cat= value, accepting both current and pre-restructure slugs. */
+/** Resolve a ?cat= value, accepting both current and pre-restructure slugs.
+
+    A product type that still resolves outranks a category slug that no
+    longer does: an old link like ?cat=road-bikes-framesets&sub=framesets
+    has to land on Framesets, not on Road Bikes filtered to a product type
+    it does not carry — which would silently show nothing. */
 export function resolveCategoryParam(
   cat?: string,
   sub?: string,
 ): { cat?: string; sub?: string } {
-  if (!cat) return { cat: undefined, sub: getSubcategory(sub)?.slug };
-  if (categoryBySlug.has(cat)) return { cat, sub: getSubcategory(sub)?.slug };
-  const legacy = legacyCategorySlugs[cat];
-  if (legacy) return { cat: legacy.cat, sub: getSubcategory(sub)?.slug ?? legacy.sub };
-  return { cat: undefined, sub: getSubcategory(sub)?.slug };
+  const subSlug = getSubcategory(sub)?.slug;
+  if (cat && categoryBySlug.has(cat)) return { cat, sub: subSlug };
+
+  // Stale or missing cat — let the product type name its own aisle.
+  const owner = getSubcategory(subSlug)?.category;
+  if (owner) return { cat: owner, sub: subSlug };
+
+  const legacy = cat ? legacyCategorySlugs[cat] : undefined;
+  if (legacy) return { cat: legacy.cat, sub: legacy.sub };
+  return { cat: undefined, sub: subSlug };
 }
 
 /* ---------------------------------------------------------------
