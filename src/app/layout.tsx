@@ -1,9 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Barlow_Condensed, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import InlineScript from "@/components/InlineScript";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import SiteJsonLd from "@/components/SiteJsonLd";
+import MotionProvider from "@/components/motion/MotionProvider";
+import { CREDIT } from "@/lib/credit";
 import { getNavAvailability } from "@/lib/db";
+import { MOTION_BOOT } from "@/lib/motion";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const barlow = Barlow_Condensed({
@@ -39,6 +44,14 @@ export const metadata: Metadata = {
   },
   description: DESCRIPTION,
   applicationName: SITE_NAME,
+  // Who made the site vs. who runs it. `authors` emits both <meta name="author">
+  // and <link rel="author" href> pointing at the agency, which is the standard
+  // machine-readable form of a build credit. These are attribution signals for
+  // crawlers and AI, not link equity — the followed anchor in the footer is
+  // what carries that. See src/components/BuiltBy.tsx.
+  authors: [{ name: CREDIT.name, url: CREDIT.url }],
+  creator: CREDIT.name,
+  publisher: SITE_NAME,
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -75,11 +88,21 @@ export default async function RootLayout({
   const availability = await getNavAvailability();
 
   return (
+    // The boot script below adds a class to this element before React
+    // hydrates; suppressHydrationWarning tells React to accept the DOM it
+    // finds rather than reset the attribute. It applies to <html> alone, so
+    // genuine mismatches deeper in the tree still surface.
     <html
       lang="en"
       className={`${barlow.variable} ${archivo.variable} ${plex.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <InlineScript html={MOTION_BOOT} />
+        <SiteJsonLd />
+      </head>
       <body className="flex min-h-svh flex-col bg-paper font-body text-ink">
+        <MotionProvider />
         <SiteHeader availability={availability} />
         <main className="flex-1">{children}</main>
         <SiteFooter />

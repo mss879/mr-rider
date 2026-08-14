@@ -3,11 +3,34 @@ import ArrowCta from "@/components/ArrowCta";
 import Marquee from "@/components/Marquee";
 import ProductCard from "@/components/ProductCard";
 import SectionHead from "@/components/SectionHead";
+import ClubFaq from "@/components/home/ClubFaq";
+import Experience from "@/components/home/Experience";
+import InquiryModel from "@/components/home/InquiryModel";
+import JoinCta from "@/components/home/JoinCta";
+import ProofBand from "@/components/home/ProofBand";
+import WhyClub from "@/components/home/WhyClub";
 import { brandName, categories, directoryBrands, subcategoryName } from "@/lib/taxonomy";
 import { getCoaches, getLots, getPrograms, getProducts } from "@/lib/db";
+import { rise } from "@/lib/motion";
 
 // Re-fetch backend data at most every 60s
 export const revalidate = 60;
+
+/* Reading order of the page, and why it is this order:
+
+   The hero states what this is. Everything after it answers, in the order a
+   sceptical visitor asks them, "why would I join a shop?" — the argument
+   (WhyClub), the inventory of what a membership actually contains
+   (Experience), then proof it is real (the aisles, the stock, the drop, the
+   coaches, the lots), then the model that makes the club unusual
+   (InquiryModel), the numbers (ProofBand), the process (How you get in), the
+   objections (ClubFaq) and the ask (JoinCta).
+
+   Motion is split in two. Above the fold uses [data-rise] — pure CSS, running
+   on the first frame, so the headline never waits on a network round-trip.
+   Everything below uses [data-reveal], driven by the one GSAP ScrollTrigger
+   batch in MotionProvider. Both tiers are inert under prefers-reduced-motion.
+   See globals.css and src/lib/motion.ts. */
 
 export default async function Home() {
   const [products, coaches, programs, lots] = await Promise.all([
@@ -19,6 +42,7 @@ export default async function Home() {
   const featuredItems = products.filter((p) => p.featured);
   const todaysListings = products.filter((p) => p.addedDaysAgo === 0);
   const clearanceItems = products.filter((p) => p.clearance);
+  const countryCount = new Set(coaches.map((c) => c.code)).size;
 
   return (
     <>
@@ -26,15 +50,23 @@ export default async function Home() {
       <section className="border-b border-line">
         <div className="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-12">
           <div className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:border-r lg:border-line lg:py-16">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft">
+            <p
+              data-rise
+              style={rise(1)}
+              className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft"
+            >
               A members-only cycling club
             </p>
-            <p className="max-w-sm text-sm leading-relaxed text-ink-soft">
+            <p
+              data-rise
+              style={rise(2)}
+              className="max-w-sm text-sm leading-relaxed text-ink-soft"
+            >
               One shop floor with {categories.length} aisles, fresh listings
               every morning, a live auction, a clearance market and coaches on
               four continents. You don&apos;t browse MR.RIDER — you get let in.
             </p>
-            <div className="bg-carbon p-5 text-chalk">
+            <div data-rise style={rise(3)} className="bg-carbon p-5 text-chalk">
               <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-accent">
                 The gate
               </p>
@@ -43,19 +75,39 @@ export default async function Home() {
                 floor is yours.
               </p>
             </div>
-            <ArrowCta href="/apply">Apply for membership</ArrowCta>
+            <div
+              data-rise
+              style={rise(4)}
+              className="flex flex-col items-start gap-3"
+            >
+              <ArrowCta href="/apply">Apply for membership</ArrowCta>
+              <Link
+                href="/account"
+                className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft underline decoration-line decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-accent-deep hover:decoration-accent"
+              >
+                Already riding with us? Sign in →
+              </Link>
+            </div>
           </div>
           <div className="min-w-0 px-6 py-12 lg:col-span-8 lg:py-16 lg:pl-12">
+            {/* Three blocks rather than <br>s, so each line can carry its own
+                step in the entrance cascade. */}
             <h1 className="headline text-[clamp(3.2rem,9.5vw,7.5rem)]">
-              Ride fast.
-              <br />
-              Buy smart.
-              <br />
-              <span className="text-accent">Join the club.</span>
+              <span data-rise style={rise(0)} className="block">
+                Ride fast.
+              </span>
+              <span data-rise style={rise(1)} className="block">
+                Buy smart.
+              </span>
+              <span data-rise style={rise(2)} className="block text-accent">
+                Join the club.
+              </span>
             </h1>
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               <Link
                 href="/shop"
+                data-rise
+                style={rise(4)}
                 className="group hatch-dark relative flex aspect-[16/10] flex-col justify-end p-6 text-chalk transition-transform duration-200 ease-out hover:-translate-y-1"
               >
                 <span className="headline text-6xl">
@@ -73,13 +125,15 @@ export default async function Home() {
               </Link>
               <Link
                 href="/coaching"
+                data-rise
+                style={rise(5)}
                 className="group hatch-dark relative flex aspect-[16/10] flex-col justify-end p-6 text-chalk transition-transform duration-200 ease-out hover:-translate-y-1"
               >
                 <span className="headline text-6xl">
                   {String(coaches.length).padStart(2, "0")}
                 </span>
                 <span className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-chalk/70">
-                  Coaches · {new Set(coaches.map((c) => c.code)).size} countries
+                  Coaches · {countryCount} countries
                 </span>
                 <span
                   aria-hidden
@@ -89,6 +143,30 @@ export default async function Home() {
                 </span>
               </Link>
             </div>
+
+            {/* Today's drop, live from the catalog — the one genuinely
+                time-sensitive thing on the page, so it sits in the fold. */}
+            <Link
+              href="/daily-listings"
+              data-rise
+              style={rise(6)}
+              className="group mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border border-line bg-chalk px-5 py-4 transition-colors duration-200 ease-out hover:border-ink"
+            >
+              <span className="flex items-center gap-3">
+                <span
+                  aria-hidden
+                  className="size-2 shrink-0 rounded-full bg-accent"
+                />
+                <span className="font-mono text-[11px] uppercase tracking-[0.18em]">
+                  {todaysListings.length > 0
+                    ? `${todaysListings.length} items landed today`
+                    : "Next drop lands 09:00"}
+                </span>
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft transition-colors duration-200 ease-out group-hover:text-accent-deep">
+                See the drop →
+              </span>
+            </Link>
           </div>
         </div>
       </section>
@@ -103,18 +181,37 @@ export default async function Home() {
         ]}
       />
 
+      {/* WHY THE CLUB — the argument, before the merchandise */}
+      <WhyClub
+        coachCount={coaches.length}
+        countryCount={countryCount}
+        brandCount={directoryBrands.length}
+      />
+
+      {/* WHAT A MEMBERSHIP CONTAINS */}
+      <Experience
+        categoryCount={categories.length}
+        brandCount={directoryBrands.length}
+        coachCount={coaches.length}
+        countryCount={countryCount}
+        lotCount={lots.length}
+      />
+
       {/* CATEGORY INDEX */}
       <section className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-        <SectionHead
-          eyebrow="The shop"
-          title={`${categories.length} aisles. One floor.`}
-          link={{ href: "/shop", label: "Enter the shop" }}
-        />
+        <div data-reveal="fade">
+          <SectionHead
+            eyebrow="The shop"
+            title={`${categories.length} aisles. One floor.`}
+            link={{ href: "/shop", label: "Enter the shop" }}
+          />
+        </div>
         <div className="grid grid-cols-2 border-l border-t border-line md:grid-cols-3 xl:grid-cols-4">
           {categories.map((c, i) => (
             <Link
               key={c.slug}
               href={`/shop?cat=${c.slug}`}
+              data-reveal
               className="group flex flex-col gap-8 border-b border-r border-line p-5 transition-colors duration-200 ease-out hover:bg-chalk"
             >
               <span className="font-mono text-[11px] tracking-[0.16em] text-ink-soft">
@@ -139,7 +236,10 @@ export default async function Home() {
         </div>
 
         {/* Brands stay out of the product aisles — they get their own door. */}
-        <div className="mt-10 flex flex-col gap-4 border border-line bg-chalk p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          data-reveal
+          className="mt-10 flex flex-col gap-4 border border-line bg-chalk p-6 sm:flex-row sm:items-center sm:justify-between"
+        >
           <div className="min-w-0">
             <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft">
               {directoryBrands.length} brands on the floor
@@ -161,12 +261,20 @@ export default async function Home() {
       {/* FEATURED PRODUCTS */}
       <section className="border-t border-line bg-paper-2">
         <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-          <SectionHead
-            eyebrow="Fresh on the racks"
-            title="Featured stock."
-            link={{ href: "/shop", label: "Shop everything" }}
-          />
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <div data-reveal="fade">
+            <SectionHead
+              eyebrow="Fresh on the racks"
+              title="Featured stock."
+              link={{ href: "/shop", label: "Shop everything" }}
+            />
+          </div>
+          {/* The grid reveals as one block rather than card-by-card: the cards
+              are equal-height grid children, and wrapping each one to give it
+              its own trigger would cost that. */}
+          <div
+            data-reveal
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4"
+          >
             {featuredItems.map((p) => (
               <ProductCard key={p.id} p={p} />
             ))}
@@ -177,17 +285,20 @@ export default async function Home() {
       {/* DAILY LISTINGS TEASER — dark band */}
       <section className="border-y border-line bg-carbon text-chalk">
         <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-          <SectionHead
-            dark
-            eyebrow="Daily listings"
-            title="Today's drop."
-            link={{ href: "/daily-listings", label: "See all listings" }}
-          />
+          <div data-reveal="fade">
+            <SectionHead
+              dark
+              eyebrow="Daily listings"
+              title="Today's drop."
+              link={{ href: "/daily-listings", label: "See all listings" }}
+            />
+          </div>
           <div>
             {todaysListings.slice(0, 4).map((p, i) => (
               <Link
                 key={p.id}
                 href={`/shop?cat=${p.category}&sub=${p.subcategory}`}
+                data-reveal
                 className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-baseline gap-4 border-b border-line-dark py-4"
               >
                 <span className="font-mono text-[11px] text-chalk/40">
@@ -207,7 +318,10 @@ export default async function Home() {
               </Link>
             ))}
           </div>
-          <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-chalk/50">
+          <p
+            data-reveal="fade"
+            className="mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-chalk/50"
+          >
             {todaysListings.length} items landed today · drop hits 09:00 ·
             members get first call
           </p>
@@ -218,34 +332,43 @@ export default async function Home() {
       <section className="border-b border-line">
         <div className="mx-auto grid max-w-7xl lg:grid-cols-2">
           <div className="flex flex-col gap-6 px-6 py-16 lg:border-r lg:border-line md:py-20">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft">
+            <p
+              data-reveal="fade"
+              className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft"
+            >
               Coaching
             </p>
-            <h2 className="headline text-[clamp(2.2rem,5vw,3.8rem)]">
+            <h2 data-reveal="fade" className="headline text-[clamp(2.2rem,5vw,3.8rem)]">
               Train with the pool.
             </h2>
-            <p className="max-w-md text-sm leading-relaxed text-ink-soft">
+            <p
+              data-reveal="fade"
+              className="max-w-md text-sm leading-relaxed text-ink-soft"
+            >
               Four structured training programs and {coaches.length} coaches
-              across {new Set(coaches.map((c) => c.code)).size} countries —
-              climbing, sprint, time trial, endurance, fueling. Booked through
-              your membership.
+              across {countryCount} countries — climbing, sprint, time trial,
+              endurance, fueling. Booked through your membership.
             </p>
             <ul className="flex flex-wrap gap-2">
               {programs.map((pr) => (
                 <li
                   key={pr.id}
+                  data-reveal
                   className="border border-line bg-chalk px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em]"
                 >
                   {pr.name} · {pr.weeks} wks
                 </li>
               ))}
             </ul>
-            <ArrowCta href="/coaching">View programs</ArrowCta>
+            <div data-reveal="fade">
+              <ArrowCta href="/coaching">View programs</ArrowCta>
+            </div>
           </div>
           <div className="flex flex-col justify-center gap-0 bg-chalk px-6 py-16 md:py-20">
             {coaches.slice(0, 4).map((c) => (
               <div
                 key={c.id}
+                data-reveal
                 className="flex items-baseline justify-between gap-4 border-b border-line py-4"
               >
                 <span className="min-w-0">
@@ -263,6 +386,7 @@ export default async function Home() {
             ))}
             <Link
               href="/coaching#coaches"
+              data-reveal="fade"
               className="mt-6 w-fit font-mono text-[11px] font-semibold uppercase tracking-[0.18em] underline decoration-accent decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-accent-deep"
             >
               Meet all {coaches.length} coaches →
@@ -273,7 +397,10 @@ export default async function Home() {
 
       {/* AUCTION + CLEARANCE DUO */}
       <section className="mx-auto grid max-w-7xl gap-px md:grid-cols-2">
-        <div className="hatch-dark relative flex flex-col gap-5 overflow-clip p-8 text-chalk md:p-12">
+        <div
+          data-reveal
+          className="hatch-dark relative flex flex-col gap-5 overflow-clip p-8 text-chalk md:p-12"
+        >
           <span
             aria-hidden
             className="headline ghost-dark pointer-events-none absolute right-5 top-4 select-none text-[clamp(2.5rem,5vw,4.25rem)] leading-none"
@@ -294,7 +421,10 @@ export default async function Home() {
             Browse lots
           </ArrowCta>
         </div>
-        <div className="relative flex flex-col gap-5 overflow-clip border border-line bg-chalk p-8 md:p-12">
+        <div
+          data-reveal
+          className="relative flex flex-col gap-5 overflow-clip border border-line bg-chalk p-8 md:p-12"
+        >
           <span
             aria-hidden
             className="headline ghost pointer-events-none absolute right-5 top-4 select-none text-[clamp(2.5rem,5vw,4.25rem)] leading-none"
@@ -317,14 +447,31 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* WHY THERE ARE NO PRICES */}
+      <InquiryModel />
+
+      {/* THE FLOOR, COUNTED */}
+      <ProofBand
+        categoryCount={categories.length}
+        brandCount={directoryBrands.length}
+        productCount={products.length}
+        coachCount={coaches.length}
+        countryCount={countryCount}
+      />
+
       {/* JOIN THE CLUB */}
-      <section className="mt-16 border-t border-line md:mt-20">
+      <section className="border-t border-line">
         <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-          <SectionHead
-            eyebrow="Membership"
-            title="How you get in."
-          />
-          <div className="grid gap-px border border-line bg-line md:grid-cols-3">
+          <div data-reveal="fade">
+            <SectionHead eyebrow="Membership" title="How you get in." />
+          </div>
+          {/* One reveal for the whole grid — the rules between the steps are
+              this element's background showing through the gap, so fading the
+              steps individually would strand a grey slab on screen. */}
+          <div
+            data-reveal
+            className="grid gap-px border border-line bg-line md:grid-cols-3"
+          >
             {[
               {
                 n: "01",
@@ -353,7 +500,10 @@ export default async function Home() {
               </div>
             ))}
           </div>
-          <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div
+            data-reveal="fade"
+            className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between"
+          >
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">
               {products.length} items on the floor right now
             </p>
@@ -361,6 +511,12 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* THE OBJECTIONS */}
+      <ClubFaq />
+
+      {/* THE ASK */}
+      <JoinCta productCount={products.length} />
     </>
   );
 }

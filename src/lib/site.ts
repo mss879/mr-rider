@@ -20,6 +20,15 @@ function resolve(): string {
 export const SITE_URL = resolve();
 export const SITE_NAME = "MR.RIDER";
 
+/* The club's mark — masthead, mobile drawer, footer and the Organization node
+   in the JSON-LD graph all read from here.
+
+   Square (1254×1254) with the wordmark built into the artwork, so it is never
+   cropped and never paired with a separate text wordmark; `alt` carries the
+   name for crawlers and screen readers instead. */
+export const SITE_LOGO = "/logo.png";
+export const SITE_LOGO_SIZE = 1254;
+
 /** Absolute URL for a site-relative path. */
 export const absolute = (path = "/") =>
   new URL(path.startsWith("/") ? path : `/${path}`, SITE_URL).toString();

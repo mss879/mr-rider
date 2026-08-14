@@ -1,4 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
+import BuiltBy from "@/components/BuiltBy";
+import { SITE_LOGO, SITE_LOGO_SIZE, SITE_NAME } from "@/lib/site";
 import { categories } from "@/lib/taxonomy";
 
 const SHOP_LINKS = [
@@ -48,7 +51,14 @@ export default function SiteFooter() {
       </div>
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p className="headline mb-4 text-2xl">MR.RIDER</p>
+          <Image
+            src={SITE_LOGO}
+            alt={SITE_NAME}
+            width={SITE_LOGO_SIZE}
+            height={SITE_LOGO_SIZE}
+            sizes="112px"
+            className="mb-4 h-24 w-auto"
+          />
           <p className="max-w-xs text-sm leading-relaxed text-chalk/60">
             A members-only cycling club. One shop floor, daily listings, an
             auction, a clearance market and an international coaching pool —
@@ -106,6 +116,8 @@ export default function SiteFooter() {
           </Link>
         </div>
       </div>
+      <BuiltBy />
+
       <div className="border-t border-line-dark">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-5 font-mono text-[10px] uppercase tracking-[0.18em] text-chalk/40 sm:flex-row sm:justify-between">
           <span>© 2026 MR.RIDER Club</span>

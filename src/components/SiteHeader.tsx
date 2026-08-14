@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -12,6 +13,7 @@ import {
   type MenuSection,
 } from "@/lib/taxonomy";
 import type { NavAvailability } from "@/lib/db";
+import { SITE_LOGO, SITE_LOGO_SIZE, SITE_NAME } from "@/lib/site";
 import { useSession } from "@/lib/useSession";
 
 /* Club navigation — the product categories live in the Shop mega-menu,
@@ -162,12 +164,25 @@ export default function SiteHeader({
         onMouseLeave={scheduleClose}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
-          <Link
-            href="/"
-            className="headline shrink-0 text-2xl"
-            aria-label="MR.RIDER — home"
-          >
-            MR.RIDER
+          {/* The mark carries the wordmark inside the artwork, so `alt` is the
+              link's accessible name and the text a crawler reads — no separate
+              aria-label, which would only override it. `priority` because this
+              is above the fold on every route. */}
+          <Link href="/" className="shrink-0">
+            <Image
+              src={SITE_LOGO}
+              alt={SITE_NAME}
+              width={SITE_LOGO_SIZE}
+              height={SITE_LOGO_SIZE}
+              sizes="64px"
+              priority
+              /* The mark is chrome on a near-white ground, so its highlights
+                 and the wordmark under the bike wash out against the paper
+                 masthead. A hairline ink shadow puts an edge back under it
+                 without boxing the logo in or altering the artwork. The dark
+                 footer and drawer need none of this. */
+              className="h-12 w-auto [filter:drop-shadow(0_1px_1px_oklch(17%_0.006_270/0.55))] md:h-14"
+            />
           </Link>
 
           <nav className="hidden items-center gap-5 xl:flex" aria-label="Main">
@@ -337,7 +352,14 @@ export default function SiteHeader({
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-carbon text-chalk xl:hidden">
           <div className="sticky top-0 flex items-center justify-between border-b border-line-dark bg-carbon px-6 py-4">
-            <span className="headline text-2xl">MR.RIDER</span>
+            <Image
+              src={SITE_LOGO}
+              alt={SITE_NAME}
+              width={SITE_LOGO_SIZE}
+              height={SITE_LOGO_SIZE}
+              sizes="48px"
+              className="h-10 w-auto"
+            />
             <button
               type="button"
               onClick={() => setMobileOpen(false)}

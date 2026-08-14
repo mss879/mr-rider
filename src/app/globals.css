@@ -7,6 +7,14 @@ body {
   overflow-x: clip;
 }
 
+/* Anchor links (#faq, #programs, #coaches) land under the sticky masthead
+   without this. Set once on the scroller so every current and future anchor
+   target clears the header — targets must not also carry `scroll-mt-*`, or the
+   two offsets add up. */
+html {
+  scroll-padding-top: 7rem;
+}
+
 body {
   background: var(--color-paper);
   color: var(--color-ink);
@@ -64,6 +72,66 @@ body {
 .ghost-dark {
   -webkit-text-stroke: 1px oklch(100% 0 0 / 0.16);
   color: transparent;
+}
+
+/* ── Motion ───────────────────────────────────────────────────────────
+   Two tiers, both gated on the `.motion` class that the boot script in the
+   root layout adds before the first paint. The class is never added when the
+   reader asks for reduced motion, and a 2.5s failsafe in that same script
+   drops it again if the motion chunk never arrives — so nothing on the page
+   can end up permanently invisible.
+
+   Tier 1 · [data-rise]    CSS keyframes, above the fold only. Starts at the
+                           first paint, so the hero never waits on a JS chunk
+                           and LCP is not held hostage to the network.
+   Tier 2 · [data-reveal]  GSAP + ScrollTrigger, below the fold only. The
+                           library is imported on idle by MotionProvider, so
+                           none of it sits on the critical path.
+   ------------------------------------------------------------------- */
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+}
+
+/* `both` holds the from-state until the delay elapses; leaving out the `to`
+   keyframe means the element settles on its own styles rather than on values
+   duplicated here. --rise is the stagger index. */
+.motion [data-rise] {
+  animation: rise-in 0.62s var(--ease-out) both;
+  animation-delay: calc(var(--rise, 0) * 90ms);
+}
+
+/* GSAP writes inline opacity/transform on these as the tween runs, and inline
+   styles beat a class rule — so the two never fight over the same property. */
+.motion [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+}
+
+.motion [data-reveal="fade"] {
+  transform: none;
+}
+
+/* Reading progress hairline — scrubbed by ScrollTrigger, decorative only. */
+.scroll-progress {
+  display: none;
+}
+
+.motion .scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  display: block;
+  height: 2px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: var(--color-accent);
+  pointer-events: none;
 }
 
 /* Ticker marquee */

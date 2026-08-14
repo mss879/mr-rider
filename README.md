@@ -30,7 +30,7 @@ Until they are run the site serves built-in mock data, so every page still works
 
 | Route | What it is |
 |-------|-----------|
-| `/` | Home — hero, category index, featured stock, today's drop, coaching, auction + clearance |
+| `/` | Home — the pitch to a visitor who hasn't joined yet: hero, why riders join, what a membership contains, category index, featured stock, today's drop, coaching, auction + clearance, why there are no prices, the floor in numbers, how you get in, FAQ and the ask. Sections live in [`src/components/home/`](src/components/home) |
 | `/shop` | The whole catalog in one place: 11 categories with search, brand and condition filters plus sorting |
 | `/daily-listings` | Today's and yesterday's drops (09:00 daily) |
 | `/coaching` | Training programs + the international coaching pool |
@@ -124,3 +124,28 @@ CTA and sale badge.
 
 Product images are hatched placeholders; drop in real photography when it is
 ready and the cards are already shaped for it.
+
+### Motion
+
+Two tiers, both switched on by one class that an inline script in the root
+layout adds to `<html>` before the first paint
+([`src/lib/motion.ts`](src/lib/motion.ts)):
+
+- **`[data-rise]`** — CSS keyframes, used above the fold. Runs on the first
+  frame, so the hero never waits on a network round-trip and LCP is not held
+  back by a JavaScript chunk. `rise(n)` sets the stagger position.
+- **`[data-reveal]`** — GSAP + ScrollTrigger, used below the fold and driven by
+  a single `ScrollTrigger.batch` in
+  [`MotionProvider`](src/components/motion/MotionProvider.tsx). `[data-count]`
+  elements additionally count up to the number already rendered in the HTML.
+
+GSAP is imported dynamically on the first idle callback, so it lands in its own
+chunk, sits off the critical path and is **never downloaded at all** for
+visitors on `prefers-reduced-motion: reduce` — they get the finished page with
+no animation. Only opacity and transform are animated, so nothing triggers
+layout or paint.
+
+Every rule is scoped under that one class, which means the page is fully
+visible whenever it is absent: reduced motion, JavaScript off, or the 2.5s
+failsafe in the boot script firing because the motion chunk never arrived.
+Nothing on this page can end up permanently invisible.

@@ -34,7 +34,9 @@ export default async function CoachingPage() {
       />
 
       {/* TRAINING PROGRAMS */}
-      <section id="programs" className="mx-auto max-w-7xl scroll-mt-24 px-6 py-16 md:py-20">
+      {/* The header offset for anchor targets is now `scroll-padding-top` on
+          <html> in globals.css — a per-target scroll-mt would add to it. */}
+      <section id="programs" className="mx-auto max-w-7xl px-6 py-16 md:py-20">
         <SectionHead
           eyebrow="Training programs"
           title="Pick a block. Do the work."
@@ -81,7 +83,7 @@ export default async function CoachingPage() {
       {/* INTERNATIONAL COACHING POOL */}
       <section
         id="coaches"
-        className="scroll-mt-24 border-t border-line bg-carbon text-chalk"
+        className="border-t border-line bg-carbon text-chalk"
       >
         <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
           <SectionHead
