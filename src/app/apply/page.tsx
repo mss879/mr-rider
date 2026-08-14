@@ -3,7 +3,7 @@ import ApplicationForm from "@/components/ApplicationForm";
 import PageHero from "@/components/PageHero";
 
 export const metadata: Metadata = {
-  title: "Apply — MR.RIDER",
+  title: "Apply",
   description:
     "Apply for MR.RIDER membership: sign up, pay your dues, get approved by the club.",
 };

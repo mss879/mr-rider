@@ -7,7 +7,7 @@ import { getClearanceProducts } from "@/lib/db";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Clearance Market — MR.RIDER",
+  title: "Clearance Market",
   description:
     "End of line, last sizes and race-used stock, out the door. When it's gone, it's gone.",
 };

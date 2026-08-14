@@ -3,7 +3,7 @@ import ContactForm from "@/components/ContactForm";
 import PageHero from "@/components/PageHero";
 
 export const metadata: Metadata = {
-  title: "Contact — MR.RIDER",
+  title: "Contact",
   description:
     "Apply for membership or reach the club about orders, coaching and the auction floor.",
 };

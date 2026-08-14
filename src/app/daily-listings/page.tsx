@@ -12,7 +12,7 @@ import { getDailyProducts } from "@/lib/db";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Daily Listings — MR.RIDER",
+  title: "Daily Listings",
   description: "Fresh stock lands every morning at 09:00. Members get first call.",
 };
 

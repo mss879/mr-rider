@@ -11,7 +11,7 @@ import { getMembershipStatus, isApproved } from "@/lib/membership";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Coaching — MR.RIDER",
+  title: "Coaching",
   description:
     "Structured training programs and an international coaching pool, booked through your membership.",
 };

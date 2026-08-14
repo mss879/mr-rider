@@ -12,7 +12,7 @@ import { getMembershipStatus, isApproved } from "@/lib/membership";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Auction — MR.RIDER",
+  title: "Auction",
   description:
     "Race-used framesets, collector steel and one-of-one club pieces. Members bid; highest bid at the gun wins.",
 };

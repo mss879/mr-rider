@@ -3,7 +3,7 @@ import AccountPanel from "@/components/AccountPanel";
 import PageHero from "@/components/PageHero";
 
 export const metadata: Metadata = {
-  title: "Account — MR.RIDER",
+  title: "Account",
   description:
     "Create a rider account to ask about anything on the floor — the club answers in your inquiry inbox.",
 };

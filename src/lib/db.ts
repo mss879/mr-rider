@@ -24,6 +24,7 @@ type ProductRow = {
   category: string;
   subcategory: string | null;
   collections: string[] | null;
+  description: string | null;
   images: string[] | null;
   condition: "new" | "pre-owned";
   stock: number;
@@ -88,7 +89,10 @@ const toProduct = (r: ProductRow): Product => ({
   category: r.category,
   subcategory: r.subcategory ?? "",
   collections: r.collections ?? undefined,
-  images: r.images ?? undefined,
+  description: r.description ?? undefined,
+  // A card renders the first shot and a hover shot; the other three would
+  // cross the wire for all 1,400-odd products and never be looked at.
+  images: r.images?.slice(0, 2) ?? undefined,
   condition: r.condition,
   stock: r.stock,
   addedDaysAgo: daysAgo(r.listed_at),
@@ -133,20 +137,36 @@ async function fromTable<Row, T>(
   map: (r: Row) => T,
   fallback: T[],
   orderBy: string,
+  columns = "*",
 ): Promise<T[]> {
   const sb = getSupabase();
   if (!sb) return fallback;
-  const { data, error } = await sb.from(table).select("*").order(orderBy);
-  // Only an unreachable table means "not migrated yet". A live table that
-  // happens to be empty is answered honestly — a quiet drop day or an empty
-  // clearance rail must not resurrect the demo catalog.
-  if (error) {
-    console.warn(
-      `[db] ${table}: ${error.message} — serving local mock data (run supabase/migrations to go live)`,
-    );
-    return fallback;
+
+  // PostgREST caps a response at 1000 rows and says nothing about it, so a
+  // single select silently truncates the catalog. Page until a short read.
+  const PAGE = 1000;
+  const data: Row[] = [];
+  for (let offset = 0; ; offset += PAGE) {
+    const { data: page, error } = await sb
+      .from(table)
+      .select(columns)
+      .order(orderBy)
+      .range(offset, offset + PAGE - 1);
+    // Only an unreachable table means "not migrated yet". A live table that
+    // happens to be empty is answered honestly — a quiet drop day or an empty
+    // clearance rail must not resurrect the demo catalog.
+    if (error) {
+      console.warn(
+        `[db] ${table}: ${error.message} — serving local mock data (run supabase/migrations to go live)`,
+      );
+      return fallback;
+    }
+    if (!page?.length) break;
+    data.push(...(page as Row[]));
+    if (page.length < PAGE) break;
   }
-  if (!data || data.length === 0) {
+
+  if (data.length === 0) {
     // Not an error, but worth saying out loud: a members-only read policy
     // also returns zero rows with no error, and looks exactly like this.
     console.warn(`[db] ${table}: reachable but empty — nothing to render`);
@@ -157,9 +177,17 @@ async function fromTable<Row, T>(
 
 /* ---------- public API, one entry per menu item ---------- */
 
+/* Every catalog listing is a grid of cards, and a card needs none of the
+   supplier copy. Naming the columns keeps products.description — 1.4KB a row,
+   2MB across the catalog, ~74% of the payload — out of a response that would
+   otherwise carry it to the browser and never render it. Ask for it per
+   product with getProductDescription when a detail page needs it. */
+const CARD_COLUMNS =
+  "id,name,brand,category,subcategory,collections,images,condition,stock,listed_at,featured,clearance";
+
 /** SHOP — /shop, homepage grids */
 export const getProducts = () =>
-  fromTable<ProductRow, Product>("products", toProduct, mockProducts, "id");
+  fromTable<ProductRow, Product>("products", toProduct, mockProducts, "id", CARD_COLUMNS);
 
 /** DAILY LISTINGS — /daily-listings (view from migration 02) */
 export const getDailyProducts = () =>
@@ -168,11 +196,34 @@ export const getDailyProducts = () =>
     toProduct,
     mockProducts.filter((p) => p.addedDaysAgo <= 1),
     "id",
+    CARD_COLUMNS,
   );
 
 /** CLEARANCE MARKET — /clearance (view from migration 05) */
 export const getClearanceProducts = () =>
-  fromTable<ProductRow, Product>("clearance_items", toProduct, mockClearance, "id");
+  fromTable<ProductRow, Product>(
+    "clearance_items",
+    toProduct,
+    mockClearance,
+    "id",
+    CARD_COLUMNS,
+  );
+
+/** Supplier copy for one product — the column the grids deliberately skip. */
+export async function getProductDescription(id: string): Promise<string> {
+  const sb = getSupabase();
+  if (!sb) return "";
+  const { data, error } = await sb
+    .from("products")
+    .select("description")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) {
+    console.warn(`[db] products.description for ${id}: ${error.message}`);
+    return "";
+  }
+  return (data as { description?: string } | null)?.description ?? "";
+}
 
 /** COACHING — /coaching (migration 03) */
 export const getCoaches = () =>

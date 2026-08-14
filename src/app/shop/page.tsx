@@ -6,7 +6,7 @@ import { categories, getBrand, resolveCategoryParam } from "@/lib/taxonomy";
 import { getProducts } from "@/lib/db";
 
 export const metadata: Metadata = {
-  title: "Shop — MR.RIDER",
+  title: "Shop",
   description:
     "One shop floor, eleven categories. Filter by category, product type, brand and condition, then request an inquiry on anything.",
 };

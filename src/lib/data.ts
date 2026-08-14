@@ -25,6 +25,8 @@ export type Product = {
   subcategory: string;
   /** Extra brand/collection slugs the product also belongs to (no duplicate records). */
   collections?: string[];
+  /** Supplier copy as a sanitised HTML subset — see migration 17. Undefined on demo rows. */
+  description?: string;
   /** Up to five photos — storage paths or URLs. images[0] is the primary shot. */
   images?: string[];
   /* No price. The floor carries no pricing — riders open an inquiry on a

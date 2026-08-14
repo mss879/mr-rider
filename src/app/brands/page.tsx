@@ -15,7 +15,7 @@ import {
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Brands — MR.RIDER",
+  title: "Brands",
   description:
     "The MR.RIDER brand directory: every brand on the floor, grouped by the category it belongs to.",
 };

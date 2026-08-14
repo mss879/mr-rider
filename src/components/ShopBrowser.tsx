@@ -18,6 +18,9 @@ type Condition = "all" | "new" | "pre-owned";
 /* No price on the floor, so no price band and no price sort. */
 type Sort = "featured" | "new" | "availability";
 
+/* Cards mounted per batch — three full rows on the widest grid. */
+const PAGE_SIZE = 48;
+
 const CONDITIONS: { value: Condition; label: string }[] = [
   { value: "all", label: "All" },
   { value: "new", label: "New" },
@@ -115,6 +118,23 @@ export default function ShopBrowser({
       );
     return list;
   }, [products, q, cats, subs, brandSet, cond, inStockOnly, clearanceOnly, sort]);
+
+  /* The floor carries over 1,400 items. Mounting a card for every one of them
+     puts ~1,400 images and their markup in the document before the rider has
+     scrolled anywhere, which is what made /shop a 10MB page. Cards come in a
+     batch at a time instead; filtering and counts still run across the whole
+     catalog, so nothing is hidden from search — only from the DOM. */
+  const [visible, setVisible] = useState(PAGE_SIZE);
+  /* A new result set starts from the top again. `filtered` is memoised on
+     every filter input, so a change of identity is exactly "the results are
+     different now" — adjusted during render rather than in an effect, which
+     would render the old count first and then immediately render again. */
+  const [lastResults, setLastResults] = useState(filtered);
+  if (lastResults !== filtered) {
+    setLastResults(filtered);
+    setVisible(PAGE_SIZE);
+  }
+  const shown = useMemo(() => filtered.slice(0, visible), [filtered, visible]);
 
   const toggle = (set: Set<string>, value: string) => {
     const next = new Set(set);
@@ -394,11 +414,27 @@ export default function ShopBrowser({
           {filtered.length} / {products.length} items
         </p>
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((p) => (
-              <ProductCard key={p.id} p={p} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {shown.map((p) => (
+                <ProductCard key={p.id} p={p} />
+              ))}
+            </div>
+            {visible < filtered.length && (
+              <div className="mt-10 flex flex-col items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setVisible((n) => n + PAGE_SIZE)}
+                  className="bg-ink px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+                >
+                  Load more
+                </button>
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">
+                  Showing {shown.length} of {filtered.length}
+                </p>
+              </div>
+            )}
+          </>
         ) : (
           <div className="border border-line bg-chalk px-6 py-20 text-center">
             <p className="headline mb-3 text-3xl">Nothing matches.</p>

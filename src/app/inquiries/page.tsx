@@ -3,7 +3,7 @@ import PageHero from "@/components/PageHero";
 import MemberInbox from "@/components/inquiry/MemberInbox";
 
 export const metadata: Metadata = {
-  title: "My Inquiries — MR.RIDER",
+  title: "My Inquiries",
   description:
     "Every product you have asked about, and the club's answers, in one thread each.",
 };

@@ -37,6 +37,12 @@ yarn-error.log*
 # local tooling
 .hallmark/
 
+# Catalogue photography staged for upload (migration 17). ~745MB of binaries
+# whose home is the product-images Storage bucket, not the repo — once
+# scripts/upload-product-images.mjs has run, the bucket is the source of
+# truth. The manifest beside it IS committed, so the set is reproducible.
+/supabase/seed/product-images/
+
 # vercel
 .vercel
 
