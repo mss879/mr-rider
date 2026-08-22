@@ -15,8 +15,13 @@ import {
 } from "@/lib/taxonomy";
 
 type Condition = "all" | "new" | "pre-owned";
-/* No price on the floor, so no price band and no price sort. */
-type Sort = "featured" | "new" | "availability";
+/* No price on the floor, so no price band and no price sort.
+
+   "shelf" is the club's own running order and the default: the products
+   arrive from the database already sorted by the admin's manual position,
+   newest first behind it (SHELF_ORDER in lib/db.ts). Picking it means
+   leaving that order alone — every other option re-sorts on top of it. */
+type Sort = "shelf" | "featured" | "new" | "availability";
 
 /* Cards mounted per batch — three full rows on the widest grid. */
 const PAGE_SIZE = 48;
@@ -32,13 +37,15 @@ export default function ShopBrowser({
   initialCategory,
   initialSubcategory,
   initialBrand,
+  initialQuery,
 }: {
   products: Product[];
   initialCategory?: string;
   initialSubcategory?: string;
   initialBrand?: string;
+  initialQuery?: string;
 }) {
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQuery ?? "");
   const [cats, setCats] = useState<Set<string>>(
     () => new Set(initialCategory ? [initialCategory] : []),
   );
@@ -51,7 +58,7 @@ export default function ShopBrowser({
   const [cond, setCond] = useState<Condition>("all");
   const [inStockOnly, setInStockOnly] = useState(false);
   const [clearanceOnly, setClearanceOnly] = useState(false);
-  const [sort, setSort] = useState<Sort>("featured");
+  const [sort, setSort] = useState<Sort>("shelf");
   const [panelOpen, setPanelOpen] = useState(false);
 
   /* Brands present in the catalog, listed by display name. */
@@ -108,9 +115,10 @@ export default function ShopBrowser({
       if (clearanceOnly && !p.clearance) return false;
       return true;
     });
+    // `shelf` deliberately does nothing: the incoming order IS the answer.
     if (sort === "new") list.sort((a, b) => a.addedDaysAgo - b.addedDaysAgo);
     else if (sort === "availability") list.sort((a, b) => b.stock - a.stock);
-    else
+    else if (sort === "featured")
       list.sort(
         (a, b) =>
           Number(b.featured ?? false) - Number(a.featured ?? false) ||
@@ -249,6 +257,7 @@ export default function ShopBrowser({
             onChange={(e) => setSort(e.target.value as Sort)}
             className="border border-line bg-chalk px-2 py-2 font-mono text-[11px] uppercase tracking-[0.1em]"
           >
+            <option value="shelf">Club order</option>
             <option value="featured">Featured</option>
             <option value="new">Newest</option>
             <option value="availability">Availability</option>

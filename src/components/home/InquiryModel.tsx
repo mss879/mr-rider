@@ -12,7 +12,7 @@ import ArrowCta from "@/components/ArrowCta";
 const STEPS = [
   {
     n: "01",
-    t: "Hit request inquiry",
+    t: "Hit club price",
     d: "Every card on the floor has the button. A snapshot of the product travels with the thread, so retiring stock never erases the conversation.",
   },
   {

@@ -33,7 +33,14 @@ export type FieldDef = {
   /** images only — Storage bucket to upload into, and how many are allowed. */
   bucket?: string;
   max?: number;
+  /** Hide the field unless the rest of the row calls for it — stock only
+      matters on a brand-new product, say. A hidden field is also skipped
+      by the required check, so it can never block a save the admin has no
+      way of seeing the cause of. */
+  showIf?: (row: RowData) => boolean;
 };
+
+const isVisible = (f: FieldDef, row: RowData) => f.showIf?.(row) ?? true;
 
 function optionsOf(f: FieldDef, row: RowData): { value: string; label: string }[] {
   return f.optionsFor ? f.optionsFor(row) : (f.options ?? []);
@@ -243,6 +250,7 @@ export default function AdminCrud({
       if (f.type === "datetime" && typeof v === "string" && v) {
         v = new Date(v).toISOString();
       }
+      if (!isVisible(f, editing)) continue;
       if (f.required && (v == null || v === "" || v === false && f.type !== "checkbox")) {
         if (v !== false) {
           setError(`${f.label} is required`);
@@ -338,7 +346,7 @@ export default function AdminCrud({
             {isNew ? `New ${title.replace(/\.$/, "").toLowerCase()} entry` : `Editing: ${summary(editing).title}`}
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {fields.map((f) => (
+            {fields.filter((f) => isVisible(f, editing)).map((f) => (
               <div
                 key={f.key}
                 className={

@@ -38,9 +38,25 @@ Until they are run the site serves built-in mock data, so every page still works
 | `/clearance` | MR.Rider Clearance Market — end-of-line stock |
 | `/account` | Rider sign-up / sign-in — the door to inquiries |
 | `/inquiries` | The rider's own inquiry threads |
-| `/apply` | Membership application form (name, email, phone, interest, why) |
+| `/apply` | Membership application form — contact, a chosen reason plus notes, an international shipping address and an optional photo |
 | `/about` · `/contact` | The club story · enquiries form |
 | `/admin` | Back office — inquiry inbox, applications, clients and content management |
+
+## Applications
+
+`/apply` collects, in four steps: contact details; a **chosen reason** for
+joining (a fixed list from [`src/lib/applications.ts`](src/lib/applications.ts))
+with an optional notes box under it; a shipping address in international order
+(line 1, line 2, city, state/province, postal code, ISO country); and an
+optional **photo**, taken with the camera or picked from the gallery.
+
+The photo is downscaled in the browser to 1200px before upload — a phone camera
+hands back 4–12MB, which is both more than the admin needs and over the bucket
+limit — and lands in the **private** `applicant-photos` bucket. Only the admin
+can read it, through a short-lived signed URL.
+
+Approving an application carries all of it onto the client profile, so the
+Clients tab has the address without anyone going back to the application.
 
 ## No prices — inquiries instead
 
@@ -49,7 +65,8 @@ button; the club quotes in the thread, where it can attach a spec sheet or a
 photo and answer questions about fit, condition and availability.
 
 1. A rider creates an account at `/account` (email + password, Supabase auth).
-   Only account holders can send an inquiry.
+   Only account holders can send an inquiry. The button on every card reads
+   **Club price**.
 2. Hitting **Request inquiry** opens a thread on that product — a snapshot of
    the product travels with it, so retiring stock never erases the
    conversation. Asking again about the same product reuses the open thread.
@@ -70,6 +87,23 @@ stay readable through the public API for anyone holding the anon key — see the
 note at the end of
 [`15_pricing_retired.sql`](supabase/migrations/15_pricing_retired.sql) for the
 one-line purge if the client wants the numbers gone rather than hidden.
+
+### Language and routing
+
+A rider picks **Sinhala or English** when they open a thread. That choice
+routes the club's alert (`INQUIRY_ADMIN_EMAIL_SI` / `_EN`, both falling back to
+`INQUIRY_ADMIN_EMAIL`), decides which language the automatic acknowledgement is
+written in, and picks the WhatsApp number the rider is offered
+(`NEXT_PUBLIC_WHATSAPP_SI` / `_EN`). Any of these left blank simply falls back —
+nothing breaks while the addresses are still being confirmed.
+
+Opening a thread also sends the rider an **acknowledgement** in their language,
+asking for the size, timing and contact number the club needs to quote. It goes
+out once, on the message that opens the thread, never on the replies after it.
+
+> The Sinhala copy in [`src/lib/languages.ts`](src/lib/languages.ts) is a first
+> pass and should be checked by a native speaker. Every Sinhala string on the
+> site is in that one object.
 
 ### Email alerts (optional)
 
@@ -107,7 +141,8 @@ Supabase dashboard). Tabs:
 - **Applications** — full review cards with every answer; approving creates the client profile
 - **Clients** — approved client profiles, suspend / reactivate
 - **Enquiries** — messages from the contact page
-- **Products** — add / edit / delete stock; drives Shop, Daily Listings and Clearance
+- **Products** — add / edit / delete stock; drives Shop, Daily Listings and Clearance. Daily Listings is **opt-in** per product, stock is only asked for on new (not pre-owned) items, and `Running order` pins a product to a position — anything left blank falls in behind, newest first
+- **Clients** — searchable across name, email, phone, city and country
 - **Coaching** — training programs and the coaching pool
 - **Auction** — lots, bids and countdown end times
 - **Accounts** — auth accounts and membership status

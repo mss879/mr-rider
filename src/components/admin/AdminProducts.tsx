@@ -52,8 +52,15 @@ const fields: FieldDef[] = [
     options: brandOptions,
   },
   {
+    key: "description",
+    label: "Description",
+    type: "textarea",
+    placeholder:
+      "Spec, condition, fit, what's included — the copy a rider reads before asking about it.",
+  },
+  {
     key: "images",
-    label: "Product images",
+    label: `Product images (pick several at once — up to ${MAX_PRODUCT_IMAGES})`,
     type: "images",
     bucket: PRODUCT_IMAGE_BUCKET,
     max: MAX_PRODUCT_IMAGES,
@@ -69,8 +76,27 @@ const fields: FieldDef[] = [
       { value: "pre-owned", label: "Pre-owned" },
     ],
   },
-  { key: "stock", label: "Stock", type: "number", required: true },
-  { key: "listed_at", label: "Listed on (drives Daily Listings)", type: "date", required: true },
+  {
+    key: "stock",
+    label: "Stock on hand",
+    type: "number",
+    required: true,
+    // Pre-owned stock is one of one — the question only means something for
+    // something the club can reorder. Hidden fields skip the required check,
+    // so a pre-owned product saves on whatever number it already carries.
+    showIf: (r: RowData) => String(r.condition ?? "new") === "new",
+  },
+  { key: "listed_at", label: "Listed on", type: "date", required: true },
+  {
+    key: "daily_listing",
+    label: "Include in Daily Listings (today's drop)",
+    type: "checkbox",
+  },
+  {
+    key: "sort_position",
+    label: "Running order (lower shows first — leave blank for newest-first)",
+    type: "number",
+  },
   { key: "featured", label: "Featured on homepage", type: "checkbox" },
   { key: "clearance", label: "In the Clearance Market / Sale", type: "checkbox" },
 ];
@@ -92,19 +118,38 @@ export default function AdminProducts({ sb }: { sb: SupabaseClient }) {
         images: [],
         condition: "new",
         stock: 0,
+        description: "",
         featured: false,
         clearance: false,
+        daily_listing: true,
+        sort_position: null,
         listed_at: today(),
       })}
       summary={(r: RowData) => ({
         title: String(r.name ?? ""),
-        meta: `${brandName(String(r.brand ?? ""))} · ${subcategoryName(String(r.subcategory ?? ""))} · stock ${r.stock} · listed ${r.listed_at}`,
+        meta: [
+          brandName(String(r.brand ?? "")),
+          subcategoryName(String(r.subcategory ?? "")),
+          String(r.condition ?? "new") === "new" ? `stock ${r.stock}` : "pre-owned",
+          `listed ${r.listed_at}`,
+          r.sort_position == null ? null : `order ${r.sort_position}`,
+        ]
+          .filter(Boolean)
+          .join(" · "),
         chips: [
+          ...(r.daily_listing ? ["DAILY"] : []),
           ...(r.featured ? ["FEATURED"] : []),
           ...(r.clearance ? ["CLEARANCE"] : []),
         ],
       })}
-      quickActions={[{ label: "List today", patch: () => ({ listed_at: today() }) }]}
+      quickActions={[
+        {
+          label: "List today",
+          // Both fields, or the button would move the date and leave the
+          // product out of the very drop it was just dated into.
+          patch: () => ({ listed_at: today(), daily_listing: true }),
+        },
+      ]}
     />
   );
 }

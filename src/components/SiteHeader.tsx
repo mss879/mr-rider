@@ -92,6 +92,8 @@ export default function SiteHeader({
   const pathname = usePathname();
   const { session } = useSession();
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   const menu = useMemo(() => visibleMenu(availability), [availability]);
   const active = menu.find((c) => c.slug === activeCat) ?? menu[0];
@@ -119,21 +121,56 @@ export default function SiteHeader({
     return () => window.removeEventListener("keydown", onKey);
   }, [megaOpen, mobileOpen]);
 
-  const openMega = useCallback(() => {
+  const clearTimers = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
+    if (openTimer.current) clearTimeout(openTimer.current);
+  }, []);
+
+  const openMega = useCallback(() => {
+    clearTimers();
     setMegaOpen(true);
     setActiveCat((c) => c ?? menu[0]?.slug ?? null);
-  }, [menu]);
+  }, [clearTimers, menu]);
 
-  // Small grace period so the pointer can travel from trigger to panel.
+  /* Hover INTENT, not hover. The mega panel is full-width and covers the top
+     of the page, so opening it the instant the pointer touches "Shop" meant it
+     flew open whenever someone crossed the nav on their way to Sign in — which
+     is the behaviour the club reported as disruptive. A short dwell tells a
+     deliberate hover apart from a pointer passing through. */
+  const scheduleOpen = useCallback(() => {
+    clearTimers();
+    openTimer.current = setTimeout(openMega, 160);
+  }, [clearTimers, openMega]);
+
+  /** Pointer left the trigger before the dwell elapsed — never open. */
+  const cancelOpen = useCallback(() => {
+    if (openTimer.current) clearTimeout(openTimer.current);
+  }, []);
+
+  // Small grace period the other way, so the pointer can travel from the
+  // trigger down into the panel without it closing underneath them.
   const scheduleClose = useCallback(() => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => setMegaOpen(false), 120);
-  }, []);
+    clearTimers();
+    closeTimer.current = setTimeout(() => setMegaOpen(false), 160);
+  }, [clearTimers]);
 
-  useEffect(() => () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-  }, []);
+  useEffect(() => clearTimers, [clearTimers]);
+
+  /* Click-away. Without this the panel could be left hanging open over the
+     page: it only ever closed on Escape or on the pointer crossing back out
+     of the header, so a click anywhere else left it sitting there.
+     `pointerdown` rather than `click` so it closes on press, before the click
+     lands on whatever is underneath. */
+  useEffect(() => {
+    if (!megaOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (headerRef.current?.contains(e.target as Node)) return;
+      clearTimers();
+      setMegaOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [megaOpen, clearTimers]);
 
   const navLink = (href: string, label: string) => {
     const isActive = pathname.startsWith(href);
@@ -160,6 +197,7 @@ export default function SiteHeader({
       </p>
 
       <header
+        ref={headerRef}
         className="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur"
         onMouseLeave={scheduleClose}
       >
@@ -186,12 +224,28 @@ export default function SiteHeader({
           </Link>
 
           <nav className="hidden items-center gap-5 xl:flex" aria-label="Main">
-            {/* Hover or keyboard focus opens the mega-menu; clicking through
-                lands on the full shop floor. */}
+            {/* A deliberate hover or a keyboard tab opens the mega-menu;
+                clicking goes straight to the full shop floor without the panel
+                flashing open on the way out. */}
             <Link
               href="/shop"
-              onMouseEnter={openMega}
-              onFocus={openMega}
+              onMouseEnter={scheduleOpen}
+              onMouseLeave={cancelOpen}
+              onFocus={(e) => {
+                // A mouse click also focuses the link. :focus-visible is how the
+                // browser itself distinguishes keyboard focus from that, so the
+                // panel opens for a tab and stays shut for a click.
+                try {
+                  if (e.currentTarget.matches(":focus-visible")) openMega();
+                } catch {
+                  // Selector unsupported — fall back to opening on any focus.
+                  openMega();
+                }
+              }}
+              onClick={() => {
+                clearTimers();
+                setMegaOpen(false);
+              }}
               aria-expanded={megaOpen}
               aria-haspopup="true"
               className={`flex items-center gap-1.5 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-accent-deep ${

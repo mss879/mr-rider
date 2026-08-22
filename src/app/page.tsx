@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ArrowCta from "@/components/ArrowCta";
+import AuctionFloor from "@/components/home/AuctionFloor";
 import Marquee from "@/components/Marquee";
 import ProductCard from "@/components/ProductCard";
 import SectionHead from "@/components/SectionHead";
@@ -395,32 +396,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* AUCTION + CLEARANCE DUO */}
-      <section className="mx-auto grid max-w-7xl gap-px md:grid-cols-2">
-        <div
-          data-reveal
-          className="hatch-dark relative flex flex-col gap-5 overflow-clip p-8 text-chalk md:p-12"
-        >
-          <span
-            aria-hidden
-            className="headline ghost-dark pointer-events-none absolute right-5 top-4 select-none text-[clamp(2.5rem,5vw,4.25rem)] leading-none"
-          >
-            LOT {lots[0]?.lot ?? "01"}
-          </span>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
-            {lots.length} lots live
-          </p>
-          <h2 className="headline text-[clamp(2rem,4.5vw,3.2rem)]">
-            The auction floor.
-          </h2>
-          <p className="max-w-sm text-sm leading-relaxed text-chalk/70">
-            Race-used framesets, collector steel, one-of-one club pieces.
-            Watch freely — bidding unlocks with membership.
-          </p>
-          <ArrowCta href="/auction" className="mt-auto w-fit">
-            Browse lots
-          </ArrowCta>
-        </div>
+      {/* THE AUCTION — real lots, not a promo panel */}
+      <AuctionFloor lots={lots} />
+
+      {/* CLEARANCE */}
+      <section className="mx-auto max-w-7xl px-6 py-16 md:py-20">
         <div
           data-reveal
           className="relative flex flex-col gap-5 overflow-clip border border-line bg-chalk p-8 md:p-12"

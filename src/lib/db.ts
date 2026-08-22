@@ -29,6 +29,7 @@ type ProductRow = {
   condition: "new" | "pre-owned";
   stock: number;
   listed_at: string;
+  sort_position: number | null;
   featured: boolean;
   clearance: boolean;
 };
@@ -96,6 +97,7 @@ const toProduct = (r: ProductRow): Product => ({
   condition: r.condition,
   stock: r.stock,
   addedDaysAgo: daysAgo(r.listed_at),
+  sortPosition: r.sort_position ?? undefined,
   featured: r.featured,
   clearance: r.clearance,
 });
@@ -132,11 +134,19 @@ const toLot = (r: LotRow): Lot => ({
 
 /* ---------- generic fetch with fallback ---------- */
 
+/** One ORDER BY clause. `nullsFirst: false` is what puts unpinned rows
+    behind pinned ones — PostgREST defaults to nulls first on ascending. */
+type OrderClause = {
+  column: string;
+  ascending?: boolean;
+  nullsFirst?: boolean;
+};
+
 async function fromTable<Row, T>(
   table: string,
   map: (r: Row) => T,
   fallback: T[],
-  orderBy: string,
+  orderBy: string | OrderClause[],
   columns = "*",
 ): Promise<T[]> {
   const sb = getSupabase();
@@ -145,13 +155,20 @@ async function fromTable<Row, T>(
   // PostgREST caps a response at 1000 rows and says nothing about it, so a
   // single select silently truncates the catalog. Page until a short read.
   const PAGE = 1000;
+  const clauses: OrderClause[] =
+    typeof orderBy === "string" ? [{ column: orderBy }] : orderBy;
   const data: Row[] = [];
   for (let offset = 0; ; offset += PAGE) {
-    const { data: page, error } = await sb
-      .from(table)
-      .select(columns)
-      .order(orderBy)
-      .range(offset, offset + PAGE - 1);
+    // Paging only holds together if the sort is total and stable, so every
+    // clause is applied on every page — including the tie-breaker.
+    let query = sb.from(table).select(columns);
+    for (const c of clauses) {
+      query = query.order(c.column, {
+        ascending: c.ascending ?? true,
+        nullsFirst: c.nullsFirst ?? false,
+      });
+    }
+    const { data: page, error } = await query.range(offset, offset + PAGE - 1);
     // Only an unreachable table means "not migrated yet". A live table that
     // happens to be empty is answered honestly — a quiet drop day or an empty
     // clearance rail must not resurrect the demo catalog.
@@ -183,11 +200,22 @@ async function fromTable<Row, T>(
    otherwise carry it to the browser and never render it. Ask for it per
    product with getProductDescription when a detail page needs it. */
 const CARD_COLUMNS =
-  "id,name,brand,category,subcategory,collections,images,condition,stock,listed_at,featured,clearance";
+  "id,name,brand,category,subcategory,collections,images,condition,stock,listed_at,sort_position,featured,clearance";
+
+/* The club's running order, chosen over "newest first" so the admin can pin
+   a hero product without having to number the whole catalogue: anything with
+   a sort_position leads, in that order, and everything else falls in behind
+   it newest first. `id` last so paging cannot interleave rows that tie on
+   both — PostgREST pages a non-total sort inconsistently. */
+const SHELF_ORDER: OrderClause[] = [
+  { column: "sort_position", ascending: true, nullsFirst: false },
+  { column: "listed_at", ascending: false },
+  { column: "id", ascending: true },
+];
 
 /** SHOP — /shop, homepage grids */
 export const getProducts = () =>
-  fromTable<ProductRow, Product>("products", toProduct, mockProducts, "id", CARD_COLUMNS);
+  fromTable<ProductRow, Product>("products", toProduct, mockProducts, SHELF_ORDER, CARD_COLUMNS);
 
 /** DAILY LISTINGS — /daily-listings (view from migration 02) */
 export const getDailyProducts = () =>
@@ -195,7 +223,7 @@ export const getDailyProducts = () =>
     "daily_listings",
     toProduct,
     mockProducts.filter((p) => p.addedDaysAgo <= 1),
-    "id",
+    SHELF_ORDER,
     CARD_COLUMNS,
   );
 
@@ -205,7 +233,7 @@ export const getClearanceProducts = () =>
     "clearance_items",
     toProduct,
     mockClearance,
-    "id",
+    SHELF_ORDER,
     CARD_COLUMNS,
   );
 

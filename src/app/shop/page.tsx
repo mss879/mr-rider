@@ -14,9 +14,17 @@ export const metadata: Metadata = {
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cat?: string; sub?: string; brand?: string }>;
+  searchParams: Promise<{
+    cat?: string;
+    sub?: string;
+    brand?: string;
+    /* Pre-fills the search box. The admin's inquiry inbox links here with
+       the product name in it, so opening a thread and opening the product
+       it is about is one click. */
+    q?: string;
+  }>;
 }) {
-  const [{ cat, sub, brand }, products] = await Promise.all([
+  const [{ cat, sub, brand, q }, products] = await Promise.all([
     searchParams,
     getProducts(),
   ]);
@@ -37,6 +45,7 @@ export default async function ShopPage({
         initialCategory={resolved.cat}
         initialSubcategory={resolved.sub}
         initialBrand={initialBrand}
+        initialQuery={q}
       />
     </>
   );

@@ -3,7 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import InquiryThread from "@/components/inquiry/InquiryThread";
-import { formatThreadTime, hasUnread, type InquiryRow } from "@/lib/inquiries";
+import Link from "next/link";
+import {
+  formatThreadTime,
+  hasUnread,
+  productHref,
+  type InquiryRow,
+} from "@/lib/inquiries";
 import { productImageUrl } from "@/lib/images";
 import { brandName, subcategoryName } from "@/lib/taxonomy";
 
@@ -173,6 +179,7 @@ export default function AdminInquiries({
                         {r.product_name}
                       </span>
                       <span className="block truncate font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft">
+                        {r.language === "si" ? "SI · " : ""}
                         {r.member_name || r.member_email} ·{" "}
                         {formatThreadTime(r.last_message_at)}
                         {r.status === "closed" ? " · closed" : ""}
@@ -208,9 +215,30 @@ export default function AdminInquiries({
                       ? ` · ${subcategoryName(active.product_subcategory)}`
                       : ""}
                   </p>
-                  <p className="truncate font-display text-2xl font-bold uppercase leading-tight tracking-wide">
-                    {active.product_name}
-                  </p>
+                  {/* The club asked to be able to jump straight from a thread
+                      to the product it is about. Opens in a new tab so the
+                      half-written reply in the thread is not lost to a
+                      navigation. */}
+                  <Link
+                    href={productHref(active)}
+                    target="_blank"
+                    rel="noopener"
+                    className="group flex items-baseline gap-2 font-display text-2xl font-bold uppercase leading-tight tracking-wide underline decoration-accent decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-accent-deep"
+                  >
+                    <span className="truncate">{active.product_name}</span>
+                    <span
+                      aria-hidden
+                      className="shrink-0 text-base transition-transform duration-200 ease-out group-hover:translate-x-0.5"
+                    >
+                      ↗
+                    </span>
+                    <span className="sr-only">— open this product on the shop floor</span>
+                  </Link>
+                  {active.language === "si" && (
+                    <p className="mt-1.5 inline-block bg-accent px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-chalk">
+                      Sinhala — answer in Sinhala
+                    </p>
+                  )}
                   <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft">
                     {active.member_name || "Rider"} ·{" "}
                     <a

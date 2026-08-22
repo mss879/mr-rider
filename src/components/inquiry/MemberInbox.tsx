@@ -93,7 +93,7 @@ export default function MemberInbox() {
         <div className="border border-line bg-chalk px-6 py-20 text-center">
           <p className="headline mb-3 text-4xl">Nothing asked yet.</p>
           <p className="mb-8 font-mono text-xs uppercase tracking-[0.16em] text-ink-soft">
-            Find something on the floor and hit request inquiry
+            Find something on the floor and hit club price
           </p>
           <Link
             href="/shop"

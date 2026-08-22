@@ -10,9 +10,20 @@ import { productImageUrl } from "@/lib/images";
 import { getSupabaseBrowser } from "@/lib/supabaseBrowser";
 import { useSession } from "@/lib/useSession";
 import { brandName, subcategoryName } from "@/lib/taxonomy";
+import {
+  DEFAULT_LANGUAGE,
+  LANGUAGES,
+  copyFor,
+  whatsappLink,
+  type LanguageCode,
+} from "@/lib/languages";
 
-/* Every product carries this instead of a price. Signed-out riders are sent to
-   /account first — the club only takes inquiries from people with an account. */
+/* Every product carries this instead of a price. The label is CLUB PRICE: the
+   floor has no tags, and "club price" says what the rider actually gets out of
+   pressing it, where "request inquiry" only described the paperwork.
+
+   Signed-out riders are sent to /account first — the club only takes inquiries
+   from people with an account. */
 
 export type InquiryProduct = {
   id: string;
@@ -40,6 +51,10 @@ export default function RequestInquiryButton({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
+  /* Stamped on the thread so the club knows which mailbox to route it to
+     and which language to answer in. Chosen before sending, not after —
+     the very first alert has to go to the right person. */
+  const [language, setLanguage] = useState<LanguageCode>(DEFAULT_LANGUAGE);
 
   const open = phase !== "closed";
 
@@ -71,6 +86,8 @@ export default function RequestInquiryButton({
       .limit(1)
       .maybeSingle();
 
+    // An already-open thread keeps the language it was opened in; changing
+    // it here would re-route a conversation someone is already handling.
     if (existing) return { id: (existing as Pick<InquiryRow, "id">).id, error: null };
 
     const { data, error: err } = await sb
@@ -83,6 +100,7 @@ export default function RequestInquiryButton({
         product_category: product.category,
         product_subcategory: product.subcategory,
         product_image: product.image ?? "",
+        language,
       })
       .select("id")
       .single();
@@ -139,7 +157,7 @@ export default function RequestInquiryButton({
         onClick={() => setPhase(session ? "compose" : "signin")}
         className={trigger}
       >
-        Request inquiry
+        Club price
       </button>
 
       {/* Portalled to <body>. The product card animates with a hover
@@ -237,6 +255,37 @@ export default function RequestInquiryButton({
                     {error}
                   </p>
                 )}
+                <fieldset className="mb-4">
+                  <legend className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
+                    {copyFor(language).languageLabel}
+                  </legend>
+                  <div className="flex flex-wrap gap-2">
+                    {LANGUAGES.map((l) => (
+                      <label
+                        key={l.code}
+                        className={`cursor-pointer border px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] transition-colors duration-200 ease-out ${
+                          language === l.code
+                            ? "border-ink bg-ink text-chalk"
+                            : "border-line text-ink-soft hover:border-ink hover:text-ink"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="inquiry-language"
+                          value={l.code}
+                          checked={language === l.code}
+                          onChange={() => setLanguage(l.code)}
+                          className="sr-only"
+                        />
+                        {/* Native name alongside the English one, so a Sinhala
+                            speaker can find their language without reading
+                            English first. */}
+                        {l.label}
+                        {l.native !== l.label ? ` · ${l.native}` : ""}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
                 <InquiryComposer
                   onSend={send}
                   busy={busy}
@@ -257,6 +306,32 @@ export default function RequestInquiryButton({
                   <p className="mb-6 border border-accent-deep bg-chalk px-4 py-3 text-left font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep">
                     Sent without: {warnings.join(" · ")}
                   </p>
+                )}
+                {/* The rider can carry on in the thread or on WhatsApp,
+                    whichever they prefer — the club asked for both. The button
+                    only appears once a number is configured for this language
+                    (NEXT_PUBLIC_WHATSAPP_SI / _EN); with none set, the thread
+                    is simply the only route offered. */}
+                {whatsappLink(
+                  language,
+                  copyFor(language).whatsappPrefill(product.name),
+                ) && (
+                  <div className="mb-6">
+                    <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft">
+                      {copyFor(language).whatsappHint}
+                    </p>
+                    <a
+                      href={whatsappLink(
+                        language,
+                        copyFor(language).whatsappPrefill(product.name),
+                      )}
+                      target="_blank"
+                      rel="noopener"
+                      className="inline-block border border-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors duration-200 ease-out hover:bg-ink hover:text-chalk"
+                    >
+                      {copyFor(language).whatsappCta}
+                    </a>
+                  </div>
                 )}
                 <div className="flex flex-wrap justify-center gap-3">
                   <Link

@@ -2,6 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  AddressBlock,
+  ApplicantPhoto,
+  type PostalAddress,
+} from "@/components/admin/ApplicantDetail";
 
 type AppRow = {
   id: number;
@@ -9,10 +14,15 @@ type AppRow = {
   email: string;
   phone: string;
   interest: string;
+  /* Migration 20: the chosen reason, with `message` demoted to optional
+     notes under it. Both optional here so a project still on migration 11
+     renders instead of crashing on undefined. */
+  reason?: string;
   message: string;
+  photo_path?: string;
   status: "new" | "approved" | "rejected";
   created_at: string;
-};
+} & PostalAddress;
 
 const STATUS_STYLE: Record<AppRow["status"], string> = {
   new: "bg-accent text-chalk",
@@ -120,13 +130,21 @@ export default function AdminApplications({
           {sorted.map((r) => (
             <article key={r.id} className="flex flex-col border border-line bg-chalk">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
-                <div className="min-w-0">
-                  <p className="font-display text-xl font-bold uppercase leading-tight tracking-wide">
-                    {r.name}
-                  </p>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft">
-                    applied {fmt(r.created_at)}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <ApplicantPhoto
+                    sb={sb}
+                    path={r.photo_path ?? ""}
+                    name={r.name}
+                    className="size-14"
+                  />
+                  <div className="min-w-0">
+                    <p className="font-display text-xl font-bold uppercase leading-tight tracking-wide">
+                      {r.name}
+                    </p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft">
+                      applied {fmt(r.created_at)}
+                    </p>
+                  </div>
                 </div>
                 <span
                   className={`px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ${STATUS_STYLE[r.status]}`}
@@ -161,8 +179,29 @@ export default function AdminApplications({
                   <dt className="font-mono text-[9px] uppercase tracking-[0.22em] text-ink-soft">
                     Why should we let them in
                   </dt>
-                  <dd className="mt-1 border-l-2 border-accent pl-3 text-sm leading-relaxed text-ink-soft">
-                    {r.message}
+                  <dd className="mt-1 border-l-2 border-accent pl-3 text-sm leading-relaxed">
+                    {/* Applications from before migration 20 have no `reason`
+                        and carry their essay in `message`; fall back to it so
+                        the historic ones still read properly. */}
+                    {r.reason || r.message || "—"}
+                  </dd>
+                </div>
+                {r.reason && r.message && (
+                  <div>
+                    <dt className="font-mono text-[9px] uppercase tracking-[0.22em] text-ink-soft">
+                      Their notes
+                    </dt>
+                    <dd className="mt-1 whitespace-pre-line text-sm leading-relaxed text-ink-soft">
+                      {r.message}
+                    </dd>
+                  </div>
+                )}
+                <div>
+                  <dt className="font-mono text-[9px] uppercase tracking-[0.22em] text-ink-soft">
+                    Ships to
+                  </dt>
+                  <dd className="mt-1">
+                    <AddressBlock address={r} />
                   </dd>
                 </div>
               </dl>

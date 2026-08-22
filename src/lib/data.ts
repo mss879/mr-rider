@@ -34,6 +34,9 @@ export type Product = {
   condition: "new" | "pre-owned";
   stock: number;
   addedDaysAgo: number;
+  /** Manual running order from the admin. undefined = unpinned, which
+      sorts behind everything pinned, newest first. */
+  sortPosition?: number;
   featured?: boolean;
   clearance?: boolean;
 };

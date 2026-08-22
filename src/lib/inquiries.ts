@@ -33,7 +33,31 @@ export type InquiryAttachment = {
 /* Rows exactly as the tables return them — the chat reads them straight, with
    no mapping layer to drift out of step with the migration. */
 
+/* Where a thread's product lives on the floor.
+
+   The catalogue has no per-product page — cards link into /shop with filters
+   — so the deepest link available is the aisle it sits in plus its name in the
+   search box, which lands on the product itself in a one-item grid. Built from
+   the thread's own SNAPSHOT, so it still resolves after the product is retired
+   from the catalogue (the grid then comes back empty, which is the honest
+   answer rather than a dead link). */
+export function productHref(inquiry: {
+  product_category?: string;
+  product_subcategory?: string;
+  product_name?: string;
+}): string {
+  const params = new URLSearchParams();
+  if (inquiry.product_category) params.set("cat", inquiry.product_category);
+  if (inquiry.product_subcategory) params.set("sub", inquiry.product_subcategory);
+  if (inquiry.product_name) params.set("q", inquiry.product_name);
+  const query = params.toString();
+  return query ? `/shop?${query}` : "/shop";
+}
+
 export type InquiryRow = {
+  /** Migration 20. Optional so a project still on migration 14 type-checks;
+      readers default it to "en". */
+  language?: "en" | "si";
   id: string;
   user_id: string;
   member_name: string;
