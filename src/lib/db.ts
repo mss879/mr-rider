@@ -14,6 +14,7 @@ import {
   type Product,
   type Program,
 } from "@/lib/data";
+import { MODELS_PER_BRAND, isModelNavCategory } from "@/lib/taxonomy";
 
 /* ---------- row shapes (snake_case, as created by the migrations) ---------- */
 
@@ -274,6 +275,12 @@ export type NavAvailability = {
       client-approved brand list, so a global set would advertise Merida
       under Framesets on the strength of a road bike. */
   brands: Record<string, string[]>;
+  /** Model names per brand, for the aisles that navigate category → brand →
+      model (MODEL_NAV_CATEGORIES). Capped at MODELS_PER_BRAND per brand: this
+      rides along in the root layout on every page, so it has to stay small.
+      `total` is the uncapped count, so the menu can say what it is not showing
+      rather than quietly truncating. */
+  models: Record<string, Record<string, { names: string[]; total: number }>>;
 };
 
 export async function getNavAvailability(): Promise<NavAvailability> {
@@ -281,6 +288,10 @@ export async function getNavAvailability(): Promise<NavAvailability> {
   const categories = new Set<string>();
   const subcategories = new Set<string>();
   const brands = new Map<string, Set<string>>();
+  // category -> brand -> model names, in the order getProducts returned them,
+  // which is the club's own running order (SHELF_ORDER).
+  const models = new Map<string, Map<string, string[]>>();
+
   for (const p of products) {
     if (p.stock <= 0) continue;
     categories.add(p.category);
@@ -292,10 +303,35 @@ export async function getNavAvailability(): Promise<NavAvailability> {
     }
     inCategory.add(p.brand);
     for (const c of p.collections ?? []) inCategory.add(c);
+
+    if (isModelNavCategory(p.category)) {
+      let byBrand = models.get(p.category);
+      if (!byBrand) {
+        byBrand = new Map<string, string[]>();
+        models.set(p.category, byBrand);
+      }
+      // Only the product's own brand, not its collections: a bike shown under
+      // a brand collection is not that brand's model.
+      const list = byBrand.get(p.brand) ?? [];
+      list.push(p.name);
+      byBrand.set(p.brand, list);
+    }
   }
+
   return {
     categories: [...categories],
     subcategories: [...subcategories],
     brands: Object.fromEntries([...brands].map(([cat, set]) => [cat, [...set]])),
+    models: Object.fromEntries(
+      [...models].map(([cat, byBrand]) => [
+        cat,
+        Object.fromEntries(
+          [...byBrand].map(([brand, names]) => [
+            brand,
+            { names: names.slice(0, MODELS_PER_BRAND), total: names.length },
+          ]),
+        ),
+      ]),
+    ),
   };
 }

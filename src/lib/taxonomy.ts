@@ -1087,6 +1087,25 @@ export function subcategoriesOf(
 /** The client brand directory — the club's own label is listed separately. */
 export const directoryBrands = brands.filter((b) => !b.house);
 
+/* Aisles that navigate CATEGORY → BRAND → MODEL rather than
+   category → product type.
+
+   Every other aisle has real product types to break down — Components alone
+   has Drivetrain, Brakes, Cockpit, Pedals and Spares. A road bike is just a
+   road bike, so "Shop by Product" there held a single entry and the menu had
+   nothing in it. What a rider is actually choosing between is a Cervélo and a
+   Canyon, and then which model, so that is what the menu offers: the brand is
+   the heading and its models are the items underneath — the same shape as
+   Components, filled with the things that actually vary. */
+export const MODEL_NAV_CATEGORIES = ["road-bikes", "framesets"] as const;
+
+export function isModelNavCategory(slug: string): boolean {
+  return (MODEL_NAV_CATEGORIES as readonly string[]).includes(slug);
+}
+
+/** Models listed under one brand before the menu defers to "see all". */
+export const MODELS_PER_BRAND = 6;
+
 /** Brands the sheet places inside a category, in menu order. */
 export function brandsOf(categorySlug: string): Brand[] {
   const category = categoryBySlug.get(categorySlug);

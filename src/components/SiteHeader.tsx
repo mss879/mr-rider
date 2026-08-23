@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   brandName,
   categories,
+  isModelNavCategory,
   subcategoryName,
   utilityNav,
   type Category,
@@ -26,10 +27,39 @@ const CLUB_NAV = [
   { href: "/contact", label: "Contact" },
 ];
 
-const EMPTY: NavAvailability = { categories: [], subcategories: [], brands: {} };
+const EMPTY: NavAvailability = {
+  categories: [],
+  subcategories: [],
+  brands: {},
+  models: {},
+};
 
-type VisibleSection = MenuSection & { items: string[] };
-type VisibleCategory = Category & { sections: VisibleSection[] };
+/* A section headed by a BRAND, holding that brand's models.
+
+   Road Bikes and Framesets have exactly one product type each, so their menu
+   was a heading with a single link under it next to a tall column of brands.
+   What a rider is choosing there is the brand and then the model, so those two
+   aisles use this instead — the brand becomes the heading and its models are
+   the items, which is the shape Components already had and the club asked for.
+
+   `items` are model NAMES, not slugs: they come from the catalogue rather than
+   the taxonomy, so there is no slug to look them up by. */
+type ModelSection = {
+  title: string;
+  kind: "model";
+  /** Brand slug, for the heading's own link and each model's filter. */
+  brand: string;
+  items: string[];
+  /** Models this brand actually has, when more than the menu lists. */
+  total: number;
+};
+
+type VisibleSection = (MenuSection & { items: string[] }) | ModelSection;
+/* `Omit` the sections rather than intersecting: Category pins them to
+   MenuSection[], which a brand-headed ModelSection is deliberately not. */
+type VisibleCategory = Omit<Category, "sections"> & {
+  sections: VisibleSection[];
+};
 
 /** The full structure, minus the Future Expansion sections. */
 function fullMenu(): VisibleCategory[] {
@@ -37,6 +67,26 @@ function fullMenu(): VisibleCategory[] {
     ...c,
     sections: c.sections.filter((s) => s.kind !== "future"),
   }));
+}
+
+/* One section per brand that actually has stock in this aisle, each holding
+   that brand's models. Built from the catalogue, so it needs no taxonomy entry
+   per model and stays correct as stock comes and goes. */
+function brandSections(
+  category: string,
+  availability: NavAvailability,
+): ModelSection[] {
+  const byBrand = availability.models[category] ?? {};
+  return Object.entries(byBrand)
+    .filter(([, m]) => m.names.length > 0)
+    .map(([brand, m]) => ({
+      title: brandName(brand),
+      kind: "model" as const,
+      brand,
+      items: m.names,
+      total: m.total,
+    }))
+    .sort((a, b) => a.title.localeCompare(b.title));
 }
 
 /** Drop menu entries with no stock behind them; never render an empty section. */
@@ -51,6 +101,15 @@ function visibleMenu(availability: NavAvailability): VisibleCategory[] {
     .map((c) => {
       // Brand links are checked against this aisle's stock, not the shop's.
       const hasBrand = new Set(availability.brands[c.slug] ?? []);
+
+      /* Road Bikes and Framesets navigate brand → model instead of by product
+         type. Fall through to the normal structure when the catalogue has no
+         models to show, so the aisle is never left with an empty panel. */
+      if (isModelNavCategory(c.slug)) {
+        const sections = brandSections(c.slug, availability);
+        if (sections.length > 0) return { ...c, sections };
+      }
+
       return {
         ...c,
         sections: c.sections
@@ -70,14 +129,30 @@ function visibleMenu(availability: NavAvailability): VisibleCategory[] {
   return menu.length > 0 ? menu : fullMenu();
 }
 
-function sectionHref(category: string, section: MenuSection, item: string): string {
-  return section.kind === "brand"
-    ? `/shop?cat=${category}&brand=${item}`
-    : `/shop?cat=${category}&sub=${item}`;
+function sectionHref(
+  category: string,
+  section: VisibleSection,
+  item: string,
+): string {
+  if (section.kind === "brand") return `/shop?cat=${category}&brand=${item}`;
+  if (section.kind === "model") {
+    // The catalogue has no per-product page, so a model lands on its aisle
+    // filtered to that brand with the model name in the search box — the same
+    // deep link the admin's inquiry inbox uses.
+    const params = new URLSearchParams({
+      cat: category,
+      brand: section.brand,
+      q: item,
+    });
+    return `/shop?${params.toString()}`;
+  }
+  return `/shop?cat=${category}&sub=${item}`;
 }
 
-function itemLabel(section: MenuSection, item: string): string {
-  return section.kind === "brand" ? brandName(item) : subcategoryName(item);
+function itemLabel(section: VisibleSection, item: string): string {
+  if (section.kind === "brand") return brandName(item);
+  if (section.kind === "model") return item;
+  return subcategoryName(item);
 }
 
 export default function SiteHeader({
@@ -339,15 +414,42 @@ export default function SiteHeader({
                   </Link>
                 </div>
 
-                <div className="grid gap-8 pb-7 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-                  <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+                <div
+                  className={`grid gap-8 pb-7 ${
+                    active.sections.some((s) => s.kind === "brand")
+                      ? "lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+                      : ""
+                  }`}
+                >
+                  {/* Brand-headed aisles carry more, shorter columns than a
+                      product-type aisle, so they get a third column rather
+                      than running twice as tall. */}
+                  <div
+                    className={`grid gap-x-8 gap-y-6 sm:grid-cols-2 ${
+                      active.sections.some((s) => s.kind === "model")
+                        ? "lg:grid-cols-3"
+                        : ""
+                    }`}
+                  >
                     {active.sections
                       .filter((s) => s.kind !== "brand")
                       .map((s) => (
                         <div key={s.title}>
-                          <p className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
-                            {s.title}
-                          </p>
+                          {s.kind === "model" ? (
+                            // The brand heading is itself the way into that
+                            // brand's whole range — the middle step of
+                            // category → brand → model.
+                            <Link
+                              href={`/shop?cat=${active.slug}&brand=${s.brand}`}
+                              className="mb-2.5 block font-mono text-[10px] uppercase tracking-[0.22em] text-ink transition-colors duration-200 ease-out hover:text-accent-deep"
+                            >
+                              {s.title}
+                            </Link>
+                          ) : (
+                            <p className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
+                              {s.title}
+                            </p>
+                          )}
                           <ul className="flex flex-col gap-1.5">
                             {s.items.map((item) => (
                               <li key={item}>
@@ -360,6 +462,16 @@ export default function SiteHeader({
                               </li>
                             ))}
                           </ul>
+                          {/* Says what it is not showing rather than quietly
+                              stopping at the cap. */}
+                          {s.kind === "model" && s.total > s.items.length && (
+                            <Link
+                              href={`/shop?cat=${active.slug}&brand=${s.brand}`}
+                              className="mt-2 inline-block font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft underline decoration-accent decoration-2 underline-offset-4 hover:text-accent-deep"
+                            >
+                              All {s.total} →
+                            </Link>
+                          )}
                         </div>
                       ))}
                   </div>
@@ -457,11 +569,24 @@ export default function SiteHeader({
                         >
                           Shop all {c.name} →
                         </Link>
+                        {/* sectionHref and itemLabel already understand a
+                            brand-headed model section, so Road Bikes and
+                            Framesets get the same brand → model drill-down
+                            here as on the desktop panel. */}
                         {c.sections.map((s) => (
                           <div key={s.title} className="mb-4 last:mb-0">
-                            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-chalk/40">
-                              {s.title}
-                            </p>
+                            {s.kind === "model" ? (
+                              <Link
+                                href={`/shop?cat=${c.slug}&brand=${s.brand}`}
+                                className="mb-2 block font-mono text-[10px] uppercase tracking-[0.22em] text-accent"
+                              >
+                                {s.title} →
+                              </Link>
+                            ) : (
+                              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-chalk/40">
+                                {s.title}
+                              </p>
+                            )}
                             <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
                               {s.items.map((item) => (
                                 <li key={item}>
@@ -474,6 +599,14 @@ export default function SiteHeader({
                                 </li>
                               ))}
                             </ul>
+                            {s.kind === "model" && s.total > s.items.length && (
+                              <Link
+                                href={`/shop?cat=${c.slug}&brand=${s.brand}`}
+                                className="mt-2 inline-block font-mono text-[10px] uppercase tracking-[0.16em] text-chalk/50 underline underline-offset-4"
+                              >
+                                All {s.total} →
+                              </Link>
+                            )}
                           </div>
                         ))}
                       </div>

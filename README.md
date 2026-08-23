@@ -150,6 +150,28 @@ Supabase dashboard). Tabs:
 All writes are enforced server-side by row-level security: only the superadmin
 session can change anything.
 
+## Navigation
+
+The Shop mega-menu breaks each aisle down by **product type** — Components has
+Drivetrain, Brakes, Cockpit, Pedals and Spares, each holding its types.
+
+**Road Bikes** and **Framesets** are the exception. A road bike is just a road
+bike, so those two aisles had one product type each and their menu was a single
+link beside a tall column of brands. What a rider is choosing there is the
+brand and then the model, so those aisles navigate **category → brand → model**
+instead: the brand is the section heading and its models are the items, which
+is the same shape Components has.
+
+The models come from the catalogue, not the taxonomy — no per-model entry to
+maintain, and the menu stays correct as stock moves. Brands with no stock in
+that aisle never appear. The list is capped at `MODELS_PER_BRAND`
+([`src/lib/taxonomy.ts`](src/lib/taxonomy.ts)) with an `All N →` link, since
+this data rides along in the root layout on every page.
+
+A model link opens `/shop` filtered to that aisle and brand with the model name
+in the search box, so the rider can see why the floor is filtered and widen it
+from there.
+
 ## Design
 
 Black / grey / white with a single energetic accent, condensed italic display
