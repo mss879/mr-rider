@@ -18,7 +18,7 @@ export default function LockedNotice({
         </p>
         <Link
           href="/apply"
-          className="whitespace-nowrap font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-deep underline decoration-accent decoration-2 underline-offset-4"
+          className="whitespace-nowrap font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ink underline decoration-ink decoration-2 underline-offset-4 hover:text-ink-soft"
         >
           Apply now →
         </Link>

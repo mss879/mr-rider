@@ -253,9 +253,9 @@ export default function SiteHeader({
       <Link
         key={href}
         href={href}
-        className={`whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-accent-deep ${
+        className={`whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-ink-soft ${
           isActive
-            ? "text-accent-deep underline decoration-accent decoration-2 underline-offset-8"
+            ? "text-ink underline decoration-ink decoration-2 underline-offset-8"
             : "text-ink"
         }`}
       >
@@ -268,7 +268,7 @@ export default function SiteHeader({
     <>
       <p className="bg-carbon px-4 py-1.5 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-chalk/80">
         Members only · sign up → dues → admin approval ·{" "}
-        <span className="text-accent">new stock daily 09:00</span>
+        <span className="text-chalk">new stock daily 09:00</span>
       </p>
 
       <header
@@ -323,9 +323,9 @@ export default function SiteHeader({
               }}
               aria-expanded={megaOpen}
               aria-haspopup="true"
-              className={`flex items-center gap-1.5 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-accent-deep ${
+              className={`flex items-center gap-1.5 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-ink-soft ${
                 pathname.startsWith("/shop")
-                  ? "text-accent-deep underline decoration-accent decoration-2 underline-offset-8"
+                  ? "text-ink underline decoration-ink decoration-2 underline-offset-8"
                   : "text-ink"
               }`}
             >
@@ -344,13 +344,13 @@ export default function SiteHeader({
           <div className="flex items-center gap-4">
             <Link
               href={session ? "/inquiries" : "/account"}
-              className="hidden whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-accent-deep md:inline-block"
+              className="hidden whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-ink-soft md:inline-block"
             >
               {session ? "My inquiries" : "Sign in"}
             </Link>
             <Link
               href="/apply"
-              className="hidden whitespace-nowrap bg-accent px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep md:inline-block"
+              className="hidden whitespace-nowrap bg-ink px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft md:inline-block"
             >
               Join the Club
             </Link>
@@ -363,7 +363,7 @@ export default function SiteHeader({
             >
               <span className="block h-0.5 w-6 bg-ink" />
               <span className="block h-0.5 w-6 bg-ink" />
-              <span className="block h-0.5 w-4 bg-accent" />
+              <span className="block h-0.5 w-4 bg-ink" />
             </button>
           </div>
         </div>
@@ -385,8 +385,8 @@ export default function SiteHeader({
                       onFocus={() => setActiveCat(c.slug)}
                       className={`flex items-center justify-between gap-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors duration-200 ease-out ${
                         c.slug === active.slug
-                          ? "text-accent-deep"
-                          : "text-ink hover:text-accent-deep"
+                          ? "text-ink font-semibold"
+                          : "text-ink hover:text-ink-soft"
                       }`}
                     >
                       {c.name}
@@ -408,7 +408,7 @@ export default function SiteHeader({
                   </div>
                   <Link
                     href={`/shop?cat=${active.slug}`}
-                    className="whitespace-nowrap font-mono text-[10px] font-semibold uppercase tracking-[0.16em] underline decoration-accent decoration-2 underline-offset-4 hover:text-accent-deep"
+                    className="whitespace-nowrap font-mono text-[10px] font-semibold uppercase tracking-[0.16em] underline decoration-ink decoration-2 underline-offset-4 hover:text-ink-soft"
                   >
                     Shop all →
                   </Link>
@@ -441,7 +441,7 @@ export default function SiteHeader({
                             // category → brand → model.
                             <Link
                               href={`/shop?cat=${active.slug}&brand=${s.brand}`}
-                              className="mb-2.5 block font-mono text-[10px] uppercase tracking-[0.22em] text-ink transition-colors duration-200 ease-out hover:text-accent-deep"
+                              className="mb-2.5 block font-mono text-[10px] uppercase tracking-[0.22em] text-ink transition-colors duration-200 ease-out hover:text-ink-soft"
                             >
                               {s.title}
                             </Link>
@@ -455,7 +455,7 @@ export default function SiteHeader({
                               <li key={item}>
                                 <Link
                                   href={sectionHref(active.slug, s, item)}
-                                  className="text-sm transition-colors duration-200 ease-out hover:text-accent-deep"
+                                  className="text-sm transition-colors duration-200 ease-out hover:text-ink-soft"
                                 >
                                   {itemLabel(s, item)}
                                 </Link>
@@ -467,7 +467,7 @@ export default function SiteHeader({
                           {s.kind === "model" && s.total > s.items.length && (
                             <Link
                               href={`/shop?cat=${active.slug}&brand=${s.brand}`}
-                              className="mt-2 inline-block font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft underline decoration-accent decoration-2 underline-offset-4 hover:text-accent-deep"
+                              className="mt-2 inline-block font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft underline decoration-ink decoration-2 underline-offset-4 hover:text-ink"
                             >
                               All {s.total} →
                             </Link>
@@ -490,7 +490,7 @@ export default function SiteHeader({
                                 <li key={item}>
                                   <Link
                                     href={sectionHref(active.slug, s, item)}
-                                    className="font-mono text-xs tracking-[0.06em] transition-colors duration-200 ease-out hover:text-accent-deep"
+                                    className="font-mono text-xs tracking-[0.06em] transition-colors duration-200 ease-out hover:text-ink-soft"
                                   >
                                     {brandName(item)}
                                   </Link>
@@ -501,7 +501,7 @@ export default function SiteHeader({
                         ))}
                       <Link
                         href="/brands"
-                        className="mt-4 inline-block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] underline decoration-accent decoration-2 underline-offset-4 hover:text-accent-deep"
+                        className="mt-4 inline-block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] underline decoration-ink decoration-2 underline-offset-4 hover:text-ink-soft"
                       >
                         All brands →
                       </Link>
@@ -556,7 +556,7 @@ export default function SiteHeader({
                       </span>
                       <span
                         aria-hidden
-                        className={`font-mono text-sm text-accent transition-transform duration-200 ease-out ${expanded ? "rotate-45" : ""}`}
+                        className={`font-mono text-sm text-chalk transition-transform duration-200 ease-out ${expanded ? "rotate-45" : ""}`}
                       >
                         +
                       </span>
@@ -565,7 +565,7 @@ export default function SiteHeader({
                       <div className="pb-5">
                         <Link
                           href={`/shop?cat=${c.slug}`}
-                          className="mb-4 inline-block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-accent underline underline-offset-4"
+                          className="mb-4 inline-block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-chalk underline underline-offset-4"
                         >
                           Shop all {c.name} →
                         </Link>
@@ -578,7 +578,7 @@ export default function SiteHeader({
                             {s.kind === "model" ? (
                               <Link
                                 href={`/shop?cat=${c.slug}&brand=${s.brand}`}
-                                className="mb-2 block font-mono text-[10px] uppercase tracking-[0.22em] text-accent"
+                                className="mb-2 block font-mono text-[10px] uppercase tracking-[0.22em] text-chalk"
                               >
                                 {s.title} →
                               </Link>
@@ -642,7 +642,7 @@ export default function SiteHeader({
           <div className="border-t border-line-dark px-6 py-6">
             <Link
               href="/apply"
-              className="inline-block bg-accent px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk"
+              className="inline-block bg-chalk px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-carbon"
             >
               Join the Club →
             </Link>

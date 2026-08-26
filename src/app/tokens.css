@@ -1,5 +1,5 @@
 /* Hallmark · macrostructure: Marquee Hero · theme: studied-DNA (source: user reference images — fitness-editorial + cycling-shop)
- * paper: oklch(87% 0.004 95) · ink: oklch(17% 0.006 270) · accent: oklch(63% 0.21 33) warm signal-orange
+ * paper: oklch(87% 0.004 95) · ink: oklch(17% 0.006 270) · accent: oklch(17% 0.006 270) monochrome black
  * display: Barlow Condensed 700–900 italic UC · body: Archivo · mono: IBM Plex Mono
  * nav: N6 masthead · footer: Ft5 statement · enrichment: hatch placeholders (no stock photos)
  * studied: yes · DNA-source: image (user reference) · genre: editorial (sport)
@@ -20,9 +20,9 @@
   --color-line: oklch(76% 0.005 95);
   --color-line-dark: oklch(34% 0.006 270);
 
-  /* the single energetic accent — swap this one value to re-skin CTAs site-wide */
-  --color-accent: oklch(63% 0.21 33);
-  --color-accent-deep: oklch(52% 0.19 33);
+  /* monochrome palette — black and white typography and accents */
+  --color-accent: oklch(17% 0.006 270);
+  --color-accent-deep: oklch(0% 0 0);
 
   /* type roles */
   --font-display: var(--font-barlow), "Arial Narrow", sans-serif;

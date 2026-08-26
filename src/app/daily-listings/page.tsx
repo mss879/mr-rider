@@ -33,7 +33,7 @@ function ListingRows({ items, dim = false }: { items: Product[]; dim?: boolean }
             href={`/shop?cat=${p.category}&sub=${p.subcategory}`}
             className="min-w-0"
           >
-            <span className="font-display block text-xl font-bold uppercase leading-tight tracking-wide transition-colors duration-200 ease-out group-hover:text-accent-deep">
+            <span className="font-display block text-xl font-bold uppercase leading-tight tracking-wide transition-colors duration-200 ease-out group-hover:text-ink-soft">
               {p.name}
             </span>
             <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-soft">

@@ -62,7 +62,7 @@ const STATUS_ORDER: Record<ProfileRow["status"], number> = {
 const STATUS_STYLE: Record<ProfileRow["status"], string> = {
   pending: "border border-line bg-paper-2 text-ink-soft",
   paid: "bg-ink text-chalk",
-  active: "bg-accent text-chalk",
+  active: "bg-ink text-chalk font-semibold",
   rejected: "border border-line bg-paper-2 text-ink-soft line-through",
 };
 
@@ -70,7 +70,7 @@ const label = "mb-1.5 block font-mono text-[10px] uppercase tracking-[0.22em] te
 const field =
   "w-full border border-line bg-chalk px-3 py-3 text-sm transition-colors duration-200 ease-out placeholder:text-ink-soft/60";
 const errBox =
-  "border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep";
+  "border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold";
 
 function fmtDate(iso: string): string {
   return new Date(iso)
@@ -268,7 +268,7 @@ export default function AdminPanel() {
           <button
             type="submit"
             disabled={signingIn}
-            className="bg-ink px-5 py-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep disabled:opacity-60"
+            className="bg-ink px-5 py-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft disabled:opacity-60"
           >
             {signingIn ? "Signing in…" : "Sign in"}
           </button>
@@ -296,7 +296,7 @@ export default function AdminPanel() {
         <button
           type="button"
           onClick={() => sb.auth.signOut()}
-          className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+          className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
         >
           Sign out
         </button>
@@ -331,7 +331,7 @@ export default function AdminPanel() {
           <button
             type="button"
             onClick={() => sb.auth.signOut()}
-            className="bg-ink px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+            className="bg-ink px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
           >
             Sign out
           </button>
@@ -396,7 +396,7 @@ export default function AdminPanel() {
                   <p className="font-display text-lg font-bold uppercase leading-tight tracking-wide">
                     {p.full_name || "Unnamed rider"}
                     {p.is_admin && (
-                      <span className="ml-2 align-middle font-mono text-[9px] tracking-[0.14em] text-accent-deep">
+                      <span className="ml-2 align-middle font-mono text-[9px] tracking-[0.14em] text-ink-soft">
                         ADMIN
                       </span>
                     )}
@@ -417,7 +417,7 @@ export default function AdminPanel() {
                       <button
                         type="button"
                         onClick={() => setStatus(p.id, "active")}
-                        className="bg-accent px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+                        className="bg-ink px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
                       >
                         Approve
                       </button>

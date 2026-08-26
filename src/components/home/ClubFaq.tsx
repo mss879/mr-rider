@@ -54,7 +54,7 @@ export default function ClubFaq() {
               data-reveal
               className="bg-carbon p-7 text-chalk lg:sticky lg:top-28"
             >
-              <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-accent">
+              <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-chalk/50">
                 Still deciding
               </p>
               <p className="headline mb-4 text-3xl">Ask us instead.</p>
@@ -71,13 +71,13 @@ export default function ClubFaq() {
               {QA.map((item) => (
                 <li key={item.q} data-reveal className="border-b border-line">
                   <details name="club-faq" className="group">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 transition-colors duration-200 ease-out hover:text-accent-deep [&::-webkit-details-marker]:hidden">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 transition-colors duration-200 ease-out hover:text-ink-soft [&::-webkit-details-marker]:hidden">
                       <span className="font-display min-w-0 text-xl font-bold uppercase leading-tight tracking-wide">
                         {item.q}
                       </span>
                       <span
                         aria-hidden
-                        className="grid size-7 shrink-0 place-items-center border border-line text-lg leading-none transition-transform duration-300 ease-out group-open:rotate-45 group-open:border-accent group-open:text-accent"
+                        className="grid size-7 shrink-0 place-items-center border border-line text-lg leading-none transition-transform duration-300 ease-out group-open:rotate-45 group-open:border-ink group-open:text-ink"
                       >
                         +
                       </span>

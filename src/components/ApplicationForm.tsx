@@ -19,11 +19,11 @@ const field =
 const label =
   "mb-1.5 block font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft";
 const errText =
-  "mt-1 block font-mono text-[10px] uppercase tracking-[0.12em] text-accent-deep";
+  "mt-1 block font-mono text-[10px] uppercase tracking-[0.12em] text-ink font-semibold";
 const legend =
   "mb-4 border-b border-line pb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-ink-soft";
 
-const border = (bad: boolean) => (bad ? "border-accent-deep" : "border-line");
+const border = (bad: boolean) => (bad ? "border-ink font-medium" : "border-line");
 
 export default function ApplicationForm() {
   const sb = getSupabaseBrowser();
@@ -136,7 +136,7 @@ export default function ApplicationForm() {
             clearPhoto();
             setStatus("idle");
           }}
-          className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+          className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
         >
           Send another application
         </button>
@@ -418,7 +418,7 @@ export default function ApplicationForm() {
                 <button
                   type="button"
                   onClick={clearPhoto}
-                  className="px-2 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-deep underline underline-offset-4"
+                  className="px-2 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ink underline underline-offset-4 hover:text-ink-soft"
                 >
                   Remove
                 </button>
@@ -442,7 +442,7 @@ export default function ApplicationForm() {
       {serverError && (
         <p
           role="alert"
-          className="border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep"
+          className="border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold"
         >
           {serverError}
         </p>
@@ -453,7 +453,7 @@ export default function ApplicationForm() {
         disabled={status === "sending" || photoBusy}
         className="group inline-flex w-fit items-stretch disabled:opacity-60"
       >
-        <span className="flex items-center bg-accent px-6 py-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out group-hover:bg-accent-deep">
+        <span className="flex items-center bg-ink px-6 py-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out group-hover:bg-ink-soft">
           {status === "sending" ? "Sending…" : "Submit application"}
         </span>
         <span

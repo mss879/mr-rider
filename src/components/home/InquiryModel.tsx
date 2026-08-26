@@ -39,7 +39,7 @@ export default function InquiryModel() {
             <h2 className="headline text-[clamp(2.2rem,5vw,3.8rem)]">
               Ask a person.
               <br />
-              <span className="text-accent">Get a real number.</span>
+              <span className="text-ink">Get a real number.</span>
             </h2>
           </div>
 
@@ -57,7 +57,7 @@ export default function InquiryModel() {
                 data-reveal
                 className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 border-t border-line py-5"
               >
-                <span className="headline text-2xl text-accent">{s.n}</span>
+                <span className="headline text-2xl text-ink">{s.n}</span>
                 <div className="min-w-0">
                   <p className="font-display mb-1 text-xl font-bold uppercase tracking-wide">
                     {s.t}
@@ -87,7 +87,7 @@ export default function InquiryModel() {
                     Framesets · inquiry open
                   </p>
                 </div>
-                <span className="shrink-0 bg-accent px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-chalk">
+                <span className="shrink-0 bg-ink px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-chalk">
                   OPEN
                 </span>
               </div>
@@ -116,13 +116,13 @@ export default function InquiryModel() {
                     </p>
                     <ul className="mt-2.5 flex flex-wrap gap-2">
                       <li className="flex items-center gap-2 border border-line bg-paper-2 px-2.5 py-1.5">
-                        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-accent">
+                        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-ink">
                           PDF
                         </span>
                         <span className="truncate text-xs">spec-sheet.pdf</span>
                       </li>
                       <li className="flex items-center gap-2 border border-line bg-paper-2 px-2.5 py-1.5">
-                        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-accent">
+                        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-ink">
                           IMG
                         </span>
                         <span className="truncate text-xs">bb-shell.webp</span>

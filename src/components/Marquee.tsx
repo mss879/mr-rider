@@ -10,7 +10,7 @@ export default function Marquee({ items }: { items: string[] }) {
                 className="headline flex items-center whitespace-nowrap px-6 text-lg md:text-xl"
               >
                 {item}
-                <span aria-hidden className="ml-12 text-accent not-italic">
+                <span aria-hidden className="ml-12 text-chalk/40 not-italic">
                   ///
                 </span>
               </span>

@@ -40,7 +40,7 @@ export default function ApplyPage() {
             {STEPS.map((s) => (
               <div key={s.n} className="border-b border-line py-6">
                 <div className="flex items-baseline gap-4">
-                  <span className="headline shrink-0 whitespace-nowrap text-3xl text-accent">
+                  <span className="headline shrink-0 whitespace-nowrap text-3xl text-ink">
                     {s.n}
                   </span>
                   <div className="min-w-0">
@@ -55,7 +55,7 @@ export default function ApplyPage() {
               </div>
             ))}
             <p className="mt-6 bg-carbon p-5 text-sm leading-relaxed text-chalk/80">
-              <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.22em] text-accent">
+              <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.22em] text-chalk/70">
                 House rule
               </span>
               We&apos;d rather have fewer members who ride than a crowd who

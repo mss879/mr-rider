@@ -143,7 +143,7 @@ export async function POST(request: Request) {
         MR.RIDER · inquiry
       </p>
       <p style="margin:0 0 16px"><strong>${escapeHtml(intro)}</strong></p>
-      <blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid #e2552f;background:#f6f5f2;white-space:pre-wrap">${escapeHtml(
+      <blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid #16181d;background:#f6f5f2;white-space:pre-wrap">${escapeHtml(
         message.body || "(no message — see the attachments)",
       )}</blockquote>
       ${attachmentLine ? `<p style="margin:0 0 16px;color:#5a5f6b">${escapeHtml(attachmentLine)}</p>` : ""}
@@ -202,7 +202,7 @@ export async function POST(request: Request) {
         </p>
         <p style="margin:0 0 16px">${escapeHtml(c.ackGreeting(inquiry.member_name || "there"))}</p>
         <p style="margin:0 0 16px">${escapeHtml(c.ackBody)}</p>
-        <p style="margin:0 0 20px;padding:12px 16px;border-left:3px solid #e2552f;background:#f6f5f2">${escapeHtml(c.ackAsk)}</p>
+        <p style="margin:0 0 20px;padding:12px 16px;border-left:3px solid #16181d;background:#f6f5f2">${escapeHtml(c.ackAsk)}</p>
         ${
           riderLink
             ? `<p style="margin:0 0 16px">

@@ -24,7 +24,7 @@ const CLUB_LINKS = [
 
 export default function SiteFooter() {
   return (
-    <footer className="border-t-2 border-accent bg-carbon text-chalk">
+    <footer className="border-t border-line-dark bg-carbon text-chalk">
       <div className="overflow-clip" aria-hidden>
         <p className="headline ghost-dark -mb-[0.16em] select-none whitespace-nowrap text-[clamp(4rem,16.5vw,15rem)] leading-none">
           MR.RIDER
@@ -40,7 +40,7 @@ export default function SiteFooter() {
               <li key={c.slug}>
                 <Link
                   href={`/shop?cat=${c.slug}`}
-                  className="font-mono text-xs uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-accent"
+                  className="font-mono text-xs uppercase tracking-[0.16em] text-chalk/70 transition-colors duration-200 ease-out hover:text-chalk"
                 >
                   {c.name}
                 </Link>
@@ -74,7 +74,7 @@ export default function SiteFooter() {
               <li key={l.href}>
                 <Link
                   href={l.href}
-                  className="font-mono text-xs uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-accent"
+                  className="font-mono text-xs uppercase tracking-[0.16em] text-chalk/70 transition-colors duration-200 ease-out hover:text-chalk"
                 >
                   {l.label}
                 </Link>
@@ -91,7 +91,7 @@ export default function SiteFooter() {
               <li key={l.href}>
                 <Link
                   href={l.href}
-                  className="font-mono text-xs uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-accent"
+                  className="font-mono text-xs uppercase tracking-[0.16em] text-chalk/70 transition-colors duration-200 ease-out hover:text-chalk"
                 >
                   {l.label}
                 </Link>
@@ -110,7 +110,7 @@ export default function SiteFooter() {
           </p>
           <Link
             href="/apply"
-            className="inline-block bg-accent px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+            className="inline-block bg-chalk px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-carbon transition-colors duration-200 ease-out hover:bg-chalk/90"
           >
             Apply Now →
           </Link>
@@ -125,7 +125,7 @@ export default function SiteFooter() {
             <span>Members only · All sales final on the auction floor</span>
             <Link
               href="/admin"
-              className="transition-colors duration-200 ease-out hover:text-accent"
+              className="transition-colors duration-200 ease-out hover:text-chalk"
             >
               Admin
             </Link>

@@ -68,7 +68,7 @@ export default async function Home() {
               four continents. You don&apos;t browse MR.RIDER — you get let in.
             </p>
             <div data-rise style={rise(3)} className="bg-carbon p-5 text-chalk">
-              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-accent">
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-chalk/70">
                 The gate
               </p>
               <p className="text-sm leading-relaxed text-chalk/80">
@@ -84,7 +84,7 @@ export default async function Home() {
               <ArrowCta href="/apply">Apply for membership</ArrowCta>
               <Link
                 href="/account"
-                className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft underline decoration-line decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-accent-deep hover:decoration-accent"
+                className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft underline decoration-line decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-ink hover:decoration-ink"
               >
                 Already riding with us? Sign in →
               </Link>
@@ -100,7 +100,7 @@ export default async function Home() {
               <span data-rise style={rise(1)} className="block">
                 Buy smart.
               </span>
-              <span data-rise style={rise(2)} className="block text-accent">
+              <span data-rise style={rise(2)} className="block text-ink">
                 Join the club.
               </span>
             </h1>
@@ -119,7 +119,7 @@ export default async function Home() {
                 </span>
                 <span
                   aria-hidden
-                  className="absolute right-5 top-5 text-accent transition-transform duration-200 ease-out group-hover:translate-x-1"
+                  className="absolute right-5 top-5 text-chalk transition-transform duration-200 ease-out group-hover:translate-x-1"
                 >
                   →
                 </span>
@@ -138,7 +138,7 @@ export default async function Home() {
                 </span>
                 <span
                   aria-hidden
-                  className="absolute right-5 top-5 text-accent transition-transform duration-200 ease-out group-hover:translate-x-1"
+                  className="absolute right-5 top-5 text-chalk transition-transform duration-200 ease-out group-hover:translate-x-1"
                 >
                   →
                 </span>
@@ -156,7 +156,7 @@ export default async function Home() {
               <span className="flex items-center gap-3">
                 <span
                   aria-hidden
-                  className="size-2 shrink-0 rounded-full bg-accent"
+                  className="size-2 shrink-0 rounded-full bg-ink"
                 />
                 <span className="font-mono text-[11px] uppercase tracking-[0.18em]">
                   {todaysListings.length > 0
@@ -164,7 +164,7 @@ export default async function Home() {
                     : "Next drop lands 09:00"}
                 </span>
               </span>
-              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft transition-colors duration-200 ease-out group-hover:text-accent-deep">
+              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft transition-colors duration-200 ease-out group-hover:text-ink">
                 See the drop →
               </span>
             </Link>
@@ -228,7 +228,7 @@ export default async function Home() {
               </span>
               <span
                 aria-hidden
-                className="font-mono text-sm text-ink-soft transition-all duration-200 ease-out group-hover:translate-x-1 group-hover:text-accent-deep"
+                className="font-mono text-sm text-ink-soft transition-all duration-200 ease-out group-hover:translate-x-1 group-hover:text-ink"
               >
                 →
               </span>
@@ -306,7 +306,7 @@ export default async function Home() {
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="min-w-0">
-                  <span className="font-display block truncate text-xl font-bold uppercase tracking-wide transition-colors duration-200 ease-out group-hover:text-accent">
+                  <span className="font-display block truncate text-xl font-bold uppercase tracking-wide transition-colors duration-200 ease-out group-hover:text-chalk/80">
                     {p.name}
                   </span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-chalk/50">
@@ -388,7 +388,7 @@ export default async function Home() {
             <Link
               href="/coaching#coaches"
               data-reveal="fade"
-              className="mt-6 w-fit font-mono text-[11px] font-semibold uppercase tracking-[0.18em] underline decoration-accent decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-accent-deep"
+              className="mt-6 w-fit font-mono text-[11px] font-semibold uppercase tracking-[0.18em] underline decoration-ink decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-ink-soft"
             >
               Meet all {coaches.length} coaches →
             </Link>
@@ -411,7 +411,7 @@ export default async function Home() {
           >
             LAST CALL
           </span>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent-deep">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft">
             {clearanceItems.length} items · end of line
           </p>
           <h2 className="headline text-[clamp(2rem,4.5vw,3.2rem)]">
@@ -470,7 +470,7 @@ export default async function Home() {
               },
             ].map((s) => (
               <div key={s.n} className="flex flex-col gap-6 bg-paper p-7">
-                <span className="headline text-5xl text-accent">{s.n}</span>
+                <span className="headline text-5xl text-ink">{s.n}</span>
                 <div>
                   <p className="font-display mb-1 text-2xl font-bold uppercase tracking-wide">
                     {s.t}

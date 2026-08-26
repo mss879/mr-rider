@@ -267,7 +267,7 @@ export default function InquiryThread({
                                     : "border-line hover:border-ink"
                                 } ${url ? "" : "pointer-events-none opacity-50"}`}
                               >
-                                <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-accent">
+                                <span className={`font-mono text-[9px] font-semibold uppercase tracking-[0.14em] ${mine ? "text-chalk" : "text-ink"}`}>
                                   {image ? "IMG" : "PDF"}
                                 </span>
                                 <span className="max-w-[12rem] truncate text-xs">
@@ -296,7 +296,7 @@ export default function InquiryThread({
       {error && (
         <p
           role="alert"
-          className="mt-3 border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep"
+          className="mt-3 border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold"
         >
           {error}
         </p>

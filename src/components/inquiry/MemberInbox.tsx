@@ -62,7 +62,7 @@ export default function MemberInbox() {
         </p>
         <Link
           href="/account?next=%2Finquiries"
-          className="bg-accent px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+          className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
         >
           Sign in / create an account
         </Link>
@@ -79,7 +79,7 @@ export default function MemberInbox() {
       {error && (
         <p
           role="alert"
-          className="mb-6 border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep"
+          className="mb-6 border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold"
         >
           {error}
         </p>
@@ -97,7 +97,7 @@ export default function MemberInbox() {
           </p>
           <Link
             href="/shop"
-            className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+            className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
           >
             Shop the floor
           </Link>
@@ -146,7 +146,7 @@ export default function MemberInbox() {
                     {unread && (
                       <span
                         aria-label="Unread reply"
-                        className="size-2.5 shrink-0 rounded-full bg-accent"
+                        className="size-2.5 shrink-0 rounded-full bg-ink"
                       />
                     )}
                   </button>

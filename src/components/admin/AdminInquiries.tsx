@@ -130,7 +130,7 @@ export default function AdminInquiries({
       {error && (
         <p
           role="alert"
-          className="mb-5 border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep"
+          className="mb-5 border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold"
         >
           {error}
         </p>
@@ -188,7 +188,7 @@ export default function AdminInquiries({
                     {unread && (
                       <span
                         aria-label="Waiting on a reply"
-                        className="size-2.5 shrink-0 rounded-full bg-accent"
+                        className="size-2.5 shrink-0 rounded-full bg-ink"
                       />
                     )}
                   </button>
@@ -223,7 +223,7 @@ export default function AdminInquiries({
                     href={productHref(active)}
                     target="_blank"
                     rel="noopener"
-                    className="group flex items-baseline gap-2 font-display text-2xl font-bold uppercase leading-tight tracking-wide underline decoration-accent decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-accent-deep"
+                    className="group flex items-baseline gap-2 font-display text-2xl font-bold uppercase leading-tight tracking-wide underline decoration-ink decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-ink-soft"
                   >
                     <span className="truncate">{active.product_name}</span>
                     <span
@@ -235,7 +235,7 @@ export default function AdminInquiries({
                     <span className="sr-only">— open this product on the shop floor</span>
                   </Link>
                   {active.language === "si" && (
-                    <p className="mt-1.5 inline-block bg-accent px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-chalk">
+                    <p className="mt-1.5 inline-block bg-ink px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-chalk">
                       Sinhala — answer in Sinhala
                     </p>
                   )}
@@ -243,7 +243,7 @@ export default function AdminInquiries({
                     {active.member_name || "Rider"} ·{" "}
                     <a
                       href={`mailto:${active.member_email}`}
-                      className="underline underline-offset-4 hover:text-accent-deep"
+                      className="underline underline-offset-4 hover:text-ink"
                     >
                       {active.member_email}
                     </a>{" "}

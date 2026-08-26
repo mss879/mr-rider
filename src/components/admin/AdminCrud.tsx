@@ -67,7 +67,7 @@ const fieldCls =
 const labelCls =
   "mb-1 block font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft";
 const errCls =
-  "border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep";
+  "border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold";
 const btnSm =
   "px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ease-out";
 
@@ -325,7 +325,7 @@ export default function AdminCrud({
             setIsNew(true);
             setError(null);
           }}
-          className={`${btnSm} bg-accent px-4 py-2.5 text-chalk hover:bg-accent-deep`}
+          className={`${btnSm} bg-ink px-4 py-2.5 text-chalk hover:bg-ink-soft`}
         >
           + Add new
         </button>
@@ -381,7 +381,7 @@ export default function AdminCrud({
                                     className="size-full object-cover"
                                   />
                                   {idx === 0 && (
-                                    <span className="absolute left-0 top-0 bg-accent px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-[0.12em] text-chalk">
+                                    <span className="absolute left-0 top-0 bg-ink px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-[0.12em] text-chalk">
                                       MAIN
                                     </span>
                                   )}
@@ -410,7 +410,7 @@ export default function AdminCrud({
                                   <button
                                     type="button"
                                     onClick={() => removeImage(f, path)}
-                                    className="font-mono text-[10px] uppercase tracking-[0.1em] text-accent-deep hover:underline"
+                                    className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink underline underline-offset-2 hover:text-ink-soft"
                                   >
                                     Remove
                                   </button>
@@ -463,7 +463,7 @@ export default function AdminCrud({
                                     : [...selected, o.value],
                                 })
                               }
-                              className="size-4 accent-accent"
+                              className="size-4 accent-ink"
                             />
                             {o.label}
                           </label>
@@ -479,7 +479,7 @@ export default function AdminCrud({
                       onChange={(e) =>
                         setEditing({ ...editing, [f.key]: e.target.checked })
                       }
-                      className="size-4 accent-accent"
+                      className="size-4 accent-ink"
                     />
                     {f.label}
                   </label>
@@ -545,7 +545,7 @@ export default function AdminCrud({
             <button
               type="submit"
               disabled={busy || uploading}
-              className={`${btnSm} bg-ink px-5 py-2.5 text-chalk hover:bg-accent-deep disabled:opacity-60`}
+              className={`${btnSm} bg-ink px-5 py-2.5 text-chalk hover:bg-ink-soft disabled:opacity-60`}
             >
               {busy ? "Saving…" : uploading ? "Uploading…" : "Save"}
             </button>
@@ -623,7 +623,7 @@ export default function AdminCrud({
                 <button
                   type="button"
                   onClick={() => remove(r)}
-                  className={`${btnSm} border border-line text-ink-soft hover:border-accent-deep hover:text-accent-deep`}
+                  className={`${btnSm} border border-line text-ink-soft hover:border-ink hover:text-ink`}
                 >
                   Delete
                 </button>

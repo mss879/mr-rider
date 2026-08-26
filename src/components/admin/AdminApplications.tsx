@@ -25,7 +25,7 @@ type AppRow = {
 } & PostalAddress;
 
 const STATUS_STYLE: Record<AppRow["status"], string> = {
-  new: "bg-accent text-chalk",
+  new: "bg-ink text-chalk font-semibold",
   approved: "bg-ink text-chalk",
   rejected: "border border-line bg-paper-2 text-ink-soft line-through",
 };
@@ -115,7 +115,7 @@ export default function AdminApplications({
       {error && (
         <p
           role="alert"
-          className="mb-6 border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep"
+          className="mb-6 border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold"
         >
           {error}
         </p>
@@ -179,7 +179,7 @@ export default function AdminApplications({
                   <dt className="font-mono text-[9px] uppercase tracking-[0.22em] text-ink-soft">
                     Why should we let them in
                   </dt>
-                  <dd className="mt-1 border-l-2 border-accent pl-3 text-sm leading-relaxed">
+                  <dd className="mt-1 border-l-2 border-ink pl-3 text-sm leading-relaxed">
                     {/* Applications from before migration 20 have no `reason`
                         and carry their essay in `message`; fall back to it so
                         the historic ones still read properly. */}
@@ -211,7 +211,7 @@ export default function AdminApplications({
                     type="button"
                     disabled={busyId === r.id}
                     onClick={() => approve(r)}
-                    className={`${btn} bg-accent text-chalk hover:bg-accent-deep disabled:opacity-60`}
+                    className={`${btn} bg-ink text-chalk hover:bg-ink-soft disabled:opacity-60`}
                   >
                     {busyId === r.id ? "Working…" : "Approve → create client"}
                   </button>

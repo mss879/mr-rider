@@ -27,7 +27,7 @@ const label = "mb-1.5 block font-mono text-[10px] uppercase tracking-[0.22em] te
 const field =
   "w-full border border-line bg-chalk px-3 py-3 text-sm transition-colors duration-200 ease-out placeholder:text-ink-soft/60";
 const notice =
-  "border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep";
+  "border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold";
 
 export default function AccountPanel({ next }: { next?: string }) {
   const sb = getSupabaseBrowser();
@@ -122,7 +122,7 @@ export default function AccountPanel({ next }: { next?: string }) {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/inquiries"
-              className="bg-accent px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+              className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
             >
               My inquiries
             </Link>
@@ -149,7 +149,7 @@ export default function AccountPanel({ next }: { next?: string }) {
         <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.14em] leading-relaxed text-ink-soft">
           An account lets you send inquiries. Full membership — dues, approval,
           auction bidding and coaching — is applied for separately at{" "}
-          <Link href="/apply" className="text-accent-deep underline underline-offset-4">
+          <Link href="/apply" className="text-ink underline decoration-ink underline-offset-4 hover:text-ink-soft">
             /apply
           </Link>
           .
@@ -173,7 +173,7 @@ export default function AccountPanel({ next }: { next?: string }) {
             setConfirmSent(false);
             setMode("signin");
           }}
-          className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+          className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
         >
           Back to sign in
         </button>
@@ -266,7 +266,7 @@ export default function AccountPanel({ next }: { next?: string }) {
         <button
           type="submit"
           disabled={busy}
-          className="bg-accent px-5 py-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep disabled:opacity-60"
+          className="bg-ink px-5 py-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft disabled:opacity-60"
         >
           {busy
             ? "Working…"

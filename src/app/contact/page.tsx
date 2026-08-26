@@ -47,7 +47,7 @@ export default function ContactPage() {
               </div>
             ))}
             <p className="mt-6 bg-carbon p-5 text-sm leading-relaxed text-chalk/80">
-              <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.22em] text-accent">
+              <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.22em] text-chalk/70">
                 Note
               </span>
               Enquiries land in the club&apos;s back office and are answered

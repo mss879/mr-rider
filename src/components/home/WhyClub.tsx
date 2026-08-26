@@ -69,13 +69,13 @@ export default function WhyClub({
             data-reveal
             className="group relative flex flex-col gap-5 border-b border-r border-line p-7 transition-colors duration-200 ease-out hover:bg-chalk"
           >
-            {/* The rule thickens into the accent on hover — the same hairline
+            {/* The rule thickens into ink on hover — the same hairline
                 language the rest of the floor uses, just louder. */}
             <span
               aria-hidden
-              className="absolute inset-x-0 bottom-[-1px] h-[2px] origin-left scale-x-0 bg-accent transition-transform duration-300 ease-out group-hover:scale-x-100"
+              className="absolute inset-x-0 bottom-[-1px] h-[2px] origin-left scale-x-0 bg-ink transition-transform duration-300 ease-out group-hover:scale-x-100"
             />
-            <span className="font-mono text-[11px] tracking-[0.22em] text-ink-soft transition-colors duration-200 ease-out group-hover:text-accent-deep">
+            <span className="font-mono text-[11px] tracking-[0.22em] text-ink-soft transition-colors duration-200 ease-out group-hover:text-ink">
               {r.n}
             </span>
             <h3 className="font-display text-2xl font-bold uppercase leading-tight tracking-wide">

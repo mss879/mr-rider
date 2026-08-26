@@ -207,7 +207,7 @@ export default function ShopBrowser({
               </span>
             )}
             {c.href && i < crumbs.length - 1 ? (
-              <Link href={c.href} className="hover:text-accent-deep">
+              <Link href={c.href} className="hover:text-ink">
                 {c.label}
               </Link>
             ) : (
@@ -234,7 +234,7 @@ export default function ShopBrowser({
               type="button"
               onClick={() => setQ("")}
               aria-label="Clear search"
-              className="font-mono text-xs text-ink-soft hover:text-accent-deep"
+              className="font-mono text-xs text-ink-soft hover:text-ink"
             >
               ✕
             </button>
@@ -278,7 +278,7 @@ export default function ShopBrowser({
             <button
               type="button"
               onClick={clearAll}
-              className="font-mono text-[10px] uppercase tracking-[0.16em] text-accent-deep underline underline-offset-4"
+              className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink underline underline-offset-4 hover:text-ink-soft"
             >
               Clear all ({activeCount})
             </button>
@@ -299,7 +299,7 @@ export default function ShopBrowser({
                   type="checkbox"
                   checked={cats.has(c.slug)}
                   onChange={() => toggleCategory(c.slug)}
-                  className="size-4 shrink-0 accent-accent"
+                  className="size-4 shrink-0 accent-ink"
                 />
                 <span className="flex-1">{c.name}</span>
                 <span className="font-mono text-[10px] text-ink-soft">
@@ -325,7 +325,7 @@ export default function ShopBrowser({
                     type="checkbox"
                     checked={subs.has(s.slug)}
                     onChange={() => setSubs(toggle(subs, s.slug))}
-                    className="size-4 shrink-0 accent-accent"
+                    className="size-4 shrink-0 accent-ink"
                   />
                   <span className="flex-1">{s.name}</span>
                 </label>
@@ -348,7 +348,7 @@ export default function ShopBrowser({
                   type="checkbox"
                   checked={brandSet.has(b.slug)}
                   onChange={() => setBrandSet(toggle(brandSet, b.slug))}
-                  className="size-4 shrink-0 accent-accent"
+                  className="size-4 shrink-0 accent-ink"
                 />
                 <span className="font-mono text-xs tracking-[0.06em]">{b.name}</span>
               </label>
@@ -371,7 +371,7 @@ export default function ShopBrowser({
                   name="condition"
                   checked={cond === c.value}
                   onChange={() => setCond(c.value)}
-                  className="size-4 shrink-0 accent-accent"
+                  className="size-4 shrink-0 accent-ink"
                 />
                 {c.label}
               </label>
@@ -389,7 +389,7 @@ export default function ShopBrowser({
                 type="checkbox"
                 checked={inStockOnly}
                 onChange={() => setInStockOnly((v) => !v)}
-                className="size-4 shrink-0 accent-accent"
+                className="size-4 shrink-0 accent-ink"
               />
               In stock only
             </label>
@@ -398,7 +398,7 @@ export default function ShopBrowser({
                 type="checkbox"
                 checked={clearanceOnly}
                 onChange={() => setClearanceOnly((v) => !v)}
-                className="size-4 shrink-0 accent-accent"
+                className="size-4 shrink-0 accent-ink"
               />
               Clearance stock
             </label>
@@ -434,7 +434,7 @@ export default function ShopBrowser({
                 <button
                   type="button"
                   onClick={() => setVisible((n) => n + PAGE_SIZE)}
-                  className="bg-ink px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+                  className="bg-ink px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
                 >
                   Load more
                 </button>
@@ -453,7 +453,7 @@ export default function ShopBrowser({
             <button
               type="button"
               onClick={clearAll}
-              className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+              className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
             >
               Clear all filters
             </button>

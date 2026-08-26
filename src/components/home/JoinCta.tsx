@@ -18,7 +18,7 @@ export default function JoinCta({ productCount }: { productCount: number }) {
       <div className="relative mx-auto max-w-7xl px-6 py-20 md:py-28">
         <p
           data-reveal="fade"
-          className="mb-5 font-mono text-[11px] uppercase tracking-[0.22em] text-accent"
+          className="mb-5 font-mono text-[11px] uppercase tracking-[0.22em] text-chalk/50"
         >
           Membership
         </p>
@@ -29,7 +29,7 @@ export default function JoinCta({ productCount }: { productCount: number }) {
         >
           The floor is open.
           <br />
-          <span className="text-accent">The door isn&apos;t.</span>
+          <span className="text-chalk">The door isn&apos;t.</span>
         </h2>
 
         <p
@@ -48,7 +48,7 @@ export default function JoinCta({ productCount }: { productCount: number }) {
           <ArrowCta href="/apply">Apply for membership</ArrowCta>
           <Link
             href="/account"
-            className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk underline decoration-accent decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-accent"
+            className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk underline decoration-chalk/60 decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-chalk/80"
           >
             Or just open an inquiry first →
           </Link>

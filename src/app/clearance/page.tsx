@@ -26,7 +26,7 @@ export default async function ClearancePage() {
         title="Clearance market."
         blurb="End-of-line stock, last sizes and race-used gear on its way out of the building. Ask about anything here — clearance moves fast."
       >
-        <p className="w-fit bg-accent px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk">
+        <p className="w-fit bg-ink px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk">
           Final sale — ask before it goes
         </p>
       </PageHero>

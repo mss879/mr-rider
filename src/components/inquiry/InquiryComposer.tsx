@@ -99,7 +99,7 @@ export default function InquiryComposer({
               key={`${file.name}-${i}`}
               className="flex items-center gap-2 border border-line bg-chalk px-2.5 py-1.5"
             >
-              <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-accent-deep">
+              <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-ink">
                 {isImageAttachment(file.type) ? "IMG" : "PDF"}
               </span>
               <span className="max-w-[12rem] truncate text-xs">{file.name}</span>
@@ -110,7 +110,7 @@ export default function InquiryComposer({
                 type="button"
                 onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
                 aria-label={`Remove ${file.name}`}
-                className="font-mono text-[11px] text-ink-soft transition-colors duration-200 ease-out hover:text-accent-deep"
+                className="font-mono text-[11px] text-ink-soft transition-colors duration-200 ease-out hover:text-ink"
               >
                 ✕
               </button>
@@ -120,7 +120,7 @@ export default function InquiryComposer({
       )}
 
       {rejected.length > 0 && (
-        <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-accent-deep">
+        <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink font-semibold">
           {rejected.join(" · ")}
         </p>
       )}
@@ -148,7 +148,7 @@ export default function InquiryComposer({
         <button
           type="submit"
           disabled={busy || nothingToSend}
-          className="bg-ink px-5 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep disabled:opacity-50"
+          className="bg-ink px-5 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft disabled:opacity-50"
         >
           {busy ? "Sending…" : submitLabel}
         </button>

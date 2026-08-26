@@ -11,7 +11,7 @@ export default function ArrowCta({
 }) {
   return (
     <Link href={href} className={`group inline-flex items-stretch ${className}`}>
-      <span className="flex items-center whitespace-nowrap bg-accent px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out group-hover:bg-accent-deep">
+      <span className="flex items-center whitespace-nowrap bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out group-hover:bg-ink-soft">
         {children}
       </span>
       <span

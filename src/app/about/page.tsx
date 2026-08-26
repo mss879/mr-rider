@@ -46,7 +46,7 @@ export default function AboutPage() {
             <h2 className="headline text-[clamp(2rem,4.5vw,3.4rem)]">
               Everything on the floor
               <br />
-              <span className="text-accent">earns its place.</span>
+              <span className="text-ink">earns its place.</span>
             </h2>
           </div>
           <div className="flex flex-col gap-5 text-sm leading-relaxed text-ink-soft lg:col-span-5 lg:border-l lg:border-line lg:pl-8">
@@ -98,7 +98,7 @@ export default function AboutPage() {
             },
           ].map((s) => (
             <div key={s.n} className="flex flex-col gap-6 bg-paper p-7">
-              <span className="headline text-5xl text-accent">{s.n}</span>
+              <span className="headline text-5xl text-ink">{s.n}</span>
               <div>
                 <p className="font-display mb-1 text-2xl font-bold uppercase tracking-wide">
                   {s.t}

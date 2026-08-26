@@ -41,7 +41,7 @@ export default function AuctionFloor({ lots }: { lots: Lot[] }) {
                   className="group flex h-full flex-col gap-4 p-6 transition-colors duration-200 ease-out hover:bg-carbon-2"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <span className="headline text-4xl text-accent">
+                    <span className="headline text-4xl text-chalk">
                       {l.lot}
                     </span>
                     <span className="border border-line-dark px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-chalk/60">
@@ -50,7 +50,7 @@ export default function AuctionFloor({ lots }: { lots: Lot[] }) {
                   </div>
 
                   <div className="min-w-0">
-                    <p className="font-display text-xl font-bold uppercase leading-tight tracking-wide transition-colors duration-200 ease-out group-hover:text-accent">
+                    <p className="font-display text-xl font-bold uppercase leading-tight tracking-wide transition-colors duration-200 ease-out group-hover:text-chalk/80">
                       {l.name}
                     </p>
                     <p className="mt-1 text-xs leading-relaxed text-chalk/50">
@@ -69,7 +69,7 @@ export default function AuctionFloor({ lots }: { lots: Lot[] }) {
                     <span className="font-display text-lg font-bold tracking-wide">
                       {l.currentBid.toLocaleString("en-GB")}
                     </span>
-                    <span className="w-full font-mono text-[10px] uppercase tracking-[0.16em] text-accent">
+                    <span className="w-full font-mono text-[10px] uppercase tracking-[0.16em] text-chalk/70">
                       Ends in {l.endsIn}
                     </span>
                   </div>

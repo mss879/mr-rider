@@ -60,7 +60,7 @@ export default function ContactForm() {
         <button
           type="button"
           onClick={() => setStatus("idle")}
-          className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+          className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
         >
           Send another message
         </button>
@@ -71,7 +71,7 @@ export default function ContactForm() {
   const field =
     "w-full border bg-chalk px-3 py-3 text-sm transition-colors duration-200 ease-out placeholder:text-ink-soft/60";
   const label = "mb-1.5 block font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft";
-  const err = "mt-1 block font-mono text-[10px] uppercase tracking-[0.12em] text-accent-deep";
+  const err = "mt-1 block font-mono text-[10px] uppercase tracking-[0.12em] text-ink font-semibold";
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
@@ -84,7 +84,7 @@ export default function ContactForm() {
             id="cf-name"
             name="name"
             autoComplete="name"
-            className={`${field} ${errors.name ? "border-accent-deep" : "border-line"}`}
+            className={`${field} ${errors.name ? "border-ink font-medium" : "border-line"}`}
             placeholder="Your name"
           />
           {errors.name && <span className={err}>{errors.name}</span>}
@@ -98,7 +98,7 @@ export default function ContactForm() {
             name="email"
             type="email"
             autoComplete="email"
-            className={`${field} ${errors.email ? "border-accent-deep" : "border-line"}`}
+            className={`${field} ${errors.email ? "border-ink font-medium" : "border-line"}`}
             placeholder="you@club.cc"
           />
           {errors.email && <span className={err}>{errors.email}</span>}
@@ -122,7 +122,7 @@ export default function ContactForm() {
           id="cf-message"
           name="message"
           rows={6}
-          className={`${field} resize-y ${errors.message ? "border-accent-deep" : "border-line"}`}
+          className={`${field} resize-y ${errors.message ? "border-ink font-medium" : "border-line"}`}
           placeholder="What do you ride, and what do you need?"
         />
         {errors.message && <span className={err}>{errors.message}</span>}
@@ -130,7 +130,7 @@ export default function ContactForm() {
       {serverError && (
         <p
           role="alert"
-          className="border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep"
+          className="border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold"
         >
           {serverError}
         </p>
@@ -140,7 +140,7 @@ export default function ContactForm() {
         disabled={status === "sending"}
         className="group inline-flex w-fit items-stretch disabled:opacity-60"
       >
-        <span className="flex items-center bg-accent px-6 py-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out group-hover:bg-accent-deep">
+        <span className="flex items-center bg-ink px-6 py-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out group-hover:bg-ink-soft">
           {status === "sending" ? "Sending…" : "Send it"}
         </span>
         <span aria-hidden className="grid w-11 place-items-center bg-ink text-chalk">

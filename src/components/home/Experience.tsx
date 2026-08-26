@@ -110,11 +110,11 @@ export default function Experience({
                 href={r.href}
                 className="group grid grid-cols-[2.75rem_minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-2 border-b border-line-dark py-6 transition-colors duration-200 ease-out hover:bg-carbon-2 md:grid-cols-[3.5rem_minmax(0,18rem)_minmax(0,1fr)_10rem_2rem] md:items-center md:gap-x-6"
               >
-                <span className="font-mono text-[11px] tracking-[0.22em] text-chalk/35 transition-colors duration-200 ease-out group-hover:text-accent">
+                <span className="font-mono text-[11px] tracking-[0.22em] text-chalk/35 transition-colors duration-200 ease-out group-hover:text-chalk">
                   {r.n}
                 </span>
 
-                <span className="headline min-w-0 text-[clamp(1.6rem,3.6vw,2.4rem)] transition-colors duration-200 ease-out group-hover:text-accent">
+                <span className="headline min-w-0 text-[clamp(1.6rem,3.6vw,2.4rem)] transition-colors duration-200 ease-out group-hover:text-chalk/80">
                   {r.name}
                 </span>
 
@@ -127,7 +127,7 @@ export default function Experience({
                     className={`inline-block whitespace-nowrap border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] ${
                       r.open
                         ? "border-line-dark text-chalk/50"
-                        : "border-accent/50 text-accent"
+                        : "border-chalk/60 text-chalk"
                     }`}
                   >
                     {r.access}
@@ -136,7 +136,7 @@ export default function Experience({
 
                 <span
                   aria-hidden
-                  className="hidden text-chalk/40 transition-all duration-200 ease-out group-hover:translate-x-1 group-hover:text-accent md:block md:justify-self-end"
+                  className="hidden text-chalk/40 transition-all duration-200 ease-out group-hover:translate-x-1 group-hover:text-chalk md:block md:justify-self-end"
                 >
                   →
                 </span>

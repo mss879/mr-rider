@@ -53,7 +53,7 @@ export default async function AuctionPage() {
                   ghost={`LOT ${l.lot}`}
                   className="aspect-[16/8]"
                 />
-                <span className="absolute left-0 top-3 bg-accent px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.14em] text-chalk">
+                <span className="absolute left-0 top-3 bg-carbon-2 border border-line-dark px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.14em] text-chalk">
                   ENDS IN {l.endsIn}
                 </span>
               </div>
@@ -67,7 +67,7 @@ export default async function AuctionPage() {
                     <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-chalk/50">
                       Current bid · {l.bids} bids
                     </p>
-                    <p className="headline mt-1 text-4xl text-accent">
+                    <p className="headline mt-1 text-4xl text-chalk">
                       {usd(l.currentBid)}
                     </p>
                   </div>

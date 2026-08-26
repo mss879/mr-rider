@@ -63,7 +63,7 @@ export default function ProductCard({ p }: { p: Product }) {
             </span>
           )}
           {p.clearance && (
-            <span className="bg-accent px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-chalk">
+            <span className="bg-ink px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-chalk">
               CLEARANCE
             </span>
           )}
@@ -80,7 +80,7 @@ export default function ProductCard({ p }: { p: Product }) {
         <span className="mb-3 mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft">
           {p.stock > 0 ? (
             p.stock <= 5 ? (
-              <span className="text-accent-deep">{p.stock} left</span>
+              <span className="text-ink font-medium">{p.stock} left</span>
             ) : (
               "In stock"
             )

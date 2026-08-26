@@ -69,7 +69,7 @@ export default async function CoachingPage() {
                   )}
                   <Link
                     href={locked ? "/apply" : "/contact"}
-                    className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] underline decoration-accent decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-accent-deep"
+                    className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] underline decoration-ink decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-ink-soft"
                   >
                     {locked ? "Apply →" : "Enquire →"}
                   </Link>
@@ -122,7 +122,7 @@ export default async function CoachingPage() {
                     </p>
                     <p
                       className={`mt-auto pt-2 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] ${
-                        c.slots > 0 ? "text-accent" : "text-chalk/40"
+                        c.slots > 0 ? "text-chalk" : "text-chalk/40"
                       }`}
                     >
                       {c.slots > 0 ? `${c.slots} slots open` : "Waitlist"}

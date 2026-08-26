@@ -49,7 +49,7 @@ export default async function BrandsPage() {
               <Link
                 key={b.slug}
                 href={`/shop?brand=${b.slug}`}
-                className="border border-line bg-paper px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors duration-200 ease-out hover:border-ink hover:text-accent-deep"
+                className="border border-line bg-paper px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors duration-200 ease-out hover:border-ink hover:text-ink"
               >
                 {b.name}
                 <span className="ml-2 text-ink-soft">{countFor(b.slug)}</span>
@@ -90,7 +90,7 @@ export default async function BrandsPage() {
                 <div>
                   <Link
                     href={`/shop?cat=${category.slug}`}
-                    className="font-display text-xl font-bold uppercase leading-tight tracking-wide hover:text-accent-deep"
+                    className="font-display text-xl font-bold uppercase leading-tight tracking-wide hover:text-ink-soft"
                   >
                     {category.name}
                   </Link>
@@ -103,10 +103,10 @@ export default async function BrandsPage() {
                         href={`/shop?cat=${category.slug}&brand=${b.slug}`}
                         className="group flex items-baseline justify-between gap-3"
                       >
-                        <span className="font-mono text-xs uppercase tracking-[0.1em] transition-colors duration-200 ease-out group-hover:text-accent-deep">
+                        <span className="font-mono text-xs uppercase tracking-[0.1em] transition-colors duration-200 ease-out group-hover:text-ink">
                           {b.name}
                           {b.treatment === "direct" && (
-                            <span className="ml-2 text-[9px] tracking-[0.16em] text-accent">
+                            <span className="ml-2 text-[9px] tracking-[0.16em] text-ink-soft">
                               DIRECT
                             </span>
                           )}
@@ -133,7 +133,7 @@ export default async function BrandsPage() {
                 <li key={b.slug}>
                   <Link
                     href={`/shop?brand=${b.slug}`}
-                    className="inline-block border border-line-dark px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:border-accent hover:text-accent"
+                    className="inline-block border border-line-dark px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:border-chalk hover:text-chalk"
                   >
                     {b.name}
                     <span className="ml-2 text-chalk/40">{countFor(b.slug)}</span>

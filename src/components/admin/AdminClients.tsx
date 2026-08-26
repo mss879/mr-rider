@@ -137,7 +137,7 @@ export default function AdminClients({ sb }: { sb: SupabaseClient }) {
       {error && (
         <p
           role="alert"
-          className="mb-6 border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep"
+          className="mb-6 border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold"
         >
           {error}
         </p>
@@ -185,7 +185,7 @@ export default function AdminClients({ sb }: { sb: SupabaseClient }) {
               <span
                 className={`px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ${
                   r.status === "active"
-                    ? "bg-accent text-chalk"
+                    ? "bg-ink text-chalk"
                     : "border border-line bg-paper-2 text-ink-soft"
                 }`}
               >

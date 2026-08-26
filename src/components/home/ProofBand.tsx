@@ -70,7 +70,7 @@ export default function ProofBand({
         >
           {stats.map((s) => (
             <div key={s.label} className="flex flex-col gap-1 bg-carbon p-6 md:p-8">
-              <dd className="headline text-[clamp(3rem,7vw,5rem)] text-accent">
+              <dd className="headline text-[clamp(3rem,7vw,5rem)] text-chalk">
                 <span data-count={s.value}>{s.display}</span>
               </dd>
               <dt className="font-display text-xl font-bold uppercase tracking-wide">

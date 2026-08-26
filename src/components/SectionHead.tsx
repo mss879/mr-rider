@@ -30,8 +30,10 @@ export default function SectionHead({
       {link && (
         <Link
           href={link.href}
-          className={`shrink-0 whitespace-nowrap font-mono text-[11px] font-semibold uppercase tracking-[0.18em] underline decoration-accent decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-accent-deep ${
-            dark ? "text-chalk" : "text-ink"
+          className={`shrink-0 whitespace-nowrap font-mono text-[11px] font-semibold uppercase tracking-[0.18em] underline decoration-2 underline-offset-4 transition-colors duration-200 ease-out ${
+            dark
+              ? "text-chalk decoration-chalk/60 hover:text-chalk/80"
+              : "text-ink decoration-ink hover:text-ink-soft"
           }`}
         >
           {link.label} →

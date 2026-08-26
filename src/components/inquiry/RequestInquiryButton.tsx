@@ -143,7 +143,7 @@ export default function RequestInquiryButton({
 
   const trigger =
     variant === "block"
-      ? "mt-auto w-full bg-accent px-4 py-3 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep disabled:opacity-50"
+      ? "mt-auto w-full bg-ink px-4 py-3 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft disabled:opacity-50"
       : "whitespace-nowrap border border-ink px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ease-out hover:bg-ink hover:text-chalk disabled:opacity-50";
 
   const thumb = productImageUrl(product.image);
@@ -222,7 +222,7 @@ export default function RequestInquiryButton({
                 <div className="flex flex-wrap gap-3">
                   <Link
                     href={`/account?next=${encodeURIComponent(pathname)}`}
-                    className="bg-accent px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+                    className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
                   >
                     Create an account
                   </Link>
@@ -243,14 +243,14 @@ export default function RequestInquiryButton({
                   answers in the thread — you will get an email when it does.
                 </p>
                 {!sb && (
-                  <p className="mb-4 border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep">
+                  <p className="mb-4 border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold">
                     Backend is not configured yet
                   </p>
                 )}
                 {error && (
                   <p
                     role="alert"
-                    className="mb-4 border border-accent-deep bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep"
+                    className="mb-4 border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold"
                   >
                     {error}
                   </p>
@@ -303,7 +303,7 @@ export default function RequestInquiryButton({
                   The club replies in your inbox — you will get an email too
                 </p>
                 {warnings.length > 0 && (
-                  <p className="mb-6 border border-accent-deep bg-chalk px-4 py-3 text-left font-mono text-[11px] uppercase tracking-[0.12em] text-accent-deep">
+                  <p className="mb-6 border border-ink bg-chalk px-4 py-3 text-left font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold">
                     Sent without: {warnings.join(" · ")}
                   </p>
                 )}
@@ -336,7 +336,7 @@ export default function RequestInquiryButton({
                 <div className="flex flex-wrap justify-center gap-3">
                   <Link
                     href="/inquiries"
-                    className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-accent-deep"
+                    className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
                   >
                     Open my inquiries
                   </Link>
