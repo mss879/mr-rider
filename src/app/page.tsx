@@ -56,16 +56,19 @@ export default async function Home() {
           image, and a picture behind black type on paper can only ever be a
           washed-out watermark. Inverting the band lets the frame carry its full
           contrast and keeps the type legible on top of it. */}
-      <section className="relative isolate overflow-clip border-b border-line-dark bg-carbon text-chalk lg:min-h-[38rem]">
-        {/* Not `fill`. The frame is 2.36:1 and the band is nearer 1.6:1, so
-            object-cover crops the SIDES and shows the full height — which put
-            the riders at 70% down, precisely where the stat panels sit, and
-            left the headline on an empty sky.
+      <section className="relative isolate overflow-clip border-b border-line-dark bg-carbon text-chalk">
+        {/* Not `fill`. The frame is 2.36:1 and the band is far squarer than
+            that — under 2:1 at any laptop size — so object-cover crops the
+            SIDES and shows the full height, which put the riders at 70% down,
+            precisely where the rail sits, and left the headline on empty sky.
 
             Anchoring an oversized image to the bottom instead crops the sky off
-            the top and lifts the riders into the headline band. 160% of a
-            1280px band is still inside the 2560px master, so nothing is being
-            upscaled past its resolution. */}
+            the top and lifts the riders into the headline band. The 160% is a
+            proportion of the band, so the crop holds its composition now that
+            the band is a screenful rather than a fixed 38rem. What it costs is
+            resolution: on a tall screen this is drawn wider than the 2560px
+            master. Under two scrims at q55 that is invisible, and it is the
+            reason not to push the overshoot any further than 160%. */}
         <Image
           src={IMAGERY.peloton.src}
           alt=""
@@ -96,8 +99,20 @@ export default async function Home() {
           aria-hidden
           className="absolute inset-0 -z-10 bg-gradient-to-r from-carbon/95 from-8% via-carbon/22 via-42% to-transparent"
         />
-        <div className="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-12">
-          <div className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:border-r lg:border-line-dark lg:py-16">
+        {/* The band is a screenful: the viewport less the strip and masthead
+            above it (--chrome-h, globals.css), so its bottom edge lands on the
+            fold instead of below it. `svh` and not `dvh` — a hero that resizes
+            every time a phone's URL bar collapses reflows the headline mid-
+            scroll. It stays a MIN, so the stacked phone layout, which is
+            already taller than a screen, simply ignores it.
+
+            The height has to sit on the grid rather than the section or the
+            rows have nothing to distribute themselves in. Below `lg` that is
+            two stacked rows, centred as a block; from `lg` it is one row, and
+            it stretches instead so the rail's right-hand rule runs the full
+            height of the band. */}
+        <div className="mx-auto grid min-h-[calc(100svh-var(--chrome-h))] max-w-7xl grid-cols-1 content-center lg:grid-cols-12 lg:content-stretch">
+          <div className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:justify-center lg:border-r lg:border-line-dark lg:py-16">
             <p
               data-rise
               style={rise(1)}

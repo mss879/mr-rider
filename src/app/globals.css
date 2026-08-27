@@ -15,6 +15,32 @@ html {
   scroll-padding-top: 7rem;
 }
 
+/* The furniture stacked above the fold: the announcement strip plus the sticky
+   masthead. The home hero subtracts it from the viewport height so the band
+   ends exactly ON the fold, rather than being a full 100svh tall and pushing
+   its own bottom edge off-screen where nobody ever sees it.
+
+   Static rather than measured by script, because the hero holds the LCP image:
+   a JS-set height would land after first paint and shift the largest element
+   on the page. The three values are measured from SiteHeader, which changes
+   height exactly twice — the strip wraps to two lines below `sm`, and the join
+   button appears at `md`. Keep them in step if that header's padding moves. */
+:root {
+  --chrome-h: 6.75rem; /* 108px — 27 strip + 81 masthead */
+}
+
+@media (width < 40rem) {
+  :root {
+    --chrome-h: 7.6875rem; /* 123px — the strip wraps to two lines */
+  }
+}
+
+@media (width >= 48rem) {
+  :root {
+    --chrome-h: 7.25rem; /* 116px — the masthead gains the join button */
+  }
+}
+
 body {
   background: var(--color-paper);
   color: var(--color-ink);
