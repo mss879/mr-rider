@@ -163,10 +163,12 @@ body {
 /* ── Preloader ────────────────────────────────────────────────────────
    A hard-cut word sequence over carbon, then the panel leaves upward.
 
-   One clock, declared once: five cuts at --cut-step, the mark held for
-   --cut-hold, and the exit beginning at --curtain, which is just the sum of
-   the two. Change the step and the rule, the counter and the exit all follow
-   — nothing here repeats a number that another rule already knows.
+   One clock, declared once: --cuts words at --cut-step, the payoff held for
+   --cut-hold, and the exit beginning at --curtain, which is just the sum.
+   --cuts is set inline by the component from the length of its own copy list,
+   so adding or cutting a line re-times the rule, the counter and the exit
+   without anyone having to remember to. Nothing here repeats a number that
+   another rule already knows.
 
    Everything is opacity and transform, so the whole sequence runs on the
    compositor and never touches layout while the page behind it is still
@@ -185,9 +187,12 @@ body {
 }
 
 .preloader {
-  --cut-step: 0.1s;
-  --cut-hold: 0.4s;
-  --curtain: calc(var(--cut-step) * 5 + var(--cut-hold));
+  /* 330ms is a floor, not a preference. The first cut of this ran at 100ms,
+     which is below the point where a word is read rather than merely shown —
+     it looked like a flicker and said nothing. */
+  --cut-step: 0.33s;
+  --cut-hold: 0.5s;
+  --curtain: calc(var(--cut-step) * var(--cuts, 2) + var(--cut-hold));
 
   position: fixed;
   inset: 0;
@@ -243,19 +248,33 @@ body {
 }
 
 @keyframes pre-hold {
-  0%,
+  0% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  18%,
   100% {
     opacity: 1;
+    transform: scale(1);
   }
 }
 
+/* Each word arrives fractionally oversized and snaps down. At 330ms a plain
+   hard cut reads as slow; the punch is what keeps it aggressive while still
+   leaving the word on screen long enough to be read. */
 @keyframes pre-cut {
-  0%,
+  0% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  22%,
   92% {
     opacity: 1;
+    transform: scale(1);
   }
   100% {
     opacity: 0;
+    transform: scale(1);
   }
 }
 

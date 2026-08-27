@@ -150,9 +150,15 @@ export default async function Home() {
               style={rise(2)}
               className="max-w-sm text-justify text-sm leading-relaxed text-chalk/70"
             >
-              One shop floor with {categories.length} aisles, fresh listings
-              every morning, a live auction, a clearance market and coaches on
-              four continents. You don&apos;t browse MR.RIDER — you get let in.
+              {/* The space before "aisles" is an explicit {" "} and has to
+                  stay one. Written as plain text after the expression it is
+                  swallowed on the way to the DOM and the sentence renders as
+                  "11aisles" — a JSX text node that opens with a space, sitting
+                  directly after an expression container, loses it. */}
+              One shop floor with {categories.length}{" "}
+              aisles, fresh listings every morning, a live auction, a clearance
+              market and coaches on four continents. You don&apos;t browse
+              MR.RIDER — you get let in.
             </p>
             <div
               data-rise

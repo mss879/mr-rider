@@ -10,41 +10,56 @@ import type { CSSProperties } from "react";
 
    It also means it cannot get stuck. Nothing has to run for it to leave: the
    exit is a keyframe on the panel itself, so a reader with JS off, or with a
-   bundle that never arrives, still gets the page at 1.18s like everyone else.
+   bundle that never arrives, still gets the page at 1.44s like everyone else.
 
    Reduced motion drops the whole thing — see globals.css, where it is
    `display: none` rather than a faster animation. Someone who asked for
    stillness should not be shown a strobing word cut at all, however briefly.
 
-   Timing lives in globals.css so the word cut, the rule and the exit stay on
-   one clock. Roughly: five hard cuts at 100ms, the mark held for 400ms, then
-   the panel leaves upward in 280ms. */
+   The copy is the club's own gate, in order, and the curtain lifting is the
+   last step of it: sign up, pay, you are in — then the floor. It deliberately
+   does not reuse the hero headline underneath, which would mean lifting the
+   panel to reveal the same three lines again.
 
-const WORDS = ["Ride", "Fast", "Buy", "Smart", "Members only"];
+   Timing lives in globals.css so the cut, the rule and the exit stay on one
+   clock. Two cuts at 330ms, the payoff held for 500ms, then the panel leaves
+   upward in 280ms — about 1.44s. 330ms is the floor for this: below roughly a
+   quarter-second a word is shown without being read, which is exactly how the
+   first version of this failed. */
+
+const CUTS = ["Sign up", "Pay your dues"];
+const PAYOFF = "You’re in";
 
 /** Cut position, the same trick as `rise()` — the index drives the delay. */
 type Cut = CSSProperties & { "--cut"?: number };
+
+/** Published so the CSS clock counts the copy rather than a hardcoded 2. */
+type Panel = CSSProperties & { "--cuts"?: number };
 
 export default function Preloader() {
   return (
     /* aria-hidden, and deliberately so: the page underneath is already
        complete and announced. A screen reader should never be made to sit
        through a decoration that a sighted reader gets to skim past. */
-    <div className="preloader" aria-hidden>
-      {WORDS.map((word, i) => (
+    <div
+      className="preloader"
+      aria-hidden
+      style={{ "--cuts": CUTS.length } as Panel}
+    >
+      {CUTS.map((word, i) => (
         <span key={word} className="pre-word" style={{ "--cut": i } as Cut}>
           {word}
         </span>
       ))}
       <span
         className="pre-word pre-word-hold"
-        style={{ "--cut": WORDS.length } as Cut}
+        style={{ "--cut": CUTS.length } as Cut}
       >
-        MR.RIDER
+        {PAYOFF}
       </span>
 
       <div className="pre-rail">
-        <span>Opening the floor</span>
+        <span>Members only</span>
         <span className="pre-count" />
       </div>
       <span className="pre-bar" />
