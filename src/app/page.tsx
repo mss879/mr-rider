@@ -8,6 +8,7 @@ import SectionHead from "@/components/SectionHead";
 import ClubFaq from "@/components/home/ClubFaq";
 import Experience from "@/components/home/Experience";
 import HeroDoors from "@/components/home/HeroDoors";
+import HeroPlate from "@/components/home/HeroPlate";
 import InquiryModel from "@/components/home/InquiryModel";
 import JoinCta from "@/components/home/JoinCta";
 import ProofBand from "@/components/home/ProofBand";
@@ -19,6 +20,13 @@ import { rise } from "@/lib/motion";
 
 // Re-fetch backend data at most every 60s
 export const revalidate = 60;
+
+/* One crop, worn by both layers of the hero backdrop. The still and the clip
+   have to agree to the pixel: they crossfade into each other, and any drift
+   between these two class lists would show up as the frame jumping at the
+   swap. Changing the crop means changing it once, here. */
+const HERO_PLATE =
+  "pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover object-[62%_center]";
 
 /* Reading order of the page, and why it is this order:
 
@@ -57,18 +65,21 @@ export default async function Home() {
           washed-out watermark. Inverting the band lets the frame carry its full
           contrast and keeps the type legible on top of it. */}
       <section className="relative isolate overflow-clip border-b border-line-dark bg-carbon text-chalk">
-        {/* Not `fill`. The frame is 2.36:1 and the band is far squarer than
-            that — under 2:1 at any laptop size — so object-cover crops the
-            SIDES and shows the full height, which put the riders at 70% down,
-            precisely where the rail sits, and left the headline on empty sky.
+        {/* A plain fill, and it did not used to be. This was an oversized
+            plate pinned to the bottom at 160% of the band, because when the
+            headline was CENTRED it landed on empty sky and the riders sat down
+            at 70%, behind nothing. Overshooting cropped the sky off and shoved
+            the peloton up into the type.
 
-            Anchoring an oversized image to the bottom instead crops the sky off
-            the top and lifts the riders into the headline band. The 160% is a
-            proportion of the band, so the crop holds its composition now that
-            the band is a screenful rather than a fixed 38rem. What it costs is
-            resolution: on a tall screen this is drawn wider than the 2560px
-            master. Under two scrims at q55 that is invisible, and it is the
-            reason not to push the overshoot any further than 160%. */}
+            The headline sits on the bottom of the band now, so the riders at
+            their natural height are already exactly where the type is, and the
+            overshoot only zooms past them — it cut the riders' heads off and
+            filled the band with wheels. Both reasons for it are gone.
+
+            Filling instead also fixes what the overshoot cost: the frame is no
+            longer drawn wider than its own master, and for the clip, whose
+            peloton closes on the camera under its own steam, it is the
+            difference between a shot and a blur. */}
         <Image
           src={IMAGERY.peloton.src}
           alt=""
@@ -82,7 +93,16 @@ export default async function Home() {
           // Under two scrims and full of film grain — 55 is invisible here and
           // takes roughly 40% off the largest download on the page.
           quality={55}
-          className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[160%] w-full object-cover object-[62%_center]"
+          className={HERO_PLATE}
+        />
+        {/* The clip layers over the still on the same crop, under both scrims.
+            It is 8s, silent, and cut to loop on this exact frame — see
+            HeroPlate for why the still stays underneath it rather than being
+            replaced by it. */}
+        <HeroPlate
+          src="/img/hero.mp4"
+          srcNarrow="/img/hero-sm.mp4"
+          className={HERO_PLATE}
         />
         {/* Two scrims, not one, and the stops are placed rather than even.
 
