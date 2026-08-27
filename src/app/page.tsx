@@ -7,6 +7,7 @@ import ProductCard from "@/components/ProductCard";
 import SectionHead from "@/components/SectionHead";
 import ClubFaq from "@/components/home/ClubFaq";
 import Experience from "@/components/home/Experience";
+import HeroDoors from "@/components/home/HeroDoors";
 import InquiryModel from "@/components/home/InquiryModel";
 import JoinCta from "@/components/home/JoinCta";
 import ProofBand from "@/components/home/ProofBand";
@@ -55,7 +56,7 @@ export default async function Home() {
           image, and a picture behind black type on paper can only ever be a
           washed-out watermark. Inverting the band lets the frame carry its full
           contrast and keeps the type legible on top of it. */}
-      <section className="relative isolate overflow-clip border-b border-line-dark bg-carbon text-chalk">
+      <section className="relative isolate overflow-clip border-b border-line-dark bg-carbon text-chalk lg:min-h-[38rem]">
         {/* Not `fill`. The frame is 2.36:1 and the band is nearer 1.6:1, so
             object-cover crops the SIDES and shows the full height — which put
             the riders at 70% down, precisely where the stat panels sit, and
@@ -142,7 +143,7 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <div className="min-w-0 px-6 py-12 lg:col-span-8 lg:py-16 lg:pl-12">
+          <div className="flex min-w-0 flex-col justify-center px-6 py-12 lg:col-span-8 lg:py-24 lg:pl-12">
             {/* Three blocks rather than <br>s, so each line can carry its own
                 step in the entrance cascade. */}
             <h1 className="headline text-[clamp(3.2rem,9.5vw,7.5rem)]">
@@ -156,97 +157,18 @@ export default async function Home() {
                 Join the club.
               </span>
             </h1>
-            <div className="mt-10 grid gap-4 sm:grid-cols-2">
-              <Link
-                href="/shop"
-                data-rise
-                style={rise(4)}
-                className="group relative flex aspect-[16/10] flex-col justify-end overflow-clip border border-line-dark p-6 text-chalk transition-transform duration-200 ease-out hover:-translate-y-1"
-              >
-                <Image
-                  src={IMAGERY.floor.src}
-                  alt=""
-                  aria-hidden
-                  fill
-                  sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-                  className="-z-10 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                />
-                <span
-                  aria-hidden
-                  className="absolute inset-0 -z-10 bg-gradient-to-t from-carbon via-carbon/60 to-carbon/20"
-                />
-                <span className="headline text-6xl">
-                  {categories.length}
-                </span>
-                <span className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-chalk/70">
-                  Categories · one shop floor
-                </span>
-                <span
-                  aria-hidden
-                  className="absolute right-5 top-5 text-chalk transition-transform duration-200 ease-out group-hover:translate-x-1"
-                >
-                  →
-                </span>
-              </Link>
-              <Link
-                href="/coaching"
-                data-rise
-                style={rise(5)}
-                className="group relative flex aspect-[16/10] flex-col justify-end overflow-clip border border-line-dark p-6 text-chalk transition-transform duration-200 ease-out hover:-translate-y-1"
-              >
-                <Image
-                  src={IMAGERY.climb.src}
-                  alt=""
-                  aria-hidden
-                  fill
-                  sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-                  className="-z-10 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                />
-                <span
-                  aria-hidden
-                  className="absolute inset-0 -z-10 bg-gradient-to-t from-carbon via-carbon/60 to-carbon/20"
-                />
-                <span className="headline text-6xl">
-                  {String(coaches.length).padStart(2, "0")}
-                </span>
-                <span className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-chalk/70">
-                  Coaches · {countryCount} countries
-                </span>
-                <span
-                  aria-hidden
-                  className="absolute right-5 top-5 text-chalk transition-transform duration-200 ease-out group-hover:translate-x-1"
-                >
-                  →
-                </span>
-              </Link>
-            </div>
-
-            {/* Today's drop, live from the catalog — the one genuinely
-                time-sensitive thing on the page, so it sits in the fold. */}
-            <Link
-              href="/daily-listings"
-              data-rise
-              style={rise(6)}
-              className="group mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border border-line bg-chalk px-5 py-4 transition-colors duration-200 ease-out hover:border-ink"
-            >
-              <span className="flex items-center gap-3">
-                <span
-                  aria-hidden
-                  className="size-2 shrink-0 rounded-full bg-ink"
-                />
-                <span className="font-mono text-[11px] uppercase tracking-[0.18em]">
-                  {todaysListings.length > 0
-                    ? `${todaysListings.length} items landed today`
-                    : "Next drop lands 09:00"}
-                </span>
-              </span>
-              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft transition-colors duration-200 ease-out group-hover:text-ink">
-                See the drop →
-              </span>
-            </Link>
           </div>
         </div>
       </section>
+
+      {/* The two doors + today's drop. Their own band rather than stacked
+          inside the hero, so the headline is not sharing a column with them. */}
+      <HeroDoors
+        categoryCount={categories.length}
+        coachCount={coaches.length}
+        countryCount={countryCount}
+        todayCount={todaysListings.length}
+      />
 
       <Marquee
         items={[

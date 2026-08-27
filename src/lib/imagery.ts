@@ -29,12 +29,15 @@ export const IMAGERY = {
     height: 1086,
     alt: "A tight group of road cyclists riding hard on an open road under a heavy sky",
   },
-  /** Bikes racked along a workshop wall. */
+  /* Bikes hung in an even row, shot flat to the wall. Deliberately the most
+     graphic frame of the six: it is the one that has to survive being read at
+     card size, where the original three-quarter workshop shot turned to
+     clutter. */
   floor: {
     src: "/img/floor.webp",
     width: 1600,
     height: 893,
-    alt: "Road bikes racked in a row along a bare concrete workshop wall",
+    alt: "Road bikes hanging in an evenly spaced row on a plain concrete wall",
   },
   /** Lone rider on a wet mountain hairpin. */
   climb: {
