@@ -6,6 +6,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import SiteJsonLd from "@/components/SiteJsonLd";
 import MotionProvider from "@/components/motion/MotionProvider";
+import Preloader from "@/components/Preloader";
 import { CREDIT } from "@/lib/credit";
 import { getNavAvailability } from "@/lib/db";
 import { MOTION_BOOT } from "@/lib/motion";
@@ -102,6 +103,9 @@ export default async function RootLayout({
         <SiteJsonLd />
       </head>
       <body className="flex min-h-svh flex-col bg-paper font-body text-ink">
+        {/* First child of <body> so it is in the first byte of HTML and
+            covers the page from the first paint. Pure CSS — see Preloader. */}
+        <Preloader />
         <MotionProvider />
         <SiteHeader availability={availability} />
         <main className="flex-1">{children}</main>

@@ -160,6 +160,155 @@ body {
   pointer-events: none;
 }
 
+/* ── Preloader ────────────────────────────────────────────────────────
+   A hard-cut word sequence over carbon, then the panel leaves upward.
+
+   One clock, declared once: five cuts at --cut-step, the mark held for
+   --cut-hold, and the exit beginning at --curtain, which is just the sum of
+   the two. Change the step and the rule, the counter and the exit all follow
+   — nothing here repeats a number that another rule already knows.
+
+   Everything is opacity and transform, so the whole sequence runs on the
+   compositor and never touches layout while the page behind it is still
+   settling. The hero's own [data-rise] cascade is deliberately NOT held back
+   to wait for this: it runs on its own clock underneath and has mostly
+   settled by the time the panel lifts, so the reveal lands on a composed
+   hero rather than an empty one. Delaying it would mean re-timing every
+   [data-rise] on the site against a curtain that only ever plays on a full
+   page load, and going wrong on every client-side navigation after it.
+   ------------------------------------------------------------------- */
+
+@property --pre-n {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+.preloader {
+  --cut-step: 0.1s;
+  --cut-hold: 0.4s;
+  --curtain: calc(var(--cut-step) * 5 + var(--cut-hold));
+
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: clip;
+  background: var(--color-carbon);
+  color: var(--color-chalk);
+  animation: pre-exit 0.28s cubic-bezier(0.7, 0, 0.84, 0) var(--curtain) both;
+}
+
+/* Leaves upward and stops existing. `visibility` rather than `display` so the
+   transform still animates; the extra 1% clears any sub-pixel seam. */
+@keyframes pre-exit {
+  to {
+    transform: translate3d(0, -101%, 0);
+    visibility: hidden;
+  }
+}
+
+/* Every word sits in the same grid cell, so they replace each other in place
+   rather than reflowing. Hard cuts, not fades — the snap is the energy. */
+.pre-word {
+  grid-area: 1 / 1;
+  padding-inline: 1.5rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: clamp(3rem, 13vw, 10rem);
+  line-height: 0.92;
+  letter-spacing: 0.005em;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0;
+  /* `forwards`, emphatically not `both`. A backwards fill would apply the 0%
+     keyframe during the delay, which is opacity 1 — every word in the stack
+     visible at once from the first frame, reading as one illegible blur
+     rather than a cut. Forwards leaves the base `opacity: 0` in charge until
+     each word's turn arrives. */
+  animation: pre-cut var(--cut-step) forwards;
+  animation-delay: calc(var(--cut, 0) * var(--cut-step));
+}
+
+/* The mark cuts in like the rest but never cuts out — it holds while the rule
+   finishes and then rides up with the panel. Letting it drop to 0 like the
+   others left an empty carbon screen sitting there between the last word and
+   the wipe, which is the one moment in the sequence that must not feel like
+   waiting. */
+.pre-word-hold {
+  animation-name: pre-hold;
+  animation-duration: var(--cut-hold);
+}
+
+@keyframes pre-hold {
+  0%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pre-cut {
+  0%,
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.pre-rail {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: oklch(97.5% 0.002 95 / 0.6);
+}
+
+/* An animated custom property feeding a counter — the only way to get a
+   ticking number without a script. Where @property is unsupported the number
+   simply reads 0 and the rule below still carries the progress. */
+.pre-count {
+  animation: pre-count var(--curtain) linear both;
+  counter-reset: pre-n var(--pre-n);
+}
+
+.pre-count::after {
+  content: counter(pre-n) "%";
+}
+
+@keyframes pre-count {
+  to {
+    --pre-n: 100;
+  }
+}
+
+.pre-bar {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--color-chalk);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  animation: pre-bar var(--curtain) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pre-bar {
+  to {
+    transform: scaleX(1);
+  }
+}
+
 /* Ticker marquee */
 @keyframes ticker {
   from {
@@ -175,6 +324,13 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Not a faster curtain — no curtain. A reader who asked for stillness
+     should not be shown a strobing word cut at all, however brief, and the
+     blanket rule below would otherwise leave it flashing past in 0.01ms. */
+  .preloader {
+    display: none;
+  }
+
   .ticker-track {
     animation: none;
   }
