@@ -75,6 +75,13 @@ const nextConfig: NextConfig = {
     // The catalog is WebP already (migration 18); AVIF buys a little more on
     // the hero shots without a second stored copy.
     formats: ["image/avif", "image/webp"],
+    /* Next 16 requires the allowed quality values to be declared — an open
+       list lets anyone burn CPU generating arbitrary variants. 75 is the
+       default and what every catalogue image uses; 55 is for the two
+       full-bleed background photographs, which sit under a heavy scrim where
+       film grain hides the difference and the byte saving is the whole point
+       (the hero is the LCP element). */
+    qualities: [55, 75],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
   async headers() {

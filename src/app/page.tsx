@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import ArrowCta from "@/components/ArrowCta";
 import AuctionFloor from "@/components/home/AuctionFloor";
 import Marquee from "@/components/Marquee";
@@ -12,6 +13,7 @@ import ProofBand from "@/components/home/ProofBand";
 import WhyClub from "@/components/home/WhyClub";
 import { brandName, categories, directoryBrands, subcategoryName } from "@/lib/taxonomy";
 import { getCoaches, getLots, getPrograms, getProducts } from "@/lib/db";
+import { IMAGERY } from "@/lib/imagery";
 import { rise } from "@/lib/motion";
 
 // Re-fetch backend data at most every 60s
@@ -47,27 +49,75 @@ export default async function Home() {
 
   return (
     <>
-      {/* HERO — marquee-hero DNA: rail copy left, stacked display + stat panels right */}
-      <section className="border-b border-line">
+      {/* HERO — marquee-hero DNA over a full-bleed photograph.
+
+          The band is dark because the photograph is: the club asked for a hero
+          image, and a picture behind black type on paper can only ever be a
+          washed-out watermark. Inverting the band lets the frame carry its full
+          contrast and keeps the type legible on top of it. */}
+      <section className="relative isolate overflow-clip border-b border-line-dark bg-carbon text-chalk">
+        {/* Not `fill`. The frame is 2.36:1 and the band is nearer 1.6:1, so
+            object-cover crops the SIDES and shows the full height — which put
+            the riders at 70% down, precisely where the stat panels sit, and
+            left the headline on an empty sky.
+
+            Anchoring an oversized image to the bottom instead crops the sky off
+            the top and lifts the riders into the headline band. 160% of a
+            1280px band is still inside the 2560px master, so nothing is being
+            upscaled past its resolution. */}
+        <Image
+          src={IMAGERY.peloton.src}
+          alt=""
+          aria-hidden
+          width={IMAGERY.peloton.width}
+          height={IMAGERY.peloton.height}
+          // The LCP element on the site's most-visited page: fetched eagerly at
+          // high priority, and sized so a phone is never handed the master.
+          priority
+          sizes="100vw"
+          // Under two scrims and full of film grain — 55 is invisible here and
+          // takes roughly 40% off the largest download on the page.
+          quality={55}
+          className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[160%] w-full object-cover object-[62%_center]"
+        />
+        {/* Two scrims, not one, and the stops are placed rather than even.
+
+            Vertical: heaviest at the top where the headline sits against sky,
+            lightest at 70% — which is exactly where the riders are in the
+            frame, so the part of the photograph worth seeing is the part least
+            covered. Horizontal: weights the left third, where the rail copy is
+            smallest and has the least contrast to spare. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-carbon/88 via-carbon/12 via-72% to-carbon/72"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-r from-carbon/95 from-8% via-carbon/22 via-42% to-transparent"
+        />
         <div className="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-12">
-          <div className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:border-r lg:border-line lg:py-16">
+          <div className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:border-r lg:border-line-dark lg:py-16">
             <p
               data-rise
               style={rise(1)}
-              className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft"
+              className="font-mono text-[11px] uppercase tracking-[0.22em] text-chalk/60"
             >
               A members-only cycling club
             </p>
             <p
               data-rise
               style={rise(2)}
-              className="max-w-sm text-sm leading-relaxed text-ink-soft"
+              className="max-w-sm text-sm leading-relaxed text-chalk/70"
             >
               One shop floor with {categories.length} aisles, fresh listings
               every morning, a live auction, a clearance market and coaches on
               four continents. You don&apos;t browse MR.RIDER — you get let in.
             </p>
-            <div data-rise style={rise(3)} className="bg-carbon p-5 text-chalk">
+            <div
+              data-rise
+              style={rise(3)}
+              className="border border-line-dark bg-carbon/70 p-5 text-chalk backdrop-blur-sm"
+            >
               <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-chalk/70">
                 The gate
               </p>
@@ -81,10 +131,12 @@ export default async function Home() {
               style={rise(4)}
               className="flex flex-col items-start gap-3"
             >
-              <ArrowCta href="/apply">Apply for membership</ArrowCta>
+              <ArrowCta href="/apply" tone="chalk">
+                Apply for membership
+              </ArrowCta>
               <Link
                 href="/account"
-                className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft underline decoration-line decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-ink hover:decoration-ink"
+                className="font-mono text-[11px] uppercase tracking-[0.16em] text-chalk/60 underline decoration-line-dark decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-chalk hover:decoration-chalk"
               >
                 Already riding with us? Sign in →
               </Link>
@@ -100,7 +152,7 @@ export default async function Home() {
               <span data-rise style={rise(1)} className="block">
                 Buy smart.
               </span>
-              <span data-rise style={rise(2)} className="block text-ink">
+              <span data-rise style={rise(2)} className="block text-chalk">
                 Join the club.
               </span>
             </h1>
@@ -109,8 +161,20 @@ export default async function Home() {
                 href="/shop"
                 data-rise
                 style={rise(4)}
-                className="group hatch-dark relative flex aspect-[16/10] flex-col justify-end p-6 text-chalk transition-transform duration-200 ease-out hover:-translate-y-1"
+                className="group relative flex aspect-[16/10] flex-col justify-end overflow-clip border border-line-dark p-6 text-chalk transition-transform duration-200 ease-out hover:-translate-y-1"
               >
+                <Image
+                  src={IMAGERY.floor.src}
+                  alt=""
+                  aria-hidden
+                  fill
+                  sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+                  className="-z-10 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-0 -z-10 bg-gradient-to-t from-carbon via-carbon/60 to-carbon/20"
+                />
                 <span className="headline text-6xl">
                   {categories.length}
                 </span>
@@ -128,8 +192,20 @@ export default async function Home() {
                 href="/coaching"
                 data-rise
                 style={rise(5)}
-                className="group hatch-dark relative flex aspect-[16/10] flex-col justify-end p-6 text-chalk transition-transform duration-200 ease-out hover:-translate-y-1"
+                className="group relative flex aspect-[16/10] flex-col justify-end overflow-clip border border-line-dark p-6 text-chalk transition-transform duration-200 ease-out hover:-translate-y-1"
               >
+                <Image
+                  src={IMAGERY.climb.src}
+                  alt=""
+                  aria-hidden
+                  fill
+                  sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+                  className="-z-10 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-0 -z-10 bg-gradient-to-t from-carbon via-carbon/60 to-carbon/20"
+                />
                 <span className="headline text-6xl">
                   {String(coaches.length).padStart(2, "0")}
                 </span>
@@ -403,25 +479,40 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-6 py-16 md:py-20">
         <div
           data-reveal
-          className="relative flex flex-col gap-5 overflow-clip border border-line bg-chalk p-8 md:p-12"
+          className="relative isolate flex flex-col gap-5 overflow-clip border border-line-dark bg-carbon p-8 text-chalk md:p-12"
         >
+          {/* Parts on a bench rather than a bike: clearance is end-of-line
+              stock and last sizes, which is what the picture shows. */}
+          <Image
+            src={IMAGERY.parts.src}
+            alt=""
+            aria-hidden
+            width={IMAGERY.parts.width}
+            height={IMAGERY.parts.height}
+            sizes="(min-width: 768px) 80vw, 100vw"
+            className="pointer-events-none absolute inset-0 -z-10 size-full object-cover"
+          />
           <span
             aria-hidden
-            className="headline ghost pointer-events-none absolute right-5 top-4 select-none text-[clamp(2.5rem,5vw,4.25rem)] leading-none"
+            className="absolute inset-0 -z-10 bg-gradient-to-r from-carbon/95 via-carbon/75 to-carbon/45"
+          />
+          <span
+            aria-hidden
+            className="headline ghost-dark pointer-events-none absolute right-5 top-4 select-none text-[clamp(2.5rem,5vw,4.25rem)] leading-none"
           >
             LAST CALL
           </span>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-chalk/60">
             {clearanceItems.length} items · end of line
           </p>
           <h2 className="headline text-[clamp(2rem,4.5vw,3.2rem)]">
             Clearance market.
           </h2>
-          <p className="max-w-sm text-sm leading-relaxed text-ink-soft">
+          <p className="max-w-sm text-sm leading-relaxed text-chalk/70">
             End of line, last sizes and race-used stock on its way out of the
             building. When it&apos;s gone, it&apos;s gone.
           </p>
-          <ArrowCta href="/clearance" className="mt-auto w-fit">
+          <ArrowCta href="/clearance" tone="chalk" className="mt-auto w-fit">
             Raid the market
           </ArrowCta>
         </div>

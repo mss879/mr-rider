@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
+import { IMAGERY } from "@/lib/imagery";
 import ShopBrowser from "@/components/ShopBrowser";
 import InquiryNotice from "@/components/inquiry/InquiryNotice";
 import { categories, getBrand, resolveCategoryParam } from "@/lib/taxonomy";
@@ -35,6 +36,7 @@ export default async function ShopPage({
   return (
     <>
       <PageHero
+        image={IMAGERY.floor}
         eyebrow={`${products.length} items · ${categories.length} categories · one floor`}
         title="The shop."
         blurb="Everything sellable lives here — bar tape to full race builds. No aisle-hopping between menus: pick your filters, then ask us about anything on the floor."

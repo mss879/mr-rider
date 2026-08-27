@@ -182,6 +182,30 @@ CTA and sale badge.
 Product images are hatched placeholders; drop in real photography when it is
 ready and the cards are already shaped for it.
 
+### Editorial photography
+
+Six greyscale frames in `public/img`, catalogued in
+[`src/lib/imagery.ts`](src/lib/imagery.ts): a full-bleed hero behind the home
+page headline, the two hero stat panels, the workshop shot in the no-prices
+section, the clearance panel and the closing band. `PageHero` takes an optional
+`image` and turns dark when given one, which is what puts a masthead photograph
+on Shop, Coaching, Auction, Brands, Clearance, Daily Listings and About. Pages
+that are mostly a form — apply, account, contact, inquiries — deliberately keep
+the plain light masthead.
+
+**These frames are AI-generated** (Higgsfield, Nano Banana Pro) and exist as
+ATMOSPHERE. None is a product shot and none should become one: a generated
+photo standing in for stock would misrepresent what a rider is buying. Product
+photography stays real, from Storage, with the hatched placeholder until the
+club supplies it.
+
+Each background sits under a scrim whose gradient stops are placed rather than
+even — the lightest point is put where the subject of the photograph is, so the
+part worth seeing is the part least covered. The two full-bleed backgrounds are
+served at `quality={55}` (declared in `next.config.ts` under `images.qualities`,
+which Next 16 requires): heavy film grain hides the compression, and it takes
+the hero — the LCP element — from 556KB to 156KB.
+
 ### Motion
 
 Two tiers, both switched on by one class that an inline script in the root

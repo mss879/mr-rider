@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/PageHero";
+import { IMAGERY } from "@/lib/imagery";
 import SectionHead from "@/components/SectionHead";
 import { getNavAvailability, getProducts } from "@/lib/db";
 import { matchesBrand } from "@/lib/data";
@@ -34,6 +35,7 @@ export default async function BrandsPage() {
   return (
     <>
       <PageHero
+        image={IMAGERY.floor}
         eyebrow={`${directoryBrands.length} brands · one directory`}
         title="Shop by brand."
         blurb="Brands live here and inside category filters — never mixed in with product types. Pick a brand to drop straight onto the shop floor with the filter already applied."

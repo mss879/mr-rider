@@ -4,6 +4,7 @@ import Lock from "@/components/Lock";
 import LockedNotice from "@/components/LockedNotice";
 import Marquee from "@/components/Marquee";
 import PageHero from "@/components/PageHero";
+import { IMAGERY } from "@/lib/imagery";
 import Ph from "@/components/Ph";
 import { usd } from "@/lib/data";
 import { getLots } from "@/lib/db";
@@ -26,6 +27,7 @@ export default async function AuctionPage() {
   return (
     <>
       <PageHero
+        image={IMAGERY.peloton}
         eyebrow={`${auctionLots.length} lots live · members bid`}
         title="The auction floor."
         blurb="Race-used framesets, collector steel, one-of-one club pieces. Watch the lots freely — bidding unlocks with member login. Highest bid at the gun wins."

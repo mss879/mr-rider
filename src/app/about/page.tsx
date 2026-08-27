@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ArrowCta from "@/components/ArrowCta";
 import Marquee from "@/components/Marquee";
 import PageHero from "@/components/PageHero";
+import { IMAGERY } from "@/lib/imagery";
 import SectionHead from "@/components/SectionHead";
 import { coaches, products } from "@/lib/data";
 import { categories, directoryBrands } from "@/lib/taxonomy";
@@ -35,6 +36,7 @@ export default function AboutPage() {
   return (
     <>
       <PageHero
+        image={IMAGERY.road}
         eyebrow="The club"
         title="Built like a club. Run like a shop."
         blurb="MR.RIDER started with a simple problem: good gear gets buried under noise, and good coaching hides behind hype. So we put a door on it."

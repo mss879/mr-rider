@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Marquee from "@/components/Marquee";
 import PageHero from "@/components/PageHero";
+import { IMAGERY } from "@/lib/imagery";
 import SectionHead from "@/components/SectionHead";
 import InquiryNotice from "@/components/inquiry/InquiryNotice";
 import RequestInquiryButton from "@/components/inquiry/RequestInquiryButton";
@@ -78,6 +79,7 @@ export default async function DailyListingsPage() {
   return (
     <>
       <PageHero
+        image={IMAGERY.bench}
         eyebrow={`${today} · drop hits 09:00`}
         title="Daily listings."
         blurb="What landed on the floor this morning — and what you missed yesterday. Members get first call before stock hits the shop grid."

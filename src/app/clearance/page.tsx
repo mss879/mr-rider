@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
+import { IMAGERY } from "@/lib/imagery";
 import ProductCard from "@/components/ProductCard";
 import InquiryNotice from "@/components/inquiry/InquiryNotice";
 import { getClearanceProducts } from "@/lib/db";
@@ -22,6 +23,7 @@ export default async function ClearancePage() {
   return (
     <>
       <PageHero
+        image={IMAGERY.parts}
         eyebrow={`${clearanceItems.length} items · end of line`}
         title="Clearance market."
         blurb="End-of-line stock, last sizes and race-used gear on its way out of the building. Ask about anything here — clearance moves fast."

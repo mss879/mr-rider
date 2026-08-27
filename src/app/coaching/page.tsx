@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/PageHero";
+import { IMAGERY } from "@/lib/imagery";
 import Ph from "@/components/Ph";
 import SectionHead from "@/components/SectionHead";
 import Lock from "@/components/Lock";
@@ -28,6 +29,7 @@ export default async function CoachingPage() {
   return (
     <>
       <PageHero
+        image={IMAGERY.climb}
         eyebrow={`${programs.length} programs · ${coaches.length} coaches · ${countries} countries`}
         title="Coaching."
         blurb="Pick a structured block or work one-to-one with the international pool. Coaching is booked through your membership once you're approved."

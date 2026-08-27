@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import ArrowCta from "@/components/ArrowCta";
+import { IMAGERY } from "@/lib/imagery";
 
 /* The last thing on the page. Two doors on purpose: applying is the ask, but
    a rider account is the smaller step for someone who wants to try the club
@@ -7,7 +9,24 @@ import ArrowCta from "@/components/ArrowCta";
 
 export default function JoinCta({ productCount }: { productCount: number }) {
   return (
-    <section className="hatch-dark relative overflow-clip border-t border-line text-chalk">
+    <section className="relative isolate overflow-clip border-t border-line bg-carbon text-chalk">
+      {/* The closing image is the empty road, not another crowd: the section
+          argues that the floor is waiting on one application, and a single
+          rider under a lot of sky says that better than a peloton does. */}
+      <Image
+        src={IMAGERY.road.src}
+        alt=""
+        aria-hidden
+        width={IMAGERY.road.width}
+        height={IMAGERY.road.height}
+        sizes="100vw"
+        quality={55}
+        className="pointer-events-none absolute inset-0 -z-10 size-full object-cover object-center"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-carbon/95 from-15% via-carbon/70 via-55% to-carbon/40"
+      />
       <span
         aria-hidden
         className="headline ghost-dark pointer-events-none absolute -right-2 top-2 select-none text-[clamp(4rem,14vw,11rem)] leading-none"
@@ -45,7 +64,9 @@ export default function JoinCta({ productCount }: { productCount: number }) {
           data-reveal
           className="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center"
         >
-          <ArrowCta href="/apply">Apply for membership</ArrowCta>
+          <ArrowCta href="/apply" tone="chalk">
+            Apply for membership
+          </ArrowCta>
           <Link
             href="/account"
             className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk underline decoration-chalk/60 decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-chalk/80"

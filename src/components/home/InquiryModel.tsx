@@ -1,4 +1,6 @@
+import Image from "next/image";
 import ArrowCta from "@/components/ArrowCta";
+import { IMAGERY } from "@/lib/imagery";
 
 /* The single strangest thing about this shop is that nothing has a price on
    it. Left unexplained that reads as evasion; explained, it is the reason the
@@ -49,6 +51,23 @@ export default function InquiryModel() {
             that, so we took the stickers off and put a conversation there
             instead.
           </p>
+
+          {/* Carries its own alt text rather than aria-hidden: this one is
+              content, not a background wash behind other content. */}
+          <figure data-reveal className="border border-line">
+            <Image
+              src={IMAGERY.bench.src}
+              alt={IMAGERY.bench.alt}
+              width={IMAGERY.bench.width}
+              height={IMAGERY.bench.height}
+              sizes="(min-width: 1024px) 45vw, 92vw"
+              className="aspect-[16/9] w-full object-cover"
+            />
+            <figcaption className="border-t border-line bg-chalk px-4 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-soft">
+              The people who answer your thread are the people who check the
+              stock
+            </figcaption>
+          </figure>
 
           <ol className="flex flex-col">
             {STEPS.map((s) => (
