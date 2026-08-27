@@ -16,10 +16,17 @@ import type { CSSProperties } from "react";
    `display: none` rather than a faster animation. Someone who asked for
    stillness should not be shown a strobing word cut at all, however briefly.
 
-   The copy is the club's own gate, in order, and the curtain lifting is the
-   last step of it: sign up, pay, you are in — then the floor. It deliberately
-   does not reuse the hero headline underneath, which would mean lifting the
-   panel to reveal the same three lines again.
+   The copy states the business model and nothing else: a club, a shop, one
+   floor. That is the whole of MR.RIDER in six words, and the rail underneath
+   is the line the About page already leads with, so the curtain is quoting
+   the company rather than inventing a slogan for it.
+
+   Short beats on purpose. These render at ~160px of condensed caps, where
+   roughly fourteen characters is the ceiling before a line stops fitting the
+   viewport — and the shorter the beat, the less of its 330ms is spent reading
+   and the more is spent landing. It also avoids the hero headline sitting
+   underneath: repeating RIDE FAST / BUY SMART / JOIN THE CLUB here would mean
+   lifting the panel to reveal those same three lines again.
 
    Timing lives in globals.css so the cut, the rule and the exit stay on one
    clock. Two cuts at 330ms, the payoff held for 500ms, then the panel leaves
@@ -27,8 +34,9 @@ import type { CSSProperties } from "react";
    quarter-second a word is shown without being read, which is exactly how the
    first version of this failed. */
 
-const CUTS = ["Sign up", "Pay your dues"];
-const PAYOFF = "You’re in";
+const CUTS = ["A club", "A shop"];
+const PAYOFF = "One floor";
+const RAIL = "Built like a club. Run like a shop.";
 
 /** Cut position, the same trick as `rise()` — the index drives the delay. */
 type Cut = CSSProperties & { "--cut"?: number };
@@ -59,7 +67,7 @@ export default function Preloader() {
       </span>
 
       <div className="pre-rail">
-        <span>Members only</span>
+        <span>{RAIL}</span>
         <span className="pre-count" />
       </div>
       <span className="pre-bar" />

@@ -311,6 +311,18 @@ body {
   }
 }
 
+/* The rail quote is 35 characters, and at the tracking above it needs 287px
+   of the 286px a 375px phone has left after the padding and the counter — so
+   it wrapped, dropping "SHOP." onto a second line on top of the rule. Mono
+   tracking is the cheapest thing to give back here: the line stays whole and
+   still reads, where truncating the quote or letting it wrap would not. */
+@media (width < 40rem) {
+  .pre-rail {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+}
+
 .pre-bar {
   position: absolute;
   inset-inline: 0;
