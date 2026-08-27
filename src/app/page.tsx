@@ -112,7 +112,12 @@ export default async function Home() {
             it stretches instead so the rail's right-hand rule runs the full
             height of the band. */}
         <div className="mx-auto grid min-h-[calc(100svh-var(--chrome-h))] max-w-7xl grid-cols-1 content-center lg:grid-cols-12 lg:content-stretch">
-          <div className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:justify-center lg:border-r lg:border-line-dark lg:py-16">
+          {/* The rail spreads to fill its side of the rule — eyebrow on the
+              top edge, sign-in on the bottom, the argument and the gate spaced
+              out between them — rather than sitting as one tight clump with a
+              screenful of dead space around it. `gap-8` stays the FLOOR on the
+              spacing; justify-between only ever adds to it. */}
+          <div className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:justify-between lg:border-r lg:border-line-dark lg:py-16">
             <p
               data-rise
               style={rise(1)}
@@ -123,7 +128,7 @@ export default async function Home() {
             <p
               data-rise
               style={rise(2)}
-              className="max-w-sm text-sm leading-relaxed text-chalk/70"
+              className="max-w-sm text-justify text-sm leading-relaxed text-chalk/70"
             >
               One shop floor with {categories.length} aisles, fresh listings
               every morning, a live auction, a clearance market and coaches on
@@ -158,7 +163,12 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <div className="flex min-w-0 flex-col justify-center px-6 py-12 lg:col-span-8 lg:py-24 lg:pl-12">
+          {/* The headline sits ON the bottom of the band, not in the middle of
+              it, so the screenful of height above reads as deliberate negative
+              space rather than slack. Its `pb-16` matches the rail's, which is
+              what lands the last line on the same baseline as the sign-in link
+              across the rule — move one padding and move the other. */}
+          <div className="flex min-w-0 flex-col justify-center px-6 py-12 lg:col-span-8 lg:justify-end lg:pb-16 lg:pl-12 lg:pt-24">
             {/* Three blocks rather than <br>s, so each line can carry its own
                 step in the entrance cascade. */}
             <h1 className="headline text-[clamp(3.2rem,9.5vw,7.5rem)]">
