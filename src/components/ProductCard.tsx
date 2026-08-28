@@ -8,16 +8,22 @@ import { brandName, categoryName, subcategoryName } from "@/lib/taxonomy";
 
 const CARD_SIZES = "(min-width: 1280px) 22vw, (min-width: 640px) 45vw, 92vw";
 
-/* `contain`, not `cover`. The card well is 4:3 but the catalogue is not: a
-   sample of 250 stored shots runs 63% square, 19% at 1.44, 6% actually 4:3,
-   and a tail out to 3.66. `cover` fills the well by cropping the overflow,
-   which on catalogue photography means cropping the product — 16:9 bike shots
-   (the BMC Teammachine and Roadmachine among them) lost 25% of their width,
-   12.5% off each side, which is precisely where the wheels are.
+/* `contain`, not `cover`. The card well is 4:3 but the catalogue is not. Of
+   1417 stored primaries only a handful are actually 4:3 — 59% are square-ish,
+   the rest run from 0.33 to 5.46. `cover` fills the well by cropping the
+   overflow, which on catalogue photography means cropping the product: the
+   16:9 bike shots (the BMC Teammachine and Roadmachine among them) lost 25%
+   of their width, 12.5% off each side, which is precisely where the wheels
+   are. `contain` fits the whole product and letterboxes the remainder.
 
-   `contain` fits the whole product instead and letterboxes the remainder. The
-   well is painted white to match the photography's own background so the
-   letterboxing reads as the shot's own margin rather than as a seam. */
+   Which raises the question of what colour the letterbox is, and there is no
+   right answer for the catalogue as a whole: 59% of these shots sit on white,
+   but 14% sit on black or near-black and another 6% on mid grey. A white well
+   framed those as a dark slab floating in white; a chalk well would do the
+   same. So the bands are filled from the picture itself — a blurred, slightly
+   oversized copy of the same shot behind the contained one. A shot on white
+   gets white bands, one on black gets black, and nobody has to store a
+   background colour per product for it to be right. */
 const CARD_IMAGE = "object-contain p-3";
 
 /* Above the default 75. The catalogue's stored files are already thin — a
@@ -46,11 +52,35 @@ export default function ProductCard({ p }: { p: Product }) {
     <article className="group flex flex-col border border-line bg-chalk transition-all duration-200 ease-out hover:-translate-y-1 hover:border-ink">
       <Link
         href={href}
-        className="relative block aspect-[4/3] bg-white"
+        // overflow-clip is load-bearing: the band fill behind is blurred and
+        // scaled past the well's edges, and without a clip that haze spills
+        // out over the whole grid.
+        className="relative block aspect-[4/3] overflow-clip bg-white"
         aria-label={`${p.name} — browse ${typeLabel}`}
       >
         {primary ? (
           <>
+            {/* The band fill. Same src and `sizes` as the shot in front, so it
+                resolves to the same optimiser URL and costs no second request
+                — it is the cached bytes painted twice. Blurred hard and
+                scaled past the edges so no detail survives to be read as a
+                second product; all that is left is the shot's own background
+                tone bleeding into the letterbox. */}
+            <Image
+              src={primary}
+              alt=""
+              aria-hidden
+              fill
+              sizes={CARD_SIZES}
+              quality={CARD_QUALITY}
+              // Blurred harder than looks necessary, and that is the tuning:
+              // the wider the radius the more the fill averages toward the
+              // dominant tone, which on a catalogue shot is the background.
+              // At a tighter radius a black shoe on white dragged its own
+              // darkness into the bands and read as a vignette round every
+              // card. Scale only has to cover the radius' soft edge.
+              className="scale-110 object-cover blur-3xl"
+            />
             <Image
               src={primary}
               alt={p.name}
