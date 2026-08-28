@@ -81,7 +81,7 @@ const nextConfig: NextConfig = {
        full-bleed background photographs, which sit under a heavy scrim where
        film grain hides the difference and the byte saving is the whole point
        (the hero is the LCP element). */
-    qualities: [55, 75],
+    qualities: [55, 75, 90],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
   async headers() {
