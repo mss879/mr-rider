@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   title: "Coaching",
   description:
     "Structured training programs and an international coaching pool, booked through your membership.",
+  alternates: { canonical: "/coaching" },
 };
 
 export default async function CoachingPage() {

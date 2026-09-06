@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   title: "Brands",
   description:
     "The MR.RIDER brand directory: every brand on the floor, grouped by the category it belongs to.",
+  alternates: { canonical: "/brands" },
 };
 
 export default async function BrandsPage() {

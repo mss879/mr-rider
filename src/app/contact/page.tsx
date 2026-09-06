@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
 import PageHero from "@/components/PageHero";
+import { CLUB_EMAIL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
   description:
     "Apply for membership or reach the club about orders, coaching and the auction floor.",
+  alternates: { canonical: "/contact" },
 };
 
 const DETAILS = [
@@ -15,7 +17,7 @@ const DETAILS = [
   },
   {
     t: "Email",
-    d: "club@mrrider.cc",
+    d: CLUB_EMAIL,
   },
   {
     t: "Hours",

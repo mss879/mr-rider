@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   title: "Auction",
   description:
     "Race-used framesets, collector steel and one-of-one club pieces. Members bid; highest bid at the gun wins.",
+  alternates: { canonical: "/auction" },
 };
 
 export default async function AuctionPage() {

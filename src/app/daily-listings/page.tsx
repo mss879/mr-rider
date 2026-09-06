@@ -15,6 +15,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Daily Listings",
   description: "Fresh stock lands every morning at 09:00. Members get first call.",
+  alternates: { canonical: "/daily-listings" },
 };
 
 /* The row is not one big link any more: the title links through to the shop

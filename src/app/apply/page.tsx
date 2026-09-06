@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Apply",
   description:
     "Apply for MR.RIDER membership: sign up, pay your dues, get approved by the club.",
+  alternates: { canonical: "/apply" },
 };
 
 const STEPS = [

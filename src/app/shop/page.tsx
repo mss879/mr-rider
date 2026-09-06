@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "Shop",
   description:
     "One shop floor, eleven categories. Filter by category, product type, brand and condition, then request an inquiry on anything.",
+  alternates: { canonical: "/shop" },
 };
 
 export default async function ShopPage({

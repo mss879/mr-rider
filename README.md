@@ -26,6 +26,70 @@ npm run dev
 Run the database migrations next — see [supabase/README.md](supabase/README.md).
 Until they are run the site serves built-in mock data, so every page still works.
 
+## Deployment
+
+Production is **https://mr-rider.lk**.
+
+### Environment
+
+Everything the site needs is in [`.env.example`](.env.example). Two of them are
+not optional in production:
+
+| Variable | Why it matters |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` / `_ANON_KEY` | Without them the site silently serves mock data instead of the real catalogue. It will *look* fine. |
+| `NEXT_PUBLIC_SITE_URL` | Every canonical URL, the sitemap, `og:image` and the "open your thread" link in emails resolve against it. |
+
+**Set `NEXT_PUBLIC_SITE_URL` on preview environments too.** Unset, it falls back
+to the production origin, so a preview deploy would advertise `mr-rider.lk` as
+its own canonical and invite Google to index the staging copy as the live site.
+
+`SUPABASE_SERVICE_ROLE_KEY` is for the local image scripts only. It is never
+read by the app and must never reach the hosting environment.
+
+### DNS and TLS
+
+- Point the apex `mr-rider.lk` at the host, and redirect `www` → apex (or the
+  reverse) with a **301**. Serving both is two sites to Google, and the
+  canonical tags name the apex.
+- HTTPS is required, not preferred: the app sends
+  `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`.
+  That header is a two-year commitment — every subdomain of `mr-rider.lk` must
+  be able to serve HTTPS before it goes out. Remove `preload` from
+  [`next.config.ts`](next.config.ts) if that is not true yet.
+
+### After the first deploy
+
+1. **Supabase → Authentication → URL Configuration**: set Site URL to
+   `https://mr-rider.lk` and add it to Redirect URLs, or email confirmation
+   links will point at localhost.
+2. **Resend**: verify `mr-rider.lk` as a sending domain, then set `RESEND_FROM`
+   to a sender on it. Until then inquiry emails are skipped — the threads
+   themselves still work.
+3. **Google Search Console**: verify the property and submit
+   `https://mr-rider.lk/sitemap.xml`.
+4. Check the share card renders — paste a link into WhatsApp, or use
+   [opengraph.xyz](https://www.opengraph.xyz/).
+
+### What is already handled
+
+- **Security headers** — CSP, HSTS, `X-Frame-Options`, `X-Content-Type-Options`,
+  `Referrer-Policy` and `Permissions-Policy`, all in
+  [`next.config.ts`](next.config.ts). `/admin` additionally sends `no-store` and
+  `noindex`.
+- **SEO** — a canonical per route, `robots.txt`, a sitemap covering every public
+  page and shop aisle, JSON-LD for the organisation, and `noindex` on `/admin`,
+  `/account` and `/inquiries`.
+- **Share card** — `public/og.jpg`, 1200×630, referenced absolutely because
+  WhatsApp does not resolve relative `og:image` paths. Re-render it from
+  `scratch/og.html` if the headline changes.
+- **Favicons** — a multi-resolution `favicon.ico` (16/32/48, the 48 being what
+  Google Search displays), `icon.png`, `apple-icon.png` and a web manifest with
+  192/512 icons.
+- **Failure states** — a branded 404, a route error boundary with a retry, and a
+  root `global-error` that renders with inline styles so it still looks
+  deliberate if the stylesheet itself is what failed.
+
 ## Pages
 
 | Route | What it is |

@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "My Inquiries",
   description:
     "Every product you have asked about, and the club's answers, in one thread each.",
+  // Private by definition — one rider's own threads. See /account for why
+  // this sits alongside the robots.txt disallow rather than instead of it.
+  robots: { index: false, follow: false },
 };
 
 export default function InquiriesPage() {

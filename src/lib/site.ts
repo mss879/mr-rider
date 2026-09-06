@@ -29,6 +29,28 @@ export const SITE_NAME = "MR.RIDER";
 export const SITE_LOGO = "/logo.png";
 export const SITE_LOGO_SIZE = 1254;
 
+/* The card a link unfurls into on WhatsApp, Facebook, X, Slack and iMessage.
+   1200×630 is the size every one of them crops from. Rendered once from the
+   club's own hero frame and committed as a static file rather than generated
+   per request — it never changes between deploys, so a build-time image is a
+   round trip nobody has to pay for.
+
+   JPEG rather than PNG because it is a photograph: the same card as a PNG was
+   876KB against 114KB here. That gap is not academic — WhatsApp gives up on a
+   heavy card and shows a bare link instead, and WhatsApp is how this club
+   shares. Re-render it with scratch/og.html if the headline ever changes. */
+export const SITE_OG_IMAGE = "/og.jpg";
+export const SITE_OG_SIZE = { width: 1200, height: 630 };
+
+/* ⚠ CONFIRM BEFORE LAUNCH — the mailbox printed on /contact and offered when
+   a form fails to submit. It read `club@mrrider.cc` until the domain was
+   settled, which is neither the site's domain nor the one the club sends
+   from: `.env` already ships mail as `inquiries@mr-rider.lk`, so `.cc` was
+   left over from before. Pointed at the live domain here so the site is
+   internally consistent; if the club reads a different mailbox, this one
+   line is the only place to change it. */
+export const CLUB_EMAIL = "club@mr-rider.lk";
+
 /** Absolute URL for a site-relative path. */
 export const absolute = (path = "/") =>
   new URL(path.startsWith("/") ? path : `/${path}`, SITE_URL).toString();

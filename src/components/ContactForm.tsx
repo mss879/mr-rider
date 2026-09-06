@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { submitContact } from "@/app/contact/actions";
+import { CLUB_EMAIL } from "@/lib/site";
 
 type Status = "idle" | "sending" | "sent";
 
@@ -45,7 +46,7 @@ export default function ContactForm() {
     } else {
       setStatus("idle");
       setServerError(
-        `${res.error ?? "Something went wrong"} — email club@mrrider.cc instead.`,
+        `${res.error ?? "Something went wrong"} — email ${CLUB_EMAIL} instead.`,
       );
     }
   }

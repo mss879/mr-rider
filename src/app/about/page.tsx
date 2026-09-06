@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "About",
   description:
     "Why MR.RIDER is a members-only club: real stock, straight answers, riders first.",
+  alternates: { canonical: "/about" },
 };
 
 const VALUES = [

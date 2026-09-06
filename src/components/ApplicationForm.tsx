@@ -10,6 +10,7 @@ import {
 } from "@/lib/applications";
 import { COUNTRIES, DEFAULT_COUNTRY } from "@/lib/countries";
 import { uploadApplicantPhoto } from "@/lib/applicantPhoto";
+import { CLUB_EMAIL } from "@/lib/site";
 import { getSupabaseBrowser } from "@/lib/supabaseBrowser";
 
 type Status = "idle" | "sending" | "sent";
@@ -118,7 +119,7 @@ export default function ApplicationForm() {
     } else {
       setStatus("idle");
       setServerError(
-        `${res.error ?? "Something went wrong"} — email club@mrrider.cc instead.`,
+        `${res.error ?? "Something went wrong"} — email ${CLUB_EMAIL} instead.`,
       );
     }
   }

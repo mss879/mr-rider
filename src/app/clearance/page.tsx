@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Clearance Market",
   description:
     "End of line, last sizes and race-used stock, out the door. When it's gone, it's gone.",
+  alternates: { canonical: "/clearance" },
 };
 
 export default async function ClearancePage() {
