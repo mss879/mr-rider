@@ -1,7 +1,7 @@
 "use client";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import AdminCrud, { type FieldDef, type RowData } from "./AdminCrud";
+import AdminCrud, { type FieldDef, type RowData, type SortOption } from "./AdminCrud";
 import { MAX_PRODUCT_IMAGES, PRODUCT_IMAGE_BUCKET } from "@/lib/images";
 import {
   brandName,
@@ -12,6 +12,33 @@ import {
 } from "@/lib/taxonomy";
 
 const today = () => new Date().toISOString().slice(0, 10);
+
+/* BE-01 — the products log carries 1,400+ rows, so it is searched, ordered and
+   paged in Postgres rather than rendered whole. */
+
+/* Searched columns. All four are what an admin has in front of them when they
+   go looking: the name off an inquiry, the brand off an invoice, the slug off
+   a URL, the id off a support thread. `description` is deliberately NOT here —
+   matching inside long copy turns a search for "carbon" into half the shop.
+
+   `brand` and `subcategory` hold SLUGS, not display names, so searching
+   "Pinarello" matches on `pinarello` — which is what the admin sees in the
+   URL bar and the CSV, and close enough to the display name to find. */
+const SEARCH_COLUMNS = ["name", "brand", "subcategory", "id"];
+
+const PAGE_SIZE = 50;
+
+const SORTS: SortOption[] = [
+  // Date Listed first and descending: the club asked for it by name, and it
+  // is the order anybody auditing "what went up this week" needs.
+  { value: "listed-new", label: "Date listed · newest", column: "listed_at", ascending: false },
+  { value: "listed-old", label: "Date listed · oldest", column: "listed_at", ascending: true },
+  { value: "added", label: "Date added · newest", column: "created_at", ascending: false },
+  { value: "name", label: "Name · A–Z", column: "name", ascending: true },
+  { value: "brand", label: "Brand · A–Z", column: "brand", ascending: true },
+  // The club's own running order — what /shop is actually showing.
+  { value: "shelf", label: "Club running order", column: "sort_position", ascending: true },
+];
 
 const brandOptions = [...brands]
   .sort((a, b) => a.name.localeCompare(b.name))
@@ -109,6 +136,9 @@ export default function AdminProducts({ sb }: { sb: SupabaseClient }) {
       title="Products."
       blurb="feeds Shop, Daily Listings and Clearance"
       fields={fields}
+      searchColumns={SEARCH_COLUMNS}
+      sortOptions={SORTS}
+      pageSize={PAGE_SIZE}
       newRow={() => ({
         id: `p-${Date.now().toString(36)}`,
         brand: brandOptions[0].value,

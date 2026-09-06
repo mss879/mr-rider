@@ -8,6 +8,7 @@ import {
   formatBytes,
   isImageAttachment,
 } from "@/lib/inquiries";
+import type { QuickChip } from "@/lib/languages";
 
 /* The one composer both sides type into — the rider's first request, the
    rider's replies and the club's answers. Files are held locally until send:
@@ -25,6 +26,8 @@ export default function InquiryComposer({
   submitLabel = "Send",
   rows = 4,
   autoFocus = false,
+  chips,
+  chipsLabel = "Quick questions",
 }: {
   /** Resolve true to clear the composer, false to keep what was typed. */
   onSend: (body: string, files: File[]) => Promise<boolean>;
@@ -33,13 +36,37 @@ export default function InquiryComposer({
   submitLabel?: string;
   rows?: number;
   autoFocus?: boolean;
+  /** UI-02 — one-tap questions written into the box. Readonly because the
+      copy they come from is declared `as const` in lib/languages. */
+  chips?: readonly QuickChip[];
+  chipsLabel?: string;
 }) {
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [rejected, setRejected] = useState<string[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
+  const bodyBox = useRef<HTMLTextAreaElement>(null);
   // A page can hold a thread composer and a request dialog at once.
   const bodyId = useId();
+
+  /* A chip APPENDS rather than replaces, so a rider can stack "what sizes"
+     and "how soon" into one message instead of choosing between them. Tapping
+     a chip that is already in the box takes it back out again, which is what
+     anyone who taps a pressed button expects. */
+  function toggleChip(chip: QuickChip) {
+    setBody((current) => {
+      if (current.includes(chip.text)) {
+        return current
+          .split("\n")
+          .filter((line) => line.trim() !== chip.text)
+          .join("\n")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+      }
+      return current.trim() ? `${current.trim()}\n${chip.text}` : chip.text;
+    });
+    bodyBox.current?.focus();
+  }
 
   function addFiles(list: FileList | null) {
     if (!list || list.length === 0) return;
@@ -76,12 +103,40 @@ export default function InquiryComposer({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-3">
+      {chips && chips.length > 0 && (
+        <div>
+          <p className={label}>{chipsLabel}</p>
+          <div className="flex flex-wrap gap-2">
+            {chips.map((chip) => {
+              const on = body.includes(chip.text);
+              return (
+                <button
+                  key={chip.id}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => toggleChip(chip)}
+                  className={`border px-3 py-2 text-left font-mono text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors duration-200 ease-out ${
+                    on
+                      ? "border-ink bg-ink text-chalk"
+                      : "border-line text-ink-soft hover:border-ink hover:text-ink"
+                  }`}
+                >
+                  {on ? "✓ " : "+ "}
+                  {chip.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div>
         <label htmlFor={bodyId} className={label}>
           Message
         </label>
         <textarea
           id={bodyId}
+          ref={bodyBox}
           rows={rows}
           value={body}
           autoFocus={autoFocus}

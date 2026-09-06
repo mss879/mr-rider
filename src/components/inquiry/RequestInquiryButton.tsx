@@ -148,6 +148,7 @@ export default function RequestInquiryButton({
 
   const thumb = productImageUrl(product.image);
   const typeLabel = subcategoryName(product.subcategory);
+  const copy = copyFor(language);
 
   return (
     <>
@@ -239,8 +240,7 @@ export default function RequestInquiryButton({
             {phase === "compose" && (
               <div>
                 <p className="mb-4 text-sm leading-relaxed text-ink-soft">
-                  Ask about size, spec, condition or availability. The club
-                  answers in the thread — you will get an email when it does.
+                  {copy.composerHint}
                 </p>
                 {!sb && (
                   <p className="mb-4 border border-ink bg-chalk px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink font-semibold">
@@ -257,7 +257,7 @@ export default function RequestInquiryButton({
                 )}
                 <fieldset className="mb-4">
                   <legend className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
-                    {copyFor(language).languageLabel}
+                    {copy.languageLabel}
                   </legend>
                   <div className="flex flex-wrap gap-2">
                     {LANGUAGES.map((l) => (
@@ -286,12 +286,21 @@ export default function RequestInquiryButton({
                     ))}
                   </div>
                 </fieldset>
+                {/* UI-02 — chips and placeholder both come out of COPY, so
+                    flipping the toggle above re-labels them. `key` on the
+                    language is what makes that a clean swap: without it the
+                    composer keeps a body full of English sentences while the
+                    chips underneath are suddenly Sinhala, and none of them
+                    read as pressed any more. */}
                 <InquiryComposer
+                  key={language}
                   onSend={send}
                   busy={busy}
                   autoFocus
                   submitLabel="Send inquiry"
-                  placeholder="What size do you need, and when do you need it?"
+                  chips={copy.chips}
+                  chipsLabel={copy.chipsLabel}
+                  placeholder={copy.composerPlaceholder}
                 />
               </div>
             )}
@@ -312,24 +321,21 @@ export default function RequestInquiryButton({
                     only appears once a number is configured for this language
                     (NEXT_PUBLIC_WHATSAPP_SI / _EN); with none set, the thread
                     is simply the only route offered. */}
-                {whatsappLink(
-                  language,
-                  copyFor(language).whatsappPrefill(product.name),
-                ) && (
+                {whatsappLink(language, copy.whatsappPrefill(product.name)) && (
                   <div className="mb-6">
                     <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft">
-                      {copyFor(language).whatsappHint}
+                      {copy.whatsappHint}
                     </p>
                     <a
                       href={whatsappLink(
                         language,
-                        copyFor(language).whatsappPrefill(product.name),
+                        copy.whatsappPrefill(product.name),
                       )}
                       target="_blank"
                       rel="noopener"
                       className="inline-block border border-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors duration-200 ease-out hover:bg-ink hover:text-chalk"
                     >
-                      {copyFor(language).whatsappCta}
+                      {copy.whatsappCta}
                     </a>
                   </div>
                 )}

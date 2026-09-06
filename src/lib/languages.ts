@@ -76,6 +76,42 @@ export function whatsappLink(language: string, message: string): string {
 export const COPY = {
   en: {
     languageLabel: "Answer me in",
+    /* UI-02 — the modal opened on an empty box with a greyed-out example
+       sentence in it, and the club's note was that riders read the example
+       and then typed nothing. These are the four questions the inbox actually
+       receives, as buttons: one tap writes the sentence, and the rider edits
+       it or sends it as it stands.
+
+       `label` is what fits on the chip. `text` is the whole question, written
+       the way the club would rather receive it — an inquiry that already says
+       which size and how soon is one the club can answer in a single reply
+       instead of three. */
+    chipsLabel: "Quick questions",
+    chips: [
+      {
+        id: "size",
+        label: "Size availability",
+        text: "What sizes do you have in stock for this one?",
+      },
+      {
+        id: "quote",
+        label: "Club price",
+        text: "Could you send me a club price for this?",
+      },
+      {
+        id: "condition",
+        label: "Condition & photos",
+        text: "How is the condition, and could I see a few more photos?",
+      },
+      {
+        id: "delivery",
+        label: "Delivery",
+        text: "How soon could this be delivered, and what does delivery cost?",
+      },
+    ],
+    composerPlaceholder: "What size do you need, and when do you need it?",
+    composerHint:
+      "Ask about size, spec, condition or availability. The club answers in the thread — you will get an email when it does.",
     whatsappCta: "Continue on WhatsApp",
     whatsappHint: "Prefer chat? Carry on with the club there instead.",
     whatsappPrefill: (product: string) =>
@@ -91,6 +127,32 @@ export const COPY = {
   },
   si: {
     languageLabel: "පිළිතුරු භාෂාව",
+    chipsLabel: "ඉක්මන් ප්‍රශ්න",
+    chips: [
+      {
+        id: "size",
+        label: "සයිස් තිබේද",
+        text: "මේකට මොන සයිස් තියෙනවද?",
+      },
+      {
+        id: "quote",
+        label: "ක්ලබ් මිල",
+        text: "මේකේ ක්ලබ් මිල එවන්න පුළුවන්ද?",
+      },
+      {
+        id: "condition",
+        label: "තත්ත්වය සහ ඡායාරූප",
+        text: "තත්ත්වය කොහොමද? තව ඡායාරූප කිහිපයක් බලන්න පුළුවන්ද?",
+      },
+      {
+        id: "delivery",
+        label: "බෙදාහැරීම",
+        text: "කොපමණ ඉක්මනින් බෙදාහැරිය හැකිද? බෙදාහැරීමේ ගාස්තුව කීයද?",
+      },
+    ],
+    composerPlaceholder: "ඔබට අවශ්‍ය සයිස් එක සහ කවදා අවශ්‍යද කියා ලියන්න.",
+    composerHint:
+      "සයිස්, විස්තර, තත්ත්වය හෝ තිබේද යන්න ගැන අසන්න. සමාජශාලාව මෙම සංවාදයේම පිළිතුරු දෙනු ඇත — ඊමේල් එකකුත් ලැබෙනවා.",
     whatsappCta: "WhatsApp හරහා දිගටම",
     whatsappHint: "චැට් කැමතිද? එතැනින් දිගටම කතා කරන්න.",
     whatsappPrefill: (product: string) =>
@@ -105,6 +167,9 @@ export const COPY = {
     ackSignoff: "— MR.RIDER",
   },
 } as const;
+
+/** One tappable question in the inquiry modal. See COPY.en.chips. */
+export type QuickChip = { id: string; label: string; text: string };
 
 /** Copy for a language code, falling back to English for anything unknown. */
 export function copyFor(language: string) {

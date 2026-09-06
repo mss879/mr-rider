@@ -26,6 +26,11 @@ Run them **in numeric order** in the Supabase dashboard → **SQL Editor**
 | 14 | `14_product_inquiries.sql` | Inquiry inbox: threads, chat messages, `inquiry-files` bucket, RLS + Realtime | 07, 08 |
 | 15 | `15_pricing_retired.sql` | No prices on the floor: `price` defaults to 0, Clearance follows the flag | 01 |
 | 16 | `16_road_bikes_framesets_split.sql` | Road Bikes and Framesets become two separate categories (10 → 11) | 12 |
+| 17 | `17_spoken_catalogue_import.sql` | The real catalogue — 1,400+ products, replacing the demo stock | 12, 16 |
+| 18 | `18_product_images_webp.sql` | Product photography moves to WebP | 13 |
+| 19 | `19_imported_brands_visible.sql` | Imported brands join the menus and `/brands` | 12, 17 |
+| 20 | `20_client_change_requests.sql` | Application reason + address + photo, inquiry language, opt-in Daily Listings, manual running order | 01, 08, 11, 14 |
+| 21 | `21_admin_product_log.sql` | QA BE-01: indexes behind the admin product log's search, sort and pages | 01, 12, 20 |
 
 Every file is idempotent (`if not exists` / `on conflict do nothing`), so
 re-running one is safe on its own. Two ordering caveats:

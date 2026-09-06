@@ -61,17 +61,26 @@ export default function ShopBrowser({
   const [sort, setSort] = useState<Sort>("shelf");
   const [panelOpen, setPanelOpen] = useState(false);
 
-  /* Brands present in the catalog, listed by display name. */
+  /* Brands with stock inside the CURRENT category scope, by display name.
+
+     UI-01 — this used to be every brand in the catalogue, so choosing Road
+     Bikes still offered a column of bar-tape and nutrition brands that could
+     only ever return nothing. The scope is the category and product-type
+     filters and deliberately NOT the brand filter itself: narrowing by the
+     thing being listed would hide every brand but the ticked one and make the
+     multi-select unusable after the first click. */
   const brandOptions = useMemo(() => {
     const slugs = new Set<string>();
     for (const p of products) {
+      if (cats.size > 0 && !cats.has(p.category)) continue;
+      if (subs.size > 0 && !subs.has(p.subcategory)) continue;
       slugs.add(p.brand);
       for (const c of p.collections ?? []) slugs.add(c);
     }
     return [...slugs]
       .map((slug) => ({ slug, name: brandName(slug) }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [products]);
+  }, [products, cats, subs]);
 
   /* Categories present in the catalog — empty ones stay off the rail. */
   const catOptions = useMemo(() => {
@@ -87,6 +96,23 @@ export default function ShopBrowser({
       subcategoriesOf(slug).filter((s) => present.has(s.slug)),
     );
   }, [products, cats, catOptions]);
+
+  /* A brand ticked under one category has to come OFF when the scope moves
+     somewhere it has no stock — otherwise the rider is left filtering on
+     something the rail no longer draws a checkbox for, and the floor goes
+     empty with nothing on screen explaining why.
+
+     Adjusted during render, the same way `visible` is below: an effect would
+     paint the stale result set first and then immediately paint again. It
+     cannot loop — `brandOptions` does not depend on `brandSet`, so one pass
+     always settles it. */
+  const inScope = useMemo(
+    () => new Set(brandOptions.map((b) => b.slug)),
+    [brandOptions],
+  );
+  if ([...brandSet].some((b) => !inScope.has(b))) {
+    setBrandSet(new Set([...brandSet].filter((b) => inScope.has(b))));
+  }
 
   const activeCount =
     cats.size +
@@ -334,9 +360,15 @@ export default function ShopBrowser({
           </fieldset>
         )}
 
+        {brandOptions.length > 0 && (
         <fieldset className="mb-7">
           <legend className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
             Brand
+            {cats.size > 0 || subs.size > 0 ? (
+              <span className="ml-1.5 normal-case tracking-normal text-ink-soft/70">
+                ({brandOptions.length} here)
+              </span>
+            ) : null}
           </legend>
           <div className="flex max-h-72 flex-col gap-2 overflow-y-auto pr-1">
             {brandOptions.map((b) => (
@@ -355,6 +387,7 @@ export default function ShopBrowser({
             ))}
           </div>
         </fieldset>
+        )}
 
         <fieldset className="mb-7">
           <legend className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
@@ -446,16 +479,35 @@ export default function ShopBrowser({
           </>
         ) : (
           <div className="border border-line bg-chalk px-6 py-20 text-center">
-            <p className="headline mb-3 text-3xl">Nothing matches.</p>
-            <p className="mb-6 font-mono text-xs uppercase tracking-[0.16em] text-ink-soft">
-              Loosen a filter and try again
+            <p className="headline mb-3 text-3xl">No products found.</p>
+            <p className="mb-2 text-sm leading-relaxed text-ink-soft">
+              Nothing on the floor matches this combination. Loosen a filter and
+              the stock comes back.
             </p>
+            {/* Naming the combination is the difference between "try again"
+                and knowing WHICH of six rails to reach for. */}
+            {activeCount > 0 && (
+              <p className="mb-6 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft/80">
+                Filtering on{" "}
+                {[
+                  q.trim() ? `“${q.trim()}”` : null,
+                  cats.size > 0 ? `${cats.size} category${cats.size > 1 ? "s" : ""}` : null,
+                  subs.size > 0 ? `${subs.size} product type${subs.size > 1 ? "s" : ""}` : null,
+                  brandSet.size > 0 ? `${brandSet.size} brand${brandSet.size > 1 ? "s" : ""}` : null,
+                  cond !== "all" ? cond : null,
+                  inStockOnly ? "in stock" : null,
+                  clearanceOnly ? "clearance" : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
             <button
               type="button"
               onClick={clearAll}
               className="bg-ink px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft"
             >
-              Clear all filters
+              Clear filters
             </button>
           </div>
         )}

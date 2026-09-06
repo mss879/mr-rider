@@ -77,6 +77,25 @@ function toLocalInput(iso: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/** BE-01 — one entry in the log's sort picker. */
+export type SortOption = {
+  value: string;
+  label: string;
+  column: string;
+  ascending: boolean;
+};
+
+/* PostgREST parses `or=(col.ilike.%x%,col2.ilike.%x%)` by splitting the string
+   itself, so a comma, a bracket or a quote inside what the admin typed ends
+   the filter early and the query comes back as a 400. They are stripped rather
+   than escaped: the alternative is a quoting scheme that has to stay in step
+   with PostgREST's own, to support characters nobody searches product names
+   by. `%` and `_` go too — they are ILIKE wildcards, and a search box that
+   silently accepts them behaves differently for two admins typing the same
+   thing. */
+const sanitiseSearch = (raw: string) =>
+  raw.replace(/[,()"'\\%_]/g, " ").replace(/\s+/g, " ").trim();
+
 export default function AdminCrud({
   sb,
   table,
@@ -87,6 +106,9 @@ export default function AdminCrud({
   summary,
   newRow,
   quickActions = [],
+  searchColumns,
+  sortOptions,
+  pageSize,
 }: {
   sb: SupabaseClient;
   table: string;
@@ -97,6 +119,20 @@ export default function AdminCrud({
   summary: (r: RowData) => { title: string; meta: string; chips?: string[] };
   newRow: () => RowData;
   quickActions?: { label: string; patch: () => RowData }[];
+  /* BE-01 — the three below turn this list into a LOG: a table that can be
+     searched, ordered and paged through instead of one that renders every row
+     it can find. Opt-in, because they cost a `count: exact` on every query and
+     a tab holding twenty rows does not need any of it.
+
+     All three are done in Postgres, not in the browser. Products is past 1,400
+     rows: filtering client-side would still mean fetching all 1,400 and
+     mounting a card for each one, which is the problem, not the fix. */
+  /** Columns an ILIKE search runs across. Omit for no search box. */
+  searchColumns?: string[];
+  /** Orderings offered in the picker. The first is the default. */
+  sortOptions?: SortOption[];
+  /** Rows per page. Omit to load the whole table as before. */
+  pageSize?: number;
 }) {
   const [rows, setRows] = useState<RowData[]>([]);
   const [editing, setEditing] = useState<RowData | null>(null);
@@ -104,6 +140,36 @@ export default function AdminCrud({
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /* `query` is what is in the box; `search` is what has been sent. Typing into
+     an unthrottled box on a 1,400-row table fires a query per keystroke. */
+  const [query, setQuery] = useState("");
+  const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState(() => sortOptions?.[0]?.value ?? "");
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const paged = typeof pageSize === "number" && pageSize > 0;
+  const perPage = pageSize ?? 0;
+
+  useEffect(() => {
+    if (query === search) return;
+    const t = setTimeout(() => setSearch(query), 300);
+    return () => clearTimeout(t);
+  }, [query, search]);
+
+  /* A different question deserves its first page, not page 7 of the last one.
+
+     Adjusted during render rather than in an effect: an effect would let the
+     page-7 query fire first and then immediately fire the page-1 one, so the
+     admin pays for two round trips and sees the wrong fifty rows in between. */
+  const question = `${search}\u0000${sortKey}`;
+  const [lastQuestion, setLastQuestion] = useState(question);
+  if (lastQuestion !== question) {
+    setLastQuestion(question);
+    setPage(0);
+  }
 
   /* Uploads land in Storage immediately so the admin can see a thumbnail, but
      nothing is destroyed until the form is resolved: saving deletes the files
@@ -125,11 +191,62 @@ export default function AdminCrud({
     [sb],
   );
 
+  /* Flattened to primitives before `load` closes over them. An array or an
+     object prop is a new identity on every render of the PARENT, so putting
+     `searchColumns` / `sortOptions` straight into the dependency list makes
+     `load` new every render — and since an effect below calls it, that is a
+     query loop for anyone who passes the props inline rather than hoisting
+     them to module scope, which is not a trap a caller should have to know
+     about. */
+  const searchKey = searchColumns?.length ? searchColumns.join(",") : "";
+  const chosen = sortOptions?.find((o) => o.value === sortKey);
+  const sortCol = chosen?.column ?? "";
+  const sortAsc = chosen?.ascending ?? true;
+
   const load = useCallback(async () => {
-    const { data, error: err } = await sb.from(table).select("*").order(orderBy);
-    if (err) setError(`${table}: ${err.message}`);
-    else setRows((data as RowData[]) ?? []);
-  }, [sb, table, orderBy]);
+    setLoading(true);
+
+    let q = paged
+      ? sb.from(table).select("*", { count: "exact" })
+      : sb.from(table).select("*");
+
+    const cols = searchKey ? searchKey.split(",") : [];
+    const term = cols.length ? sanitiseSearch(search) : "";
+    if (term) q = q.or(cols.map((c) => `${c}.ilike.%${term}%`).join(","));
+
+    if (sortCol) {
+      // nullsFirst false so an unset date or position sinks rather than
+      // occupying the top of the list the admin is trying to read.
+      q = q.order(sortCol, { ascending: sortAsc, nullsFirst: false });
+      // A stable tie-break, or two rows listed on the same day swap places
+      // between pages and one of them is never shown.
+      if (sortCol !== "id") q = q.order("id", { ascending: true });
+    } else {
+      q = q.order(orderBy);
+    }
+
+    if (paged) q = q.range(page * perPage, page * perPage + perPage - 1);
+
+    const { data, error: err, count } = await q;
+    setLoading(false);
+    if (err) {
+      setError(`${table}: ${err.message}`);
+      return;
+    }
+    setRows((data as RowData[]) ?? []);
+    if (paged) setTotal(count ?? 0);
+  }, [
+    sb,
+    table,
+    orderBy,
+    paged,
+    perPage,
+    page,
+    search,
+    searchKey,
+    sortCol,
+    sortAsc,
+  ]);
 
   useEffect(() => {
     load();
@@ -313,7 +430,10 @@ export default function AdminCrud({
         <div>
           <h2 className="headline text-3xl">{title}</h2>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">
-            {rows.length} rows{blurb ? ` · ${blurb}` : ""}
+            {paged && total !== null
+              ? `${total} row${total === 1 ? "" : "s"}${search ? " matching" : ""}`
+              : `${rows.length} rows`}
+            {blurb ? ` · ${blurb}` : ""}
           </p>
         </div>
         <button
@@ -330,6 +450,50 @@ export default function AdminCrud({
           + Add new
         </button>
       </div>
+
+      {(searchColumns?.length || sortOptions?.length) && (
+        <div className="mb-5 flex flex-wrap items-center gap-3">
+          {searchColumns?.length ? (
+            <label className="flex min-w-0 flex-1 basis-64 items-center gap-2 border-b-2 border-ink">
+              <span className="sr-only">Search {table}</span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="SEARCH BY NAME, BRAND OR ID…"
+                className="w-full min-w-0 bg-transparent py-2 font-mono text-xs uppercase tracking-[0.14em] placeholder:text-ink-soft/60 focus:outline-none"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label="Clear search"
+                  className="font-mono text-xs text-ink-soft hover:text-ink"
+                >
+                  ✕
+                </button>
+              )}
+            </label>
+          ) : null}
+          {sortOptions?.length ? (
+            <label className="flex items-center gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-soft">
+                Sort
+              </span>
+              <select
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value)}
+                className="border border-line bg-chalk px-2 py-2 font-mono text-[11px] uppercase tracking-[0.1em]"
+              >
+                {sortOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+        </div>
+      )}
 
       {error && (
         <p role="alert" className={`${errCls} mb-5`}>
@@ -560,7 +724,46 @@ export default function AdminCrud({
         </form>
       )}
 
-      <div className="border-t border-line">
+      {/* UX gap — a query across 1,400 rows takes long enough that a list
+          which simply does not change looks broken. Skeleton rows the same
+          height as real ones, so the page does not jump when they arrive. */}
+      {loading && rows.length === 0 ? (
+        <div className="border-t border-line" aria-busy="true">
+          <span className="sr-only">Loading {table}…</span>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              aria-hidden
+              className="flex items-center gap-x-6 border-b border-line py-3.5"
+            >
+              <span className="size-12 shrink-0 animate-pulse bg-line/50" />
+              <span className="min-w-0 flex-1 basis-56">
+                <span className="mb-2 block h-4 w-2/5 animate-pulse bg-line/50" />
+                <span className="block h-3 w-3/5 animate-pulse bg-line/35" />
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="border-y border-line px-6 py-14 text-center">
+          <p className="font-display text-xl font-bold uppercase tracking-wide">
+            {search ? "No rows match that search" : "Nothing here yet"}
+          </p>
+          {search && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className={`${btnSm} mt-4 border border-ink hover:bg-ink hover:text-chalk`}
+            >
+              Clear search
+            </button>
+          )}
+        </div>
+      ) : (
+      <div
+        className={`border-t border-line ${loading ? "opacity-50 transition-opacity" : ""}`}
+        aria-busy={loading}
+      >
         {rows.map((r) => {
           const s = summary(r);
           const imageField = fields.find((f) => f.type === "images");
@@ -632,6 +835,39 @@ export default function AdminCrud({
           );
         })}
       </div>
+      )}
+
+      {/* BE-01 — pages rather than one 1,400-row scroll. Numbered jumps are
+          deliberately not offered: with search and sort in the toolbar above,
+          "page 19" is never the thing an admin is actually looking for. */}
+      {paged && total !== null && total > perPage && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft">
+            {page * perPage + 1}–{Math.min((page + 1) * perPage, total)} of {total}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0 || loading}
+              className={`${btnSm} border border-ink px-4 py-2.5 hover:bg-ink hover:text-chalk disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-ink`}
+            >
+              ← Previous
+            </button>
+            <span className="flex items-center px-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft">
+              Page {page + 1} / {Math.max(1, Math.ceil(total / perPage))}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={(page + 1) * perPage >= total || loading}
+              className={`${btnSm} border border-ink px-4 py-2.5 hover:bg-ink hover:text-chalk disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-ink`}
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
