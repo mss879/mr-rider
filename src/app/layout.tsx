@@ -10,12 +10,22 @@ import Preloader from "@/components/Preloader";
 import { CREDIT } from "@/lib/credit";
 import { getNavAvailability } from "@/lib/db";
 import { MOTION_BOOT } from "@/lib/motion";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import {
+  SITE_NAME,
+  SITE_OG_IMAGE,
+  SITE_OG_SIZE,
+  SITE_URL,
+  absolute,
+} from "@/lib/site";
 
+/* Only the cuts the site wears. `.headline` is 800 italic and every other
+   display use is `font-bold` (700) roman; 600 and 900 were preloaded on
+   every page and never drawn. next/font loads the weight × style grid, so
+   this is four files where there were eight. */
 const barlow = Barlow_Condensed({
   variable: "--font-barlow",
   subsets: ["latin"],
-  weight: ["600", "700", "800", "900"],
+  weight: ["700", "800"],
   style: ["normal", "italic"],
 });
 
@@ -24,10 +34,11 @@ const archivo = Archivo({
   subsets: ["latin"],
 });
 
+// 400 and 600 only — nothing on the site sets the mono face to medium.
 const plex = IBM_Plex_Mono({
   variable: "--font-plex",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "600"],
 });
 
 const DESCRIPTION =
@@ -53,19 +64,42 @@ export const metadata: Metadata = {
   authors: [{ name: CREDIT.name, url: CREDIT.url }],
   creator: CREDIT.name,
   publisher: SITE_NAME,
-  alternates: { canonical: "/" },
+  /* No `alternates.canonical` here, deliberately. A canonical set on the root
+     layout is INHERITED by every page that does not override it, so the whole
+     site shipped `<link rel="canonical" href="https://mr-rider.lk">` — /shop,
+     /coaching, /about and the rest each declaring themselves a duplicate of
+     the home page, which is an instruction to Google to index one page and
+     drop the others. Each route now states its own; the home page's lives in
+     app/page.tsx alongside the others. */
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
     url: SITE_URL,
     title: "MR.RIDER — Members-Only Cycling Club & Shop",
     description: DESCRIPTION,
-    locale: "en_NZ",
+    // Sri Lanka. It read en_NZ, which is where the build was set up, not
+    // where the club is — and og:locale is what a platform reads to decide
+    // which regional audience a link belongs to.
+    locale: "en_LK",
+    /* Absolute, not relative. metadataBase would resolve a relative path
+       correctly, but several unfurlers (WhatsApp among them) fetch og:image
+       without resolving it against the document, and a bare "/og.jpg" is a
+       broken card on exactly the channel the club shares through most. */
+    images: [
+      {
+        url: absolute(SITE_OG_IMAGE),
+        width: SITE_OG_SIZE.width,
+        height: SITE_OG_SIZE.height,
+        alt: "MR.RIDER — ride fast, buy smart, join the club",
+        type: "image/jpeg",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "MR.RIDER — Members-Only Cycling Club & Shop",
     description: DESCRIPTION,
+    images: [absolute(SITE_OG_IMAGE)],
   },
   robots: {
     index: true,
@@ -76,7 +110,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#111111",
+  // --color-carbon from tokens.css, so the browser chrome on Android and the
+  // manifest's theme_color agree with the site's own dark bands.
+  themeColor: "#151619",
   colorScheme: "light",
 };
 

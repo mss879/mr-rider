@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   brandName,
@@ -13,8 +13,10 @@ import {
   type Category,
   type MenuSection,
 } from "@/lib/taxonomy";
+import ProfileMenu, { riderName } from "@/components/ProfileMenu";
 import type { NavAvailability } from "@/lib/db";
 import { SITE_LOGO, SITE_LOGO_SIZE, SITE_NAME } from "@/lib/site";
+import { getSupabaseBrowser } from "@/lib/supabaseBrowser";
 import { useSession } from "@/lib/useSession";
 
 /* Club navigation — the product categories live in the Shop mega-menu,
@@ -165,7 +167,8 @@ export default function SiteHeader({
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [openMobileCat, setOpenMobileCat] = useState<string | null>(null);
   const pathname = usePathname();
-  const { session } = useSession();
+  const router = useRouter();
+  const { session, ready } = useSession();
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -195,6 +198,15 @@ export default function SiteHeader({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [megaOpen, mobileOpen]);
+
+  /* The drawer's own sign out — ProfileMenu is desktop-only, and a rider on a
+     phone should not have to walk to /account to get out. Local scope, so the
+     session on their other devices survives. */
+  const signOut = useCallback(async () => {
+    setMobileOpen(false);
+    await getSupabaseBrowser()?.auth.signOut({ scope: "local" });
+    router.refresh();
+  }, [router]);
 
   const clearTimers = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -273,7 +285,11 @@ export default function SiteHeader({
 
       <header
         ref={headerRef}
-        className="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur"
+        // Solid, not 95% + backdrop-blur. A backdrop-filter on a sticky bar
+        // re-blurs whatever scrolls under it on every single frame, which is
+        // the most expensive thing a header can ask a phone's GPU to do — and
+        // at 95% opacity the frosting was all but invisible anyway.
+        className="sticky top-0 z-40 border-b border-line bg-paper"
         onMouseLeave={scheduleClose}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
@@ -348,12 +364,23 @@ export default function SiteHeader({
             >
               {session ? "My inquiries" : "Sign in"}
             </Link>
-            <Link
-              href="/apply"
-              className="hidden whitespace-nowrap bg-ink px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft md:inline-block"
-            >
-              Join the Club
-            </Link>
+            {/* UI-06 — the club's loudest call to action is for people who are
+                not in yet. A rider who is signed in gets their own name and a
+                menu instead. `ready` gates the swap: rendering the button and
+                then yanking it out a beat later once the session resolves is
+                worse than the button appearing a beat late. */}
+            {ready && session ? (
+              <ProfileMenu session={session} />
+            ) : (
+              <Link
+                href="/apply"
+                className={`hidden whitespace-nowrap bg-ink px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft md:inline-block ${
+                  ready ? "" : "invisible"
+                }`}
+              >
+                Join the Club
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
@@ -640,12 +667,35 @@ export default function SiteHeader({
           </nav>
 
           <div className="border-t border-line-dark px-6 py-6">
-            <Link
-              href="/apply"
-              className="inline-block bg-chalk px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-carbon"
-            >
-              Join the Club →
-            </Link>
+            {session ? (
+              <>
+                <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-chalk">
+                  Hi, {riderName(session)}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/account"
+                    className="inline-block bg-chalk px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-carbon"
+                  >
+                    My account
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={signOut}
+                    className="inline-block border border-line-dark px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk/70"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              </>
+            ) : (
+              <Link
+                href="/apply"
+                className="inline-block bg-chalk px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-carbon"
+              >
+                Join the Club →
+              </Link>
+            )}
           </div>
         </div>
       )}
