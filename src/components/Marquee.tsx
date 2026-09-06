@@ -1,7 +1,9 @@
+/* A CSS ticker from first paint; MotionProvider takes it over on idle and
+   ties its speed and direction to the scroll (data-marquee). */
 export default function Marquee({ items }: { items: string[] }) {
   return (
     <div className="overflow-clip border-y border-line bg-carbon py-3 text-chalk">
-      <div className="ticker-track flex w-max">
+      <div data-marquee className="ticker-track flex w-max">
         {[0, 1].map((copy) => (
           <div key={copy} aria-hidden={copy === 1} className="flex shrink-0">
             {items.map((item, i) => (

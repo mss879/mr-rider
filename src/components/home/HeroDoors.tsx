@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import DropBanner from "@/components/home/DropBanner";
 import { IMAGERY } from "@/lib/imagery";
 import { rise } from "@/lib/motion";
 
@@ -13,10 +14,21 @@ import { rise } from "@/lib/motion";
 
    Still `data-rise` rather than `data-reveal`: on a tall screen this band is
    just below the fold and on a laptop it is partly in it, so it belongs to the
-   hero's CSS entrance cascade rather than waiting for GSAP to scroll it in. */
+   hero's CSS entrance cascade rather than waiting for GSAP to scroll it in.
+   The "wipe" variant: each card unmasks upward while its photograph settles
+   from a zoom, and the photograph then parallaxes on scroll — see the Motion
+   section of globals.css for why the zoom and the parallax sit on two
+   different elements. */
 
+/* `isolate` is load-bearing. The plate sits at -z-10 and the shutter at
+   z-10, and both only mean anything inside a stacking context the card
+   itself owns. Without one, the negative-z plate falls through to the page
+   root and paints BEHIND the section's paper — the photograph is loaded,
+   decoded and invisible. The card used to get a stacking context for free
+   from its clip-path animation; the shutter replaced that, so it is stated
+   here rather than left to whatever the current animation happens to be. */
 const CARD =
-  "group relative flex aspect-[16/9] flex-col justify-end overflow-clip border border-line-dark p-6 text-chalk transition-transform duration-200 ease-out hover:-translate-y-1 sm:aspect-[4/3] lg:aspect-[16/10]";
+  "group relative isolate flex aspect-[16/9] flex-col justify-end overflow-clip border border-line-dark p-6 text-chalk transition-transform duration-200 ease-out hover:-translate-y-1 sm:aspect-[4/3] lg:aspect-[16/10]";
 
 export default function HeroDoors({
   categoryCount,
@@ -33,15 +45,25 @@ export default function HeroDoors({
     <section className="border-b border-line bg-paper">
       <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
         <div className="grid gap-5 md:grid-cols-2">
-          <Link href="/shop" data-rise style={rise(5)} className={CARD}>
-            <Image
-              src={IMAGERY.floor.src}
-              alt=""
+          <Link href="/shop" data-rise="wipe" style={rise(5)} className={CARD}>
+            {/* The shutter is the band's own paper, so until it slides off
+                the card reads as not there yet. z-10 puts it over the copy;
+                the card's overflow clip swallows it once it has gone. */}
+            <span aria-hidden data-shutter className="absolute inset-0 z-10 bg-paper" />
+            <span
+              data-plate
               aria-hidden
-              fill
-              sizes="(min-width: 768px) 46vw, 92vw"
-              className="-z-10 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-            />
+              className="absolute inset-0 -z-10 overflow-clip transition-transform duration-500 ease-out group-hover:scale-105"
+            >
+              <Image
+                src={IMAGERY.floor.src}
+                alt=""
+                fill
+                sizes="(min-width: 768px) 46vw, 92vw"
+                data-parallax="6"
+                className="object-cover"
+              />
+            </span>
             <span
               aria-hidden
               className="absolute inset-0 -z-10 bg-gradient-to-t from-carbon via-carbon/55 to-carbon/15"
@@ -60,15 +82,25 @@ export default function HeroDoors({
             </span>
           </Link>
 
-          <Link href="/coaching" data-rise style={rise(6)} className={CARD}>
-            <Image
-              src={IMAGERY.climb.src}
-              alt=""
+          <Link href="/coaching" data-rise="wipe" style={rise(6)} className={CARD}>
+            {/* The shutter is the band's own paper, so until it slides off
+                the card reads as not there yet. z-10 puts it over the copy;
+                the card's overflow clip swallows it once it has gone. */}
+            <span aria-hidden data-shutter className="absolute inset-0 z-10 bg-paper" />
+            <span
+              data-plate
               aria-hidden
-              fill
-              sizes="(min-width: 768px) 46vw, 92vw"
-              className="-z-10 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-            />
+              className="absolute inset-0 -z-10 overflow-clip transition-transform duration-500 ease-out group-hover:scale-105"
+            >
+              <Image
+                src={IMAGERY.climb.src}
+                alt=""
+                fill
+                sizes="(min-width: 768px) 46vw, 92vw"
+                data-parallax="6"
+                className="object-cover"
+              />
+            </span>
             <span
               aria-hidden
               className="absolute inset-0 -z-10 bg-gradient-to-t from-carbon via-carbon/55 to-carbon/15"
@@ -90,25 +122,10 @@ export default function HeroDoors({
 
         {/* Today's drop, live from the catalog — the one genuinely
             time-sensitive thing on the page, so it stays directly under the
-            two doors rather than waiting for its own section further down. */}
-        <Link
-          href="/daily-listings"
-          data-rise
-          style={rise(7)}
-          className="group mt-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border border-line bg-chalk px-5 py-4 transition-colors duration-200 ease-out hover:border-ink"
-        >
-          <span className="flex items-center gap-3">
-            <span aria-hidden className="size-2 shrink-0 rounded-full bg-ink" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em]">
-              {todayCount > 0
-                ? `${todayCount} items landed today`
-                : "Next drop lands 09:00"}
-            </span>
-          </span>
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft transition-colors duration-200 ease-out group-hover:text-ink">
-            See the drop →
-          </span>
-        </Link>
+            two doors rather than waiting for its own section further down.
+            Its own client component because it carries a live countdown; see
+            DropBanner for why the clock is not rendered on the server. */}
+        <DropBanner todayCount={todayCount} />
       </div>
     </section>
   );

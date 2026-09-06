@@ -85,13 +85,11 @@ export default function Experience({
   return (
     <section className="border-y border-line bg-carbon text-chalk">
       <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-        <div data-reveal="fade">
-          <SectionHead
-            dark
-            eyebrow="Inside the membership"
-            title="One door. Six rooms."
-          />
-        </div>
+        <SectionHead
+          dark
+          eyebrow="Inside the membership"
+          title="One door. Six rooms."
+        />
 
         <p
           data-reveal="fade"
@@ -105,7 +103,7 @@ export default function Experience({
 
         <ul className="border-t border-line-dark">
           {rooms.map((r) => (
-            <li key={r.n} data-reveal>
+            <li key={r.n} data-reveal="slide">
               <Link
                 href={r.href}
                 className="group grid grid-cols-[2.75rem_minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-2 border-b border-line-dark py-6 transition-colors duration-200 ease-out hover:bg-carbon-2 md:grid-cols-[3.5rem_minmax(0,18rem)_minmax(0,1fr)_10rem_2rem] md:items-center md:gap-x-6"

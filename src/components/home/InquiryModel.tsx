@@ -34,14 +34,17 @@ export default function InquiryModel() {
     <section className="border-t border-line bg-paper-2">
       <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:py-20 lg:grid-cols-12 lg:gap-16">
         <div className="flex flex-col gap-8 lg:col-span-6">
-          <div data-reveal="fade">
-            <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft">
+          <div>
+            <p
+              data-reveal="fade"
+              className="mb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft"
+            >
               No price tags
             </p>
-            <h2 className="headline text-[clamp(2.2rem,5vw,3.8rem)]">
-              Ask a person.
+            <h2 data-split className="headline text-[clamp(2.2rem,5vw,3.8rem)]">
+              Ask a person.{" "}
               <br />
-              <span className="text-ink">Get a real number.</span>
+              Get a real number.
             </h2>
           </div>
 
@@ -54,15 +57,22 @@ export default function InquiryModel() {
 
           {/* Carries its own alt text rather than aria-hidden: this one is
               content, not a background wash behind other content. */}
-          <figure data-reveal className="border border-line">
-            <Image
-              src={IMAGERY.bench.src}
-              alt={IMAGERY.bench.alt}
-              width={IMAGERY.bench.width}
-              height={IMAGERY.bench.height}
-              sizes="(min-width: 1024px) 45vw, 92vw"
-              className="aspect-[16/9] w-full object-cover"
-            />
+          <figure data-reveal="wipe" className="relative isolate overflow-clip border border-line">
+            {/* Paper-2 to match the band it sits on. Slides off upward on
+                reveal — see MotionProvider · wipes. */}
+            <span aria-hidden data-shutter className="absolute inset-0 z-10 bg-paper-2" />
+            {/* The plate clips; the picture inside it parallaxes. */}
+            <div data-plate className="aspect-[16/9] w-full overflow-clip">
+              <Image
+                src={IMAGERY.bench.src}
+                alt={IMAGERY.bench.alt}
+                width={IMAGERY.bench.width}
+                height={IMAGERY.bench.height}
+                sizes="(min-width: 1024px) 45vw, 92vw"
+                data-parallax="5"
+                className="size-full object-cover"
+              />
+            </div>
             <figcaption className="border-t border-line bg-chalk px-4 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-soft">
               The people who answer your thread are the people who check the
               stock

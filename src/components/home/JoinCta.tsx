@@ -21,6 +21,7 @@ export default function JoinCta({ productCount }: { productCount: number }) {
         height={IMAGERY.road.height}
         sizes="100vw"
         quality={55}
+        data-parallax="7"
         className="pointer-events-none absolute inset-0 -z-10 size-full object-cover object-center"
       />
       <div
@@ -29,6 +30,7 @@ export default function JoinCta({ productCount }: { productCount: number }) {
       />
       <span
         aria-hidden
+        data-drift
         className="headline ghost-dark pointer-events-none absolute -right-2 top-2 select-none text-[clamp(4rem,14vw,11rem)] leading-none"
       >
         JOIN
@@ -42,13 +44,12 @@ export default function JoinCta({ productCount }: { productCount: number }) {
           Membership
         </p>
 
-        <h2
-          data-reveal="fade"
-          className="headline max-w-4xl text-[clamp(2.6rem,8vw,6rem)]"
-        >
-          The floor is open.
+        {/* Plain text under the split: the second line used to sit in a
+            span that only restated the colour it already inherited. */}
+        <h2 data-split className="headline max-w-4xl text-[clamp(2.6rem,8vw,6rem)]">
+          The floor is open.{" "}
           <br />
-          <span className="text-chalk">The door isn&apos;t.</span>
+          The door isn&apos;t.
         </h2>
 
         <p

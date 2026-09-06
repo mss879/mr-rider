@@ -44,9 +44,7 @@ export default function ClubFaq() {
   return (
     <section id="faq" className="border-t border-line">
       <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-        <div data-reveal="fade">
-          <SectionHead eyebrow="Before you apply" title="The honest answers." />
-        </div>
+        <SectionHead eyebrow="Before you apply" title="The honest answers." />
 
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">

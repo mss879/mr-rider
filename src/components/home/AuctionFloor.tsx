@@ -33,7 +33,10 @@ export default function AuctionFloor({ lots }: { lots: Lot[] }) {
             No lots on the block right now — the next one opens soon
           </p>
         ) : (
-          <ul className="grid gap-px bg-line-dark sm:grid-cols-2">
+          /* One reveal for the grid: the hairlines between lots are this
+             element's background showing through the gap, and fading the lots
+             one by one would strand a grey slab on screen. */
+          <ul data-reveal className="grid gap-px bg-line-dark sm:grid-cols-2">
             {live.map((l) => (
               <li key={l.id} className="bg-carbon">
                 <Link
@@ -79,7 +82,10 @@ export default function AuctionFloor({ lots }: { lots: Lot[] }) {
           </ul>
         )}
 
-        <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          data-reveal="fade"
+          className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between"
+        >
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-chalk/50">
             Watch freely · bidding unlocks with membership
           </p>

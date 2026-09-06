@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import ArrowCta from "@/components/ArrowCta";
@@ -17,6 +18,12 @@ import { brandName, categories, directoryBrands, subcategoryName } from "@/lib/t
 import { getCoaches, getLots, getPrograms, getProducts } from "@/lib/db";
 import { IMAGERY } from "@/lib/imagery";
 import { rise } from "@/lib/motion";
+
+export const metadata: Metadata = {
+  // Every other route states its own; see the note in app/layout.tsx for why
+  // this cannot live on the layout and be inherited.
+  alternates: { canonical: "/" },
+};
 
 // Re-fetch backend data at most every 60s
 export const revalidate = 60;
@@ -64,7 +71,10 @@ export default async function Home() {
           image, and a picture behind black type on paper can only ever be a
           washed-out watermark. Inverting the band lets the frame carry its full
           contrast and keeps the type legible on top of it. */}
-      <section className="relative isolate overflow-clip border-b border-line-dark bg-carbon text-chalk">
+      <section
+        data-hero
+        className="relative isolate overflow-clip border-b border-line-dark bg-carbon text-chalk"
+      >
         {/* A plain fill, and it did not used to be. This was an oversized
             plate pinned to the bottom at 160% of the band, because when the
             headline was CENTRED it landed on empty sky and the riders sat down
@@ -80,30 +90,42 @@ export default async function Home() {
             longer drawn wider than its own master, and for the clip, whose
             peloton closes on the camera under its own steam, it is the
             difference between a shot and a blur. */}
-        <Image
-          src={IMAGERY.peloton.src}
-          alt=""
+        {/* Both layers of the plate in one wrapper, because the wrapper is
+            what the scroll moves (MotionProvider · hero): as the band leaves,
+            the plate trails the page and swells, and the still and the clip
+            have to do that as one picture. `-z-10` on the wrapper is load-
+            bearing — a transformed element with no z-index would paint above
+            the headline. */}
+        <div
+          data-hero-plate
           aria-hidden
-          width={IMAGERY.peloton.width}
-          height={IMAGERY.peloton.height}
-          // The LCP element on the site's most-visited page: fetched eagerly at
-          // high priority, and sized so a phone is never handed the master.
-          priority
-          sizes="100vw"
-          // Under two scrims and full of film grain — 55 is invisible here and
-          // takes roughly 40% off the largest download on the page.
-          quality={55}
-          className={HERO_PLATE}
-        />
-        {/* The clip layers over the still on the same crop, under both scrims.
-            It is 8s, silent, and cut to loop on this exact frame — see
-            HeroPlate for why the still stays underneath it rather than being
-            replaced by it. */}
-        <HeroPlate
-          src="/img/hero.mp4"
-          srcNarrow="/img/hero-sm.mp4"
-          className={HERO_PLATE}
-        />
+          className="pointer-events-none absolute inset-0 -z-10"
+        >
+          <Image
+            src={IMAGERY.peloton.src}
+            alt=""
+            aria-hidden
+            width={IMAGERY.peloton.width}
+            height={IMAGERY.peloton.height}
+            // The LCP element on the site's most-visited page: fetched eagerly at
+            // high priority, and sized so a phone is never handed the master.
+            priority
+            sizes="100vw"
+            // Under two scrims and full of film grain — 55 is invisible here and
+            // takes roughly 40% off the largest download on the page.
+            quality={55}
+            className={HERO_PLATE}
+          />
+          {/* The clip layers over the still on the same crop, under both
+              scrims. It is 8s, silent, and cut to loop on this exact frame —
+              see HeroPlate for why the still stays underneath it rather than
+              being replaced by it. */}
+          <HeroPlate
+            src="/img/hero.mp4"
+            srcNarrow="/img/hero-sm.mp4"
+            className={HERO_PLATE}
+          />
+        </div>
         {/* Two scrims, not one, and the stops are placed rather than even.
 
             Vertical: heaviest at the top where the headline sits against sky,
@@ -133,11 +155,14 @@ export default async function Home() {
             height of the band. */}
         <div className="mx-auto grid min-h-[calc(100svh-var(--chrome-h))] max-w-7xl grid-cols-1 content-center lg:grid-cols-12 lg:content-stretch">
           {/* The rail spreads to fill its side of the rule — eyebrow on the
-              top edge, sign-in on the bottom, the argument and the gate spaced
-              out between them — rather than sitting as one tight clump with a
-              screenful of dead space around it. `gap-8` stays the FLOOR on the
-              spacing; justify-between only ever adds to it. */}
-          <div className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:justify-between lg:border-r lg:border-line-dark lg:py-16">
+              top edge, the way in on the bottom — rather than sitting as one
+              tight clump with a screenful of dead space around it. `gap-8`
+              stays the FLOOR on the spacing; justify-between only ever adds
+              to it. */}
+          <div
+            data-hero-rail
+            className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:justify-between lg:border-r lg:border-line-dark lg:py-16"
+          >
             <p
               data-rise
               style={rise(1)}
@@ -145,37 +170,16 @@ export default async function Home() {
             >
               A members-only cycling club
             </p>
-            <p
+            {/* UI-03 — the club asked for the hero to carry the headline and
+                nothing competing with it, so the paragraph explaining the floor
+                and the boxed "The gate" summary both came out. Everything they
+                said is repeated below the fold anyway: the aisle count is in
+                HeroDoors, and the three steps of the gate are the whole of the
+                "How you get in" section further down. What is left here is the
+                eyebrow, the headline across the rule, and the way in. */}
+            <div
               data-rise
               style={rise(2)}
-              className="max-w-sm text-justify text-sm leading-relaxed text-chalk/70"
-            >
-              {/* The space before "aisles" is an explicit {" "} and has to
-                  stay one. Written as plain text after the expression it is
-                  swallowed on the way to the DOM and the sentence renders as
-                  "11aisles" — a JSX text node that opens with a space, sitting
-                  directly after an expression container, loses it. */}
-              One shop floor with {categories.length}{" "}
-              aisles, fresh listings every morning, a live auction, a clearance
-              market and coaches on four continents. You don&apos;t browse
-              MR.RIDER — you get let in.
-            </p>
-            <div
-              data-rise
-              style={rise(3)}
-              className="border border-line-dark bg-carbon/70 p-5 text-chalk backdrop-blur-sm"
-            >
-              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-chalk/70">
-                The gate
-              </p>
-              <p className="text-sm leading-relaxed text-chalk/80">
-                Sign up → pay your dues → the club approves you. Then the whole
-                floor is yours.
-              </p>
-            </div>
-            <div
-              data-rise
-              style={rise(4)}
               className="flex flex-col items-start gap-3"
             >
               <ArrowCta href="/apply" tone="chalk">
@@ -195,17 +199,24 @@ export default async function Home() {
               what lands the last line on the same baseline as the sign-in link
               across the rule — move one padding and move the other. */}
           <div className="flex min-w-0 flex-col justify-center px-6 py-12 lg:col-span-8 lg:justify-end lg:pb-16 lg:pl-12 lg:pt-24">
-            {/* Three blocks rather than <br>s, so each line can carry its own
-                step in the entrance cascade. */}
+            {/* Three slots rather than <br>s, so each line can carry its own
+                step in the entrance cascade — and, since the energy pass,
+                its own rate on the way out. The outer span is the slot: it
+                clips the line rising up through it at first paint, and it is
+                what the scroll then moves (data-hero-line), each at a
+                different speed so the three fan apart. The inner span is the
+                line itself, and the CSS keyframe is on that; see the Motion
+                header in globals.css for why those two jobs cannot share an
+                element. */}
             <h1 className="headline text-[clamp(3.2rem,9.5vw,7.5rem)]">
-              <span data-rise style={rise(0)} className="block">
-                Ride fast.
+              <span data-rise="mask" data-hero-line style={rise(0)} className="block">
+                <span className="block">Ride fast.</span>
               </span>
-              <span data-rise style={rise(1)} className="block">
-                Buy smart.
+              <span data-rise="mask" data-hero-line style={rise(1)} className="block">
+                <span className="block">Buy smart.</span>
               </span>
-              <span data-rise style={rise(2)} className="block text-chalk">
-                Join the club.
+              <span data-rise="mask" data-hero-line style={rise(2)} className="block">
+                <span className="block text-chalk">Join the club.</span>
               </span>
             </h1>
           </div>
@@ -249,13 +260,11 @@ export default async function Home() {
 
       {/* CATEGORY INDEX */}
       <section className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-        <div data-reveal="fade">
-          <SectionHead
-            eyebrow="The shop"
-            title={`${categories.length} aisles. One floor.`}
-            link={{ href: "/shop", label: "Enter the shop" }}
-          />
-        </div>
+        <SectionHead
+          eyebrow="The shop"
+          title={`${categories.length} aisles. One floor.`}
+          link={{ href: "/shop", label: "Enter the shop" }}
+        />
         <div className="grid grid-cols-2 border-l border-t border-line md:grid-cols-3 xl:grid-cols-4">
           {categories.map((c, i) => (
             <Link
@@ -311,13 +320,11 @@ export default async function Home() {
       {/* FEATURED PRODUCTS */}
       <section className="border-t border-line bg-paper-2">
         <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-          <div data-reveal="fade">
-            <SectionHead
-              eyebrow="Fresh on the racks"
-              title="Featured stock."
-              link={{ href: "/shop", label: "Shop everything" }}
-            />
-          </div>
+          <SectionHead
+            eyebrow="Fresh on the racks"
+            title="Featured stock."
+            link={{ href: "/shop", label: "Shop everything" }}
+          />
           {/* The grid reveals as one block rather than card-by-card: the cards
               are equal-height grid children, and wrapping each one to give it
               its own trigger would cost that. */}
@@ -335,20 +342,18 @@ export default async function Home() {
       {/* DAILY LISTINGS TEASER — dark band */}
       <section className="border-y border-line bg-carbon text-chalk">
         <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-          <div data-reveal="fade">
-            <SectionHead
-              dark
-              eyebrow="Daily listings"
-              title="Today's drop."
-              link={{ href: "/daily-listings", label: "See all listings" }}
-            />
-          </div>
+          <SectionHead
+            dark
+            eyebrow="Daily listings"
+            title="Today's drop."
+            link={{ href: "/daily-listings", label: "See all listings" }}
+          />
           <div>
             {todaysListings.slice(0, 4).map((p, i) => (
               <Link
                 key={p.id}
                 href={`/shop?cat=${p.category}&sub=${p.subcategory}`}
-                data-reveal
+                data-reveal="slide"
                 className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-baseline gap-4 border-b border-line-dark py-4"
               >
                 <span className="font-mono text-[11px] text-chalk/40">
@@ -388,7 +393,7 @@ export default async function Home() {
             >
               Coaching
             </p>
-            <h2 data-reveal="fade" className="headline text-[clamp(2.2rem,5vw,3.8rem)]">
+            <h2 data-split className="headline text-[clamp(2.2rem,5vw,3.8rem)]">
               Train with the pool.
             </h2>
             <p
@@ -418,7 +423,7 @@ export default async function Home() {
             {coaches.slice(0, 4).map((c) => (
               <div
                 key={c.id}
-                data-reveal
+                data-reveal="slide"
                 className="flex items-baseline justify-between gap-4 border-b border-line py-4"
               >
                 <span className="min-w-0">
@@ -463,6 +468,7 @@ export default async function Home() {
             width={IMAGERY.parts.width}
             height={IMAGERY.parts.height}
             sizes="(min-width: 768px) 80vw, 100vw"
+            data-parallax="6"
             className="pointer-events-none absolute inset-0 -z-10 size-full object-cover"
           />
           <span
@@ -471,6 +477,7 @@ export default async function Home() {
           />
           <span
             aria-hidden
+            data-drift
             className="headline ghost-dark pointer-events-none absolute right-5 top-4 select-none text-[clamp(2.5rem,5vw,4.25rem)] leading-none"
           >
             LAST CALL
@@ -506,9 +513,7 @@ export default async function Home() {
       {/* JOIN THE CLUB */}
       <section className="border-t border-line">
         <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-          <div data-reveal="fade">
-            <SectionHead eyebrow="Membership" title="How you get in." />
-          </div>
+          <SectionHead eyebrow="Membership" title="How you get in." />
           {/* One reveal for the whole grid — the rules between the steps are
               this element's background showing through the gap, so fading the
               steps individually would strand a grey slab on screen. */}

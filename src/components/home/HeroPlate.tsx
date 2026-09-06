@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 /* The moving half of the hero backdrop.
 
@@ -79,7 +79,23 @@ export default function HeroPlate({
   );
   const [ready, setReady] = useState(false);
 
-  if (reduced) return null;
+  /* The clip is the heaviest thing on the page — 2MB on a phone, 3.4MB on a
+     laptop — and it used to start downloading with the first byte of HTML,
+     in the same window as the fonts, the LCP still and the app's own JS. It
+     has nothing to show for that window: the curtain covers the hero for
+     1.44s and the still underneath is the clip's own first frame. So it
+     mounts after that, once the critical path is clear. A reader who has
+     asked their browser to save data never gets it at all; the still is the
+     designed fallback, not a degraded one. */
+  const [wanted, setWanted] = useState(false);
+  useEffect(() => {
+    const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
+    if (nav.connection?.saveData) return;
+    const id = window.setTimeout(() => setWanted(true), 1600);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  if (reduced || !wanted) return null;
 
   return (
     <video
