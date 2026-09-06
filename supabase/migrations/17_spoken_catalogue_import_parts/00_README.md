@@ -39,6 +39,13 @@ The one file to be careful with is `01`: it contains the delete. Running it
 again after loading products wipes them and you start the product files over.
 Nothing else is destructive.
 
+Destructive is not the only thing to watch, though. These files carry the
+categories the import got wrong (QA ticket BUG-03: seven framesets, two pairs
+of gravel shoes and a set of derailleur hangers under Road Bikes, one complete
+Cervélo S5 under Framesets), and `on conflict (id) do update` rewrites
+`category` — so re-running **any** product file puts those rows back.
+**Re-run `../22_road_bikes_frameset_refile.sql` afterwards.**
+
 ## Photos
 
 None of this puts images in place. The rows carry bucket paths like

@@ -72,12 +72,28 @@ const fields: FieldDef[] = [
         includeFuture: true,
       }).map((s) => ({ value: s.slug, label: `${s.section} · ${s.name}` })),
   },
-  {
-    key: "collections",
-    label: "Also show under (brand collections — no duplicate product record)",
-    type: "multiselect",
-    options: brandOptions,
-  },
+  /* BUG-02 — the "also show under (brand collections)" multiselect is off the
+     product form. It rendered all 104 brand checkboxes (every entry in `brands`,
+     src/lib/taxonomy.ts, via brandOptions above) into one 160px scroll box across
+     the full form width; the club read that as clutter and asked for the block
+     gone. Nothing else about the feature was touched.
+
+     `collections` is still a real column (migration 12, `text[] not null default
+     '{}'`) and is still READ everywhere it was: matchesBrand() in src/lib/data.ts,
+     the row mapper + PRODUCT_COLUMNS + getNavAvailability() in src/lib/db.ts, and
+     the brand rail in ShopBrowser.tsx. Every existing cross-listing keeps working
+     on the shop.
+
+     Removing the field def is safe precisely BECAUSE AdminCrud builds its save
+     payload from this array alone — see save() in AdminCrud.tsx, which starts at
+     `const payload: RowData = { id: editing.id }` and never spreads `editing`. So
+     `collections` is simply never written: an update PATCHes without the column
+     and leaves stored values untouched, an insert omits it and takes the column
+     default '{}'. Nothing is nulled.
+
+     To bring it back, restore this one field def — the multiselect machinery in
+     AdminCrud is still there. Until then a cross-listing is set in SQL; see
+     supabase/README.md, "One product, several brand collections". */
   {
     key: "description",
     label: "Description",
@@ -144,7 +160,10 @@ export default function AdminProducts({ sb }: { sb: SupabaseClient }) {
         brand: brandOptions[0].value,
         category: categories[0].slug,
         subcategory: subcategoriesOf(categories[0].slug)[0]?.slug ?? "",
-        collections: [],
+        // BUG-02 — no `collections: []` seed any more. With the field def gone
+        // the key is read by nothing and saved by nothing (save() walks `fields`),
+        // so seeding it would only suggest the form still writes it. New rows get
+        // the column's own '{}' default instead.
         images: [],
         condition: "new",
         stock: 0,

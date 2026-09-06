@@ -36,3 +36,15 @@ select count(*) as with_photos from public.products where images <> '{}';
 
 -- The Clearance Market. Expect 159.
 select count(*) as clearance from public.clearance_items;
+
+-- BUG-03 tripwire. The checks above only prove a product's TYPE matches its
+-- AISLE — they cannot see a product filed consistently but wrongly, which is
+-- how seven framesets, two shoes and a bag of derailleur hangers ended up in
+-- Road Bikes. Expect no rows AFTER 22_road_bikes_frameset_refile.sql; before
+-- it, expect seven. Read the copy before moving anything: 'BMC Speedmachine
+-- 01 FOUR' and 'Diverge STR Expert' say "frameset" in their description and
+-- are complete bikes.
+select p.id, p.name
+from public.products p
+where p.category = 'road-bikes' and p.name ilike '%frameset%'
+order by p.id;

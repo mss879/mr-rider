@@ -128,18 +128,26 @@ export default async function Home() {
         </div>
         {/* Two scrims, not one, and the stops are placed rather than even.
 
-            Vertical: heaviest at the top where the headline sits against sky,
-            lightest at 70% — which is exactly where the riders are in the
-            frame, so the part of the photograph worth seeing is the part least
-            covered. Horizontal: weights the left third, where the rail copy is
-            smallest and has the least contrast to spare. */}
+            Vertical: heaviest at the top where the eyebrow sits against sky
+            and heavy again at the bottom under the headline, lightest at 70% —
+            which is exactly where the riders are in the frame, so the part of
+            the photograph worth seeing is the part least covered.
+
+            Horizontal: weights the RIGHT third. It used to weight the left,
+            and it followed the copy rather than the side: the rule is that the
+            scrim goes where the type is smallest and has the least contrast to
+            spare. The rail — eyebrow, apply, sign in, all of it 11px mono at
+            60% chalk — is the type that needs it, and the rail is now the
+            right-hand column. The headline can look after itself: it is white
+            Barlow at up to 7.5rem and it sits at the bottom of the band, where
+            the vertical scrim is already back up to 72%. */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10 bg-gradient-to-b from-carbon/88 via-carbon/12 via-72% to-carbon/72"
         />
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 bg-gradient-to-r from-carbon/95 from-8% via-carbon/22 via-42% to-transparent"
+          className="absolute inset-0 -z-10 bg-gradient-to-l from-carbon/95 from-8% via-carbon/22 via-42% to-transparent"
         />
         {/* The band is a screenful: the viewport less the strip and masthead
             above it (--chrome-h, globals.css), so its bottom edge lands on the
@@ -151,54 +159,37 @@ export default async function Home() {
             The height has to sit on the grid rather than the section or the
             rows have nothing to distribute themselves in. Below `lg` that is
             two stacked rows, centred as a block; from `lg` it is one row, and
-            it stretches instead so the rail's right-hand rule runs the full
-            height of the band. */}
+            it stretches instead so the rail — the right-hand track — gets the
+            whole band to spread its eyebrow and its way in across, and so the
+            headline opposite it can sit on the band's true bottom edge.
+
+            BUG-01 took out the rail's right-hand rule, which is what that
+            stretch used to be justified by. `lg:content-stretch` did NOT die
+            with it: it is now the only thing handing the rail's
+            `justify-between` a screenful to distribute. Drop it as newly-dead
+            code and the rail collapses to its own content height — the eyebrow
+            leaves the top edge and the sign-in link stops sharing a baseline
+            with the headline. */}
         <div className="mx-auto grid min-h-[calc(100svh-var(--chrome-h))] max-w-7xl grid-cols-1 content-center lg:grid-cols-12 lg:content-stretch">
-          {/* The rail spreads to fill its side of the rule — eyebrow on the
-              top edge, the way in on the bottom — rather than sitting as one
-              tight clump with a screenful of dead space around it. `gap-8`
-              stays the FLOOR on the spacing; justify-between only ever adds
-              to it. */}
-          <div
-            data-hero-rail
-            className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:justify-between lg:border-r lg:border-line-dark lg:py-16"
-          >
-            <p
-              data-rise
-              style={rise(1)}
-              className="font-mono text-[11px] uppercase tracking-[0.22em] text-chalk/60"
-            >
-              A members-only cycling club
-            </p>
-            {/* UI-03 — the club asked for the hero to carry the headline and
-                nothing competing with it, so the paragraph explaining the floor
-                and the boxed "The gate" summary both came out. Everything they
-                said is repeated below the fold anyway: the aisle count is in
-                HeroDoors, and the three steps of the gate are the whole of the
-                "How you get in" section further down. What is left here is the
-                eyebrow, the headline across the rule, and the way in. */}
-            <div
-              data-rise
-              style={rise(2)}
-              className="flex flex-col items-start gap-3"
-            >
-              <ArrowCta href="/apply" tone="chalk">
-                Apply for membership
-              </ArrowCta>
-              <Link
-                href="/account"
-                className="font-mono text-[11px] uppercase tracking-[0.16em] text-chalk/60 underline decoration-line-dark decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-chalk hover:decoration-chalk"
-              >
-                Already riding with us? Sign in →
-              </Link>
-            </div>
-          </div>
-          {/* The headline sits ON the bottom of the band, not in the middle of
-              it, so the screenful of height above reads as deliberate negative
-              space rather than slack. Its `pb-16` matches the rail's, which is
-              what lands the last line on the same baseline as the sign-in link
-              across the rule — move one padding and move the other. */}
-          <div className="flex min-w-0 flex-col justify-center px-6 py-12 lg:col-span-8 lg:justify-end lg:pb-16 lg:pl-12 lg:pt-24">
+          {/* The headline sits ON the bottom LEFT of the band — not in the
+              middle of it — so the screenful of height above reads as
+              deliberate negative space rather than slack, and the first thing
+              the eye lands on is the first thing the club wants said.
+
+              It holds the wide eight of the eight/four split because it has to:
+              at `lg` the type is clamped to 7.5rem and "JOIN THE CLUB." needs
+              the track. `lg:pr-12` — not `pl-12`, which is what this carried
+              while it was the RIGHT-hand column — keeps the gutter between the
+              headline and the rail beside it; its own left edge stays on the
+              container's `px-6`, in line with the masthead logo above it.
+
+              Its `pb-16` matches the rail's `py-16`, which is what lands the
+              last line on the same baseline as the sign-in link across the
+              band — move one padding and move the other. Since BUG-01 took out
+              the hairline that used to run between the two columns, that
+              shared baseline is the only thing left tying the two halves of
+              the band together: it matters more now, not less. */}
+          <div className="flex min-w-0 flex-col justify-center px-6 py-12 lg:col-span-8 lg:justify-end lg:pb-16 lg:pr-12 lg:pt-24">
             {/* Three slots rather than <br>s, so each line can carry its own
                 step in the entrance cascade — and, since the energy pass,
                 its own rate on the way out. The outer span is the slot: it
@@ -219,6 +210,82 @@ export default async function Home() {
                 <span className="block text-chalk">Join the club.</span>
               </span>
             </h1>
+          </div>
+          {/* The rail — the eyebrow on the top edge, the way in on the
+              bottom — spread across its side of the band rather than sitting
+              as one tight clump with a screenful of dead space around it.
+              `gap-8` stays the FLOOR on the spacing; justify-between only ever
+              adds to it.
+
+              It is the RIGHT-hand column now. The club asked for the headline
+              bottom-left and everything else opposite it, so the two tracks
+              swapped: the headline took the wide eight, this took the four.
+              Three things moved with it and none of them are optional — the
+              horizontal scrim was flipped to weight the right (see the scrim
+              note above; this 11px mono at 60% chalk is the type that needs
+              it), the headline's inner padding turned from `pl-12` to
+              `pr-12` so the gutter still falls BETWEEN the two, and this block
+              now comes second in the DOM, which is also the stacked order
+              below `lg`: headline, then eyebrow, then the way in.
+
+              BUG-01 — this used to carry a hairline down its right edge, and
+              nothing should put one back, on this side or the other. The rail
+              was 4 of 12 columns of an 80rem container, so that line sat a
+              FIXED 213px left of the viewport's centre on every screen wider
+              than 1280: the container stops growing there and only the margins
+              widen, so the bigger the monitor the nearer the middle it crept —
+              35% of the width across at 1440, 42% at 2560. Stretched to the
+              full height of the band (see `lg:content-stretch` above) and
+              drawn in line-dark on carbon, that is the faint vertical line the
+              club reported down the centre of the hero. Nothing was holding it
+              up: the eight/four split already reads off the type. */}
+          {/* `lg:items-end` + `lg:text-right`: the rail's copy is flushed to
+              the container's right edge, not left-aligned inside its own
+              column. Without it every line started at the column's left edge
+              and trailed off into ~150px of dead space before the band ended,
+              which read as the block having drifted inwards rather than being
+              placed. Flushed right it mirrors the headline's flush-left edge
+              opposite, and the two together frame the photograph.
+
+              `lg:` only. Below the breakpoint this is a stacked single column
+              under the headline, where ragged-left copy would be a step
+              backwards — it stays left-aligned there. */}
+          <div
+            data-hero-rail
+            className="flex flex-col gap-8 px-6 py-12 lg:col-span-4 lg:items-end lg:justify-between lg:py-16 lg:text-right"
+          >
+            <p
+              data-rise
+              style={rise(1)}
+              className="font-mono text-[11px] uppercase tracking-[0.22em] text-chalk/60"
+            >
+              A members-only cycling club
+            </p>
+            {/* UI-03 — the club asked for the hero to carry the headline and
+                nothing competing with it, so the paragraph explaining the floor
+                and the boxed "The gate" summary both came out. Everything they
+                said is repeated below the fold anyway: the aisle count is in
+                HeroDoors, and the three steps of the gate are the whole of the
+                "How you get in" section further down. What is left here is the
+                eyebrow, the headline beside it, and the way in. */}
+            {/* `items-start` is the mobile posture and `lg:items-end` the
+                desktop one — the button and the sign-in link under it have to
+                agree on an edge, and at `lg` that edge is the right one. */}
+            <div
+              data-rise
+              style={rise(2)}
+              className="flex flex-col items-start gap-3 lg:items-end"
+            >
+              <ArrowCta href="/apply" tone="chalk">
+                Apply for membership
+              </ArrowCta>
+              <Link
+                href="/account"
+                className="font-mono text-[11px] uppercase tracking-[0.16em] text-chalk/60 underline decoration-line-dark decoration-2 underline-offset-4 transition-colors duration-200 ease-out hover:text-chalk hover:decoration-chalk"
+              >
+                Already riding with us? Sign in →
+              </Link>
+            </div>
           </div>
         </div>
       </section>

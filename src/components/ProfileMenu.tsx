@@ -68,12 +68,29 @@ export default function ProfileMenu({ session }: { session: Session }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex max-w-[14rem] items-center gap-2 border border-ink px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:bg-ink hover:text-chalk"
+        // UI-02 — this button occupies the same masthead slot as the "Join the
+        // Club" CTA and swaps 1:1 with it, so it takes the same 10px → 12px
+        // step. Leaving it behind would hand signed-in riders a smaller button
+        // than signed-out ones in the identical position.
+        // Width is unaffected: max-w-[14rem] + truncate already pins the worst
+        // case at 224px, which is the figure UI-02's 1280px budget assumes.
+        // Height: 12px × 1.5 + py-2.5 (20) + border (2) = 40px — the tallest
+        // thing in the row after this change, and still 16px under the 56px
+        // logo, so --chrome-h holds.
+        // The dropdown below stays at its own 10px register (see ITEM): it is a
+        // panel, not the bar, and is out of scope for the same reason the
+        // mega-menu is.
+        className="flex max-w-[14rem] items-center gap-2 border border-ink px-4 py-2.5 font-mono text-[12px] font-semibold uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:bg-ink hover:text-chalk"
       >
         <span className="truncate">Hi, {name}</span>
         <span
           aria-hidden
-          className={`text-[9px] transition-transform duration-200 ease-out ${open ? "rotate-180" : ""}`}
+          // UI-02 — twin of the Shop trigger's caret in SiteHeader.tsx and it
+          // takes the same step: the label above went 10px → 12px, so a 9px
+          // caret would sit under it looking like a rendering fault, which is
+          // exactly the reason the other one moved. Costs no width — the caret
+          // is inside a button already pinned by max-w-[14rem] + truncate.
+          className={`text-[11px] transition-transform duration-200 ease-out ${open ? "rotate-180" : ""}`}
         >
           ▼
         </span>

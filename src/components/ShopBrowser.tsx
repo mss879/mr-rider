@@ -23,6 +23,12 @@ type Condition = "all" | "new" | "pre-owned";
    leaving that order alone — every other option re-sorts on top of it. */
 type Sort = "shelf" | "featured" | "new" | "availability";
 
+/* UI-01 (QA r2) — one brand checkbox in the rail. Named because the brand
+   list is now built twice over: once grouped per category for the inline
+   lists, once flattened into the union the pruning and the standalone rail
+   read from. Both hands have to be holding the same shape. */
+type BrandOption = { slug: string; name: string };
+
 /* Cards mounted per batch — three full rows on the widest grid. */
 const PAGE_SIZE = 48;
 
@@ -61,26 +67,63 @@ export default function ShopBrowser({
   const [sort, setSort] = useState<Sort>("shelf");
   const [panelOpen, setPanelOpen] = useState(false);
 
-  /* Brands with stock inside the CURRENT category scope, by display name.
+  /* Brands with stock, keyed by the aisle they have it in.
 
-     UI-01 — this used to be every brand in the catalogue, so choosing Road
+     UI-01 — the list used to be every brand in the catalogue, so choosing Road
      Bikes still offered a column of bar-tape and nutrition brands that could
      only ever return nothing. The scope is the category and product-type
      filters and deliberately NOT the brand filter itself: narrowing by the
      thing being listed would hide every brand but the ticked one and make the
-     multi-select unusable after the first click. */
-  const brandOptions = useMemo(() => {
-    const slugs = new Set<string>();
+     multi-select unusable after the first click.
+
+     UI-01 (QA r2) — the same scoping rule, but grouped BY category instead of
+     flattened, so the list can be drawn directly under the category row that
+     produced it. Built for EVERY aisle on the floor, not just the ticked ones:
+     the map then has no `cats` dependency, so ticking and unticking a category
+     re-reads a cached map instead of re-walking 1,400 products. The
+     product-type filter still narrows it — a rider who has picked "Chains"
+     sees chain brands — and the brand filter still deliberately does not. */
+  const brandsByCategory = useMemo(() => {
+    const slugsByCat = new Map<string, Set<string>>();
     for (const p of products) {
-      if (cats.size > 0 && !cats.has(p.category)) continue;
       if (subs.size > 0 && !subs.has(p.subcategory)) continue;
+      let slugs = slugsByCat.get(p.category);
+      if (!slugs) {
+        slugs = new Set<string>();
+        slugsByCat.set(p.category, slugs);
+      }
       slugs.add(p.brand);
       for (const c of p.collections ?? []) slugs.add(c);
     }
-    return [...slugs]
-      .map((slug) => ({ slug, name: brandName(slug) }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [products, cats, subs]);
+    const out = new Map<string, BrandOption[]>();
+    for (const [cat, slugs] of slugsByCat) {
+      out.set(
+        cat,
+        [...slugs]
+          .map((slug) => ({ slug, name: brandName(slug) }))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    }
+    return out;
+  }, [products, subs]);
+
+  /* The flat union across the ticked categories — the whole floor when none
+     are ticked. Everything downstream still reads this one list: the `inScope`
+     pruning below, the filter predicate's brand test, and the standalone rail
+     that shows while no category is picked.
+
+     UI-01 (QA r2) — derived FROM the grouped map rather than a second walk of
+     the catalogue, so the two can never drift apart. A brand the rider can see
+     under a ticked category is a member of this union by construction, which
+     is precisely what stops the pruning from silently un-ticking a brand whose
+     checkbox is still on screen. */
+  const brandOptions = useMemo(() => {
+    const scope = cats.size > 0 ? [...cats] : [...brandsByCategory.keys()];
+    const union = new Map<string, BrandOption>();
+    for (const cat of scope)
+      for (const b of brandsByCategory.get(cat) ?? []) union.set(b.slug, b);
+    return [...union.values()].sort((a, b) => a.name.localeCompare(b.name));
+  }, [brandsByCategory, cats]);
 
   /* Categories present in the catalog — empty ones stay off the rail. */
   const catOptions = useMemo(() => {
@@ -316,23 +359,76 @@ export default function ShopBrowser({
             Category
           </legend>
           <div className="flex flex-col gap-2">
-            {catOptions.map((c) => (
-              <label
-                key={c.slug}
-                className="flex cursor-pointer items-center gap-2.5 text-sm"
-              >
-                <input
-                  type="checkbox"
-                  checked={cats.has(c.slug)}
-                  onChange={() => toggleCategory(c.slug)}
-                  className="size-4 shrink-0 accent-ink"
-                />
-                <span className="flex-1">{c.name}</span>
-                <span className="font-mono text-[10px] text-ink-soft">
-                  {catCounts.get(c.slug) ?? 0}
-                </span>
-              </label>
-            ))}
+            {catOptions.map((c) => {
+              /* UI-01 (QA r2) — the brands for THIS aisle, drawn only while the
+                 aisle is ticked. Empty when a product-type filter belonging to
+                 a sibling category has narrowed this one to nothing; the row
+                 then stays a plain checkbox rather than opening an empty box
+                 the rider cannot act on. */
+              const catBrands = cats.has(c.slug)
+                ? (brandsByCategory.get(c.slug) ?? [])
+                : [];
+              return (
+                <div key={c.slug} className="flex flex-col gap-2">
+                  {/* The <label> CLOSES before the nested list. A fieldset
+                      inside a label is invalid markup, and it would hand the
+                      entire brand column to the category checkbox as its
+                      accessible name — every brand read aloud on focus. */}
+                  <label className="flex cursor-pointer items-center gap-2.5 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={cats.has(c.slug)}
+                      onChange={() => toggleCategory(c.slug)}
+                      className="size-4 shrink-0 accent-ink"
+                    />
+                    <span className="flex-1">{c.name}</span>
+                    <span className="font-mono text-[10px] text-ink-soft">
+                      {catCounts.get(c.slug) ?? 0}
+                    </span>
+                  </label>
+                  {catBrands.length > 0 && (
+                    /* UI-01 (QA r2) — a nested fieldset rather than a bare div:
+                       it names the group ("Road Bikes brands"), which is the
+                       only thing telling a screen-reader user which aisle a
+                       brand belongs to when two aisles are ticked and both
+                       stock it. Hung off a rule and indented to the category
+                       label's text edge so the nesting reads at a glance.
+                       Keyboard order follows the DOM: category, its brands,
+                       next category. */
+                    <fieldset className="mb-1 ml-2 border-l border-line pl-4">
+                      <legend className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-soft">
+                        {c.name} brands
+                        <span className="ml-1.5 normal-case tracking-normal text-ink-soft/70">
+                          ({catBrands.length} here)
+                        </span>
+                      </legend>
+                      {/* Same max-h-72 scroller as the old standalone rail —
+                          Components alone carries dozens of brands. */}
+                      <div className="flex max-h-72 flex-col gap-2 overflow-y-auto pr-1">
+                        {catBrands.map((b) => (
+                          <label
+                            key={`${c.slug}-${b.slug}`}
+                            className="flex cursor-pointer items-center gap-2.5 text-sm"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={brandSet.has(b.slug)}
+                              onChange={() =>
+                                setBrandSet(toggle(brandSet, b.slug))
+                              }
+                              className="size-4 shrink-0 accent-ink"
+                            />
+                            <span className="font-mono text-xs tracking-[0.06em]">
+                              {b.name}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </fieldset>
 
@@ -360,11 +456,17 @@ export default function ShopBrowser({
           </fieldset>
         )}
 
-        {brandOptions.length > 0 && (
+        {/* UI-01 (QA r2) — the standalone rail is now the NO-CATEGORY case
+            only. Once an aisle is ticked its brands live inline underneath it
+            (see the Category fieldset above); rendering both would put the
+            same checkbox on screen twice with nothing to tell them apart. The
+            `(N here)` hint therefore only has a product-type scope left to
+            report — the category half of that condition moved upstairs. */}
+        {cats.size === 0 && brandOptions.length > 0 && (
         <fieldset className="mb-7">
           <legend className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
             Brand
-            {cats.size > 0 || subs.size > 0 ? (
+            {subs.size > 0 ? (
               <span className="ml-1.5 normal-case tracking-normal text-ink-soft/70">
                 ({brandOptions.length} here)
               </span>

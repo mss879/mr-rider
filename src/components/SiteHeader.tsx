@@ -259,13 +259,34 @@ export default function SiteHeader({
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [megaOpen, clearTimers]);
 
+  /* UI-02 — the club could not read the bar. Legibility is size + weight +
+     tracking, and all three were working against it, so all three move:
+
+     11px → 13px. Uppercase Plex Mono has a 0.698em cap-height, so 11px drew
+     7.7px capitals; 13px draws 9.1px, which is the floor for comfortable
+     uppercase UI text.
+
+     0.16em → 0.14em. On a face that is already 0.6em advance, 0.16em put 21%
+     of every character cell into inter-letter air and the labels read as loose
+     letters rather than words. This is as much of the complaint as the size.
+
+     400 → 600, NOT 500: layout.tsx:38-42 loads Plex Mono at weight 400 and 600
+     only, so `font-medium` resolves straight back to 400 and changes nothing.
+     And because Plex Mono keeps its 600/1000em advance at every weight, the
+     weight costs zero width — the one lever here that is free in the 1280px
+     budget (see the width note on the CTA below).
+
+     Resting contrast is deliberately untouched: text-ink on paper is already
+     ~10.5:1, the most the monochrome palette has. UI-03 stays out of this.
+     The hover state is a separate, pre-existing matter — see the note on
+     hover:text-ink-soft in the PR. */
   const navLink = (href: string, label: string) => {
     const isActive = pathname.startsWith(href);
     return (
       <Link
         key={href}
         href={href}
-        className={`whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-ink-soft ${
+        className={`whitespace-nowrap font-mono text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ease-out hover:text-ink-soft ${
           isActive
             ? "text-ink underline decoration-ink decoration-2 underline-offset-8"
             : "text-ink"
@@ -278,6 +299,21 @@ export default function SiteHeader({
 
   return (
     <>
+      {/* UI-02 — the strip is deliberately NOT bumped with the nav. Two
+          measured reasons: (1) it is the strip term in --chrome-h, so every
+          1px here adds 1.5px to all three values in globals.css; and (2) at 70
+          characters it is 70 × 10 × (0.6 + 0.2) = 560px + px-4 = 592px wide,
+          and at 11px it would become 648px. The two-line --chrome-h in
+          globals.css switches at 40rem (640px), so an 11px strip would wrap
+          just OUTSIDE that guard — a two-line strip carrying a one-line
+          --chrome-h, and a hero whose bottom edge no longer lands on the fold.
+          (The guard is not exact today either: it fires at 640px for a strip
+          that wraps at 592px, so --chrome-h is ~15px generous in that band.
+          Pre-existing, harmless in that direction, and not UI-02's to fix —
+          but do not make it worse by raising this size.)
+          Contrast is left alone too: the /80 here is what makes the full
+          -opacity span on the next line read as the emphasis it was written to
+          be. Raising it would flatten that for no gain the client asked for. */}
       <p className="bg-carbon px-4 py-1.5 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-chalk/80">
         Members only · sign up → dues → admin approval ·{" "}
         <span className="text-chalk">new stock daily 09:00</span>
@@ -339,7 +375,10 @@ export default function SiteHeader({
               }}
               aria-expanded={megaOpen}
               aria-haspopup="true"
-              className={`flex items-center gap-1.5 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-ink-soft ${
+              // UI-02 — the Shop trigger is a nav link that happens to own a
+              // panel, so it tracks navLink's size, weight and tracking
+              // exactly. Keep these two in step.
+              className={`flex items-center gap-1.5 whitespace-nowrap font-mono text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ease-out hover:text-ink-soft ${
                 pathname.startsWith("/shop")
                   ? "text-ink underline decoration-ink decoration-2 underline-offset-8"
                   : "text-ink"
@@ -348,7 +387,13 @@ export default function SiteHeader({
               Shop
               <span
                 aria-hidden
-                className={`text-[9px] transition-transform duration-200 ease-out ${megaOpen ? "rotate-180" : ""}`}
+                // UI-02 — the caret rides the label: it sat 2px under an 11px
+                // trigger, so it sits 2px under the 13px one. Fixed px rather
+                // than `em` because the width arithmetic for the 1280px budget
+                // counts it at 11 × 0.74 = 8.1px; it inherits the trigger's
+                // 0.14em tracking. The ProfileMenu button has the twin of this
+                // caret and takes the same step — keep the two in sync.
+                className={`text-[11px] transition-transform duration-200 ease-out ${megaOpen ? "rotate-180" : ""}`}
               >
                 ▼
               </span>
@@ -360,7 +405,14 @@ export default function SiteHeader({
           <div className="flex items-center gap-4">
             <Link
               href={session ? "/inquiries" : "/account"}
-              className="hidden whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-200 ease-out hover:text-ink-soft md:inline-block"
+              // UI-02 — same register as the nav links. This slot is the wide
+              // one: signed in it reads "My inquiries" (12 chars, ~115px at
+              // 13px/0.14em) next to a ProfileMenu pinned at its 14rem cap, and
+              // that pairing is what sets the header's width ceiling. Budget at
+              // a 1280px viewport: ~1142px used of 1232px, and of ~1217px once
+              // a classic 15px scrollbar is on screen. Do not lengthen either
+              // label without redoing that sum.
+              className="hidden whitespace-nowrap font-mono text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ease-out hover:text-ink-soft md:inline-block"
             >
               {session ? "My inquiries" : "Sign in"}
             </Link>
@@ -374,7 +426,15 @@ export default function SiteHeader({
             ) : (
               <Link
                 href="/apply"
-                className={`hidden whitespace-nowrap bg-ink px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft md:inline-block ${
+                // UI-02 — the button keeps its deliberate one-step drop below
+                // the nav (was 10 under 11, now 12 under 13) so the filled block
+                // stays tighter than the links around it. Tracking comes to
+                // 0.16em for the same reason the links came to 0.14em: the
+                // extra air was costing legibility, not buying elegance.
+                // Height check for --chrome-h: 12px × 1.5 inherited line-height
+                // + py-2.5 (20px) = 38px, well under the 56px logo that
+                // actually sets the masthead's height. --chrome-h does not move.
+                className={`hidden whitespace-nowrap bg-ink px-4 py-2.5 font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-chalk transition-colors duration-200 ease-out hover:bg-ink-soft md:inline-block ${
                   ready ? "" : "invisible"
                 }`}
               >

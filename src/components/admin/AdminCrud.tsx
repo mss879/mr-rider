@@ -18,6 +18,12 @@ export type FieldDef = {
     | "text"
     | "number"
     | "select"
+    /* BUG-02 — no field anywhere in the admin declares "multiselect" any more:
+       the products form's brand-collections picker was the only one, and the
+       club asked for it off. The type and its save/layout/render branches below
+       stay deliberately. This is generic infrastructure in a component six admin
+       tabs share, it costs nothing while unused, and it is the entire fix if the
+       collections picker (or any other multi-value field) is ever wanted back. */
     | "multiselect"
     | "images"
     | "checkbox"

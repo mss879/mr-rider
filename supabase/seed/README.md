@@ -60,6 +60,17 @@ Then run `18_product_images_webp.sql` — it is a few lines and pastes into the
 editor without trouble. It repoints `products.images` at the `.webp` files
 step 2 produced. Skip it only if you skipped step 2.
 
+**Then run `22_road_bikes_frameset_refile.sql` (QA ticket BUG-03).** The import
+filed seven framesets, two pairs of gravel shoes and a set of derailleur
+hangers under Road Bikes, and one complete Cervélo S5 under Framesets. 17 is
+left exactly as it was imported — it is 2.4MB and already applied in
+production — so 22 is what corrects those eleven rows, and its inserts use
+`on conflict (id) do update set category = excluded.category`. **Any re-run of
+17, or of a single file from `17_spoken_catalogue_import_parts/`, undoes 22, so
+22 always goes last.** It pastes into the SQL editor without the size problem
+17 has, but the editor will not show its `RAISE NOTICE` output — run the
+`select`s in the comment block at the foot of the file to confirm it landed.
+
 All three scripts are safe to re-run: they skip what is already done, so an
 interrupted run picks up where it stopped.
 

@@ -86,7 +86,9 @@ server console.
   `subcategory` and `brand` must be slugs that exist in `categories`,
   `subcategories` and `brands`.
 - **One product, several brand collections**: set `collections` (e.g.
-  `'{specialized}'` on an S-Works item) instead of duplicating the row.
+  `'{specialized}'` on an S-Works item) instead of duplicating the row. SQL
+  only — the admin form's picker for this was removed in QA round 2 (BUG-02);
+  stored values still drive the shop's brand rail and the mega-menu.
 - **Product photos**: up to 5 per product, uploaded from /admin → Products →
   Edit. `images[1]` is the card shot; `images[2]` swaps in on hover. Files live
   in the public `product-images` bucket and are stored as object paths — an

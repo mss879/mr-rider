@@ -819,7 +819,13 @@ export const brands: Brand[] = [
     slug: "look",
     name: "LOOK",
     treatment: "filter",
-    categories: ["components", "electronics", "road-bikes"],
+    /* BUG-03 — both of LOOK's road-bikes products are the 895 Vitesse and
+       T20 Sprint TRACK FRAMES, moved to Framesets by migration 22. /brands
+       lists a brand under an aisle only if it is declared here AND has stock
+       there, so without 'framesets' LOOK would vanish from the bike aisles
+       entirely. 'road-bikes' stays for the same reason every other bike brand
+       carries both: the in-stock check decides what actually renders. */
+    categories: ["components", "electronics", "road-bikes", "framesets"],
   },
   {
     slug: "magene",

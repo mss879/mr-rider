@@ -23,8 +23,18 @@ html {
    Static rather than measured by script, because the hero holds the LCP image:
    a JS-set height would land after first paint and shift the largest element
    on the page. The three values are measured from SiteHeader, which changes
-   height exactly twice — the strip wraps to two lines below `sm`, and the join
-   button appears at `md`. Keep them in step if that header's padding moves. */
+   height exactly twice — the strip wraps to two lines below `sm`, and the logo
+   steps h-12 → md:h-14 (48px → 56px) at `md`, where the join button also
+   appears. Keep them in step if that header's padding moves.
+
+   UI-02 (nav type 11px → 13px, weight 600) re-verified all three values and
+   changed none of them. The masthead's height is set by the LOGO, never by its
+   type: the row is `items-center py-4` (16px each side) + a 1px border, so it
+   is logo + 33. The tallest child in that row after the bump is the signed-in
+   ProfileMenu button at 40px (12px text × 1.5 + py-2.5 + border), still 16px
+   clear of the 56px logo. These values only move if the LOGO's height changes,
+   the row's padding changes, or the announcement strip's text-[10px] is raised
+   — which is exactly why UI-02 left that strip's size alone. */
 :root {
   --chrome-h: 6.75rem; /* 108px — 27 strip + 81 masthead */
 
