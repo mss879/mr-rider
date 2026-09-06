@@ -1,0 +1,38 @@
+# Netlify build configuration.
+#
+# These settings were previously only in the Netlify UI, which meant the build
+# could not be reproduced or reviewed from the repository. They are stated here
+# so a change to how the site builds arrives as a reviewable diff.
+# Values match what the UI was already using — this file changes nothing about
+# how the site is built except the secrets-scanning exemption below.
+
+[build]
+  command = "npm run build"
+  # @netlify/plugin-nextjs (installed from the UI) takes it from here: static
+  # assets go to the CDN and the server handler becomes a function.
+  publish = ".next"
+
+[build.environment]
+  # ── Why an exemption is needed, and why it is safe ──────────────────────
+  #
+  # Netlify's secret scanner fails the build on finding RESEND_API_KEY's value
+  # inside .next/cache/turbopack/*.sst.
+  #
+  # That is Turbopack's PERSISTENT BUILD CACHE, not build output. Turbopack
+  # records the environment it compiled against so that changing an env var
+  # correctly invalidates the cache — so the value is in there as a
+  # cache-invalidation fingerprint. Netlify restores this directory at the
+  # start of a build and saves it at the end; it is never uploaded to the CDN
+  # and never served.
+  #
+  # Verified before adding this, against a production build: the value appears
+  # in NEITHER .next/static (client bundles, served to browsers) NOR
+  # .next/server. The key is read as process.env.RESEND_API_KEY inside a
+  # function in src/lib/resend.ts, is never NEXT_PUBLIC_, and is only ever
+  # reached from the /api/inquiries/notify route handler.
+  #
+  # Scoped to the cache directories alone, so a secret appearing anywhere that
+  # IS deployed still fails the build. `scripts/check-client-bundle.mjs` runs
+  # on every build as a second, independent check on exactly that — see
+  # package.json's build script.
+  SECRETS_SCAN_OMIT_PATHS = ".next/cache/**,.netlify/.next/cache/**"
