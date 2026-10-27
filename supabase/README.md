@@ -31,6 +31,9 @@ Run them **in numeric order** in the Supabase dashboard → **SQL Editor**
 | 19 | `19_imported_brands_visible.sql` | Imported brands join the menus and `/brands` | 12, 17 |
 | 20 | `20_client_change_requests.sql` | Application reason + address + photo, inquiry language, opt-in Daily Listings, manual running order | 01, 08, 11, 14 |
 | 21 | `21_admin_product_log.sql` | QA BE-01: indexes behind the admin product log's search, sort and pages | 01, 12, 20 |
+| 22 | `22_road_bikes_frameset_refile.sql` | QA BUG-03: eleven products moved between Road Bikes and Framesets | 12, 16, 17 |
+| 23 | `23_specialized_catalogue_import.sql` | The Specialized NZ range — 367 products and four new bike aisles (Mountain, E-Bikes, City & Active, Kids). Adds only; deletes nothing | 12, 13, 15, 16, 17, 20 |
+| 24 | `24_specialized_stock_floor.sql` | Every product from 23 starts at 10+ in stock (it arrived with Specialized NZ's warehouse numbers) | 23 |
 
 Every file is idempotent (`if not exists` / `on conflict do nothing`), so
 re-running one is safe on its own. Two ordering caveats:
@@ -70,6 +73,15 @@ select * from public.brands where in_directory = false;
 New tables: `subcategories` (product types), `brands`, `brand_categories`
 (which categories a brand is relevant to) and `brand_placements` (where a brand
 link renders in the menu).
+
+## Migration 23 — the Specialized import
+
+Just over 1MB, so it is also split for the SQL editor in
+`23_specialized_catalogue_import_parts/` (see the README there). It adds four
+categories — Mountain Bikes, E-Bikes, City & Active Bikes and Kids Bikes —
+which `src/lib/taxonomy.ts` mirrors, so ship that code change alongside it. Its
+photos are already compressed in `seed/product-images/`; run
+`scripts/upload-product-images.mjs` to put them in the bucket.
 
 ## After running
 

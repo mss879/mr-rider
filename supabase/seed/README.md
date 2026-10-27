@@ -1,4 +1,4 @@
-# Catalogue seed — migration 17
+# Catalogue seed — migrations 17 and 23
 
 Everything migration 17 (`17_spoken_catalogue_import.sql`) needs that does not
 fit in a `.sql` file: the product photography and the record of what was left
@@ -6,9 +6,10 @@ behind.
 
 | File | Committed | What it is |
 | --- | --- | --- |
-| `product-images.json` | yes | 4,665 entries pairing each source image URL with the exact bucket path migration 17 wrote into `products.images`. |
+| `product-images.json` | yes | 5,893 entries pairing each source image URL with the exact bucket path written into `products.images`: 4,665 from migration 17, then 1,228 tagged `"migration": 23` from the Specialized import. |
 | `product-images/` | **no** (gitignored) | The downloaded photos, laid out as `<product-id>/<n>.<ext>`. ~745MB — their home is the Storage bucket, not the repo. |
 | `skipped-products.csv` | yes | The 73 supplier products deliberately not imported, with the reason for each. |
+| `specialized-duplicates.csv` | yes | The 201 Specialized products migration 23 left out because migration 17 already carries them, each paired with the existing row it matched. |
 | `image-failures.json` | only if written | Any image that would not download or upload. Absent means everything succeeded. |
 
 ## Running the import
@@ -94,3 +95,27 @@ E-Bikes (21), Kids Bikes (5), MTB Bikes (3) and one gift card. Carrying them
 would have meant inventing top-level categories the client has not approved.
 They are listed in `skipped-products.csv` — importing them later is a matter of
 adding the categories and re-running the scrape for those handles.
+
+## Migration 23 — the Specialized import
+
+`23_specialized_catalogue_import.sql` adds 367 products from the Specialized
+New Zealand site (specialized.com/nz/en). Its 1,228 photos are already in
+`product-images/`, downloaded and compressed to WebP at 1600px, so the only
+step is the upload:
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key> NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co node scripts/upload-product-images.mjs
+```
+
+It skips what is already in the bucket, so migration 17's photos are not sent
+again.
+
+Do **not** run `fetch-product-images.mjs` or `compress-product-images.mjs` to
+get there. The manifest still lists migration 17's photos under their original
+`.jpg`/`.png` names while the files on disk are `.webp` (migration 18), so the
+fetch script would download all 4,665 again, and the compress script rewrites
+the whole manifest onto one line.
+
+201 Specialized products were not imported because migration 17 already has
+them — `specialized-duplicates.csv` pairs each with the row it matched, so
+nothing on the floor appears twice.

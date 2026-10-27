@@ -4,8 +4,9 @@
    Breakdown (Client Approved)" — sheets Hierarchy, Brand
    Placement, Naming Corrections and Developer Notes.
 
-   11 product categories + 2 utility links, 83 product types and
-   40 brand menu links.
+   15 product categories + 2 utility links, 109 product types and
+   46 brand menu links. Mountain Bikes, E-Bikes, City & Active Bikes
+   and Kids Bikes came with the Specialized import (migration 23).
 
    Navigation rule: product categories in the main menu; brands
    live in filters, brand landing pages or a "Shop by Brand"
@@ -119,6 +120,89 @@ export const categories: Category[] = [
       },
     ],
   },
+  /* The four bike aisles below arrived with the Specialized import
+     (migration 23). Unlike Road Bikes they navigate by product type: one
+     brand with 70-odd models has nothing to choose between at brand level,
+     and XC / trail / downhill is the real decision. */
+  {
+    slug: "mountain-bikes",
+    name: "Mountain Bikes",
+    blurb: "Cross country, trail, downhill and dirt jump",
+    sections: [
+      {
+        title: "Shop by Type",
+        kind: "product",
+        items: [
+          "xc-mountain-bikes",
+          "trail-mountain-bikes",
+          "downhill-mountain-bikes",
+          "dirt-jump-bikes",
+        ],
+      },
+      {
+        title: "Shop by Brand",
+        kind: "brand",
+        items: ["specialized", "s-works"],
+      },
+    ],
+  },
+  {
+    slug: "e-bikes",
+    name: "E-Bikes",
+    blurb: "Pedal-assist for trail, road, town and cargo",
+    sections: [
+      {
+        title: "Shop by Type",
+        kind: "product",
+        items: [
+          "electric-mountain-bikes",
+          "electric-road-gravel-bikes",
+          "electric-hybrid-bikes",
+          "electric-cargo-bikes",
+          "e-bike-accessories",
+        ],
+      },
+      {
+        title: "Shop by Brand",
+        kind: "brand",
+        items: ["specialized", "s-works"],
+      },
+    ],
+  },
+  {
+    slug: "city-active-bikes",
+    name: "City & Active Bikes",
+    blurb: "Fitness, commuting and comfort riding",
+    sections: [
+      {
+        title: "Shop by Type",
+        kind: "product",
+        items: ["fitness-bikes", "cruiser-comfort-bikes"],
+      },
+      {
+        title: "Shop by Brand",
+        kind: "brand",
+        items: ["specialized"],
+      },
+    ],
+  },
+  {
+    slug: "kids-bikes",
+    name: "Kids Bikes",
+    blurb: "Balance bikes and first mountain bikes",
+    sections: [
+      {
+        title: "Shop by Type",
+        kind: "product",
+        items: ["kids-bikes"],
+      },
+      {
+        title: "Shop by Brand",
+        kind: "brand",
+        items: ["specialized"],
+      },
+    ],
+  },
   {
     slug: "components",
     name: "Components",
@@ -178,6 +262,8 @@ export const categories: Category[] = [
         kind: "product",
         items: [
           "road-wheels",
+          "gravel-wheels",
+          "mtb-wheels",
           "clincher-tyres",
           "tubeless-tyres",
           "tubular-tyres",
@@ -389,6 +475,19 @@ const SUBCATEGORY_NAMES: Record<string, string> = {
   // Road Bikes · Framesets — two aisles, one product type each
   "road-bikes": "Complete Road Bikes",
   framesets: "Framesets",
+  // Mountain Bikes · E-Bikes · City & Active Bikes · Kids Bikes (migration 23)
+  "xc-mountain-bikes": "Cross Country Bikes",
+  "trail-mountain-bikes": "Trail Bikes",
+  "downhill-mountain-bikes": "Downhill Bikes",
+  "dirt-jump-bikes": "Dirt Jump & Pump Track Bikes",
+  "electric-mountain-bikes": "Electric Mountain Bikes",
+  "electric-road-gravel-bikes": "Electric Road & Gravel Bikes",
+  "electric-hybrid-bikes": "Electric Hybrid & Commuter Bikes",
+  "electric-cargo-bikes": "Electric Cargo Bikes",
+  "e-bike-accessories": "E-Bike Parts & Accessories",
+  "fitness-bikes": "Fitness Bikes",
+  "cruiser-comfort-bikes": "Cruiser & Comfort Bikes",
+  "kids-bikes": "Kids Bikes",
   // Components · Drivetrain
   groupsets: "Groupsets",
   cranksets: "Cranksets",
@@ -419,6 +518,8 @@ const SUBCATEGORY_NAMES: Record<string, string> = {
   "other-components": "Other Components",
   // Wheels, Tyres & Tubes
   "road-wheels": "Road Wheels",
+  "gravel-wheels": "Gravel Wheels",
+  "mtb-wheels": "MTB Wheels",
   "clincher-tyres": "Clincher Tyres",
   "tubeless-tyres": "Tubeless Tyres",
   "tubular-tyres": "Tubular Tyres",
@@ -600,14 +701,23 @@ export const brands: Brand[] = [
     slug: "specialized",
     name: "Specialized",
     treatment: "direct",
-    categories: ["road-bikes", "framesets", "helmets", "shoes"],
-    note: "Client-approved placement under both bike aisles; also relevant to helmets and shoes.",
+    categories: [
+      "road-bikes",
+      "framesets",
+      "mountain-bikes",
+      "e-bikes",
+      "city-active-bikes",
+      "kids-bikes",
+      "helmets",
+      "shoes",
+    ],
+    note: "Client-approved placement under every bike aisle; also relevant to helmets and shoes.",
   },
   {
     slug: "s-works",
     name: "S-Works",
     treatment: "direct",
-    categories: ["road-bikes", "framesets"],
+    categories: ["road-bikes", "framesets", "mountain-bikes", "e-bikes"],
     note: "Client-approved standalone link alongside Specialized. Elsewhere it stays a Specialized collection.",
   },
   {
