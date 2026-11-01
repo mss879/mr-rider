@@ -23,8 +23,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "One shop floor, daily listings, a live auction, a clearance market and an international coaching pool.",
     start_url: "/",
     display: "browser",
-    background_color: "#151619", // --color-carbon
-    theme_color: "#151619",
+    background_color: "#000000", // --color-carbon
+    theme_color: "#000000",
     lang: "en-LK",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },

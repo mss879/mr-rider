@@ -34,8 +34,8 @@ export default function GlobalError({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "oklch(20% 0.006 270)",
-          color: "oklch(97.5% 0.002 95)",
+          background: "oklch(0% 0 0)",
+          color: "oklch(100% 0 0)",
           fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
           padding: "2rem",
         }}
@@ -79,9 +79,9 @@ export default function GlobalError({
             type="button"
             onClick={reset}
             style={{
-              border: "1px solid oklch(97.5% 0.002 95)",
-              background: "oklch(97.5% 0.002 95)",
-              color: "oklch(20% 0.006 270)",
+              border: "1px solid oklch(100% 0 0)",
+              background: "oklch(100% 0 0)",
+              color: "oklch(0% 0 0)",
               padding: "0.85rem 1.4rem",
               font: "inherit",
               fontSize: "11px",

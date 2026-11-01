@@ -34,7 +34,7 @@ export default function ProductGridSkeleton({ cards = 9 }: { cards?: number }) {
 
       <div aria-hidden className="lg:col-start-2">
         <span className="mb-6 block h-9 w-full max-w-md animate-pulse bg-line/40" />
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           {Array.from({ length: cards }).map((_, i) => (
             <div key={i} className="flex flex-col border border-line bg-chalk">
               <span className="block aspect-[4/3] animate-pulse bg-line/35" />

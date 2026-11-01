@@ -1,27 +1,27 @@
 /* Hallmark · macrostructure: Marquee Hero · theme: studied-DNA (source: user reference images — fitness-editorial + cycling-shop)
- * paper: oklch(87% 0.004 95) · ink: oklch(17% 0.006 270) · accent: oklch(17% 0.006 270) monochrome black
+ * paper: white · ink: black · accent: black — strictly black and white (client change)
  * display: Barlow Condensed 700–900 italic UC · body: Archivo · mono: IBM Plex Mono
  * nav: N6 masthead · footer: Ft5 statement · enrichment: hatch placeholders (no stock photos)
  * studied: yes · DNA-source: image (user reference) · genre: editorial (sport)
  */
 @theme inline {
   /* paper + ink */
-  --color-paper: oklch(87% 0.004 95);
-  --color-paper-2: oklch(91% 0.003 95);
-  --color-chalk: oklch(97.5% 0.002 95);
-  --color-ink: oklch(17% 0.006 270);
-  --color-ink-soft: oklch(40% 0.006 270);
+  --color-paper: oklch(100% 0 0);
+  --color-paper-2: oklch(100% 0 0);
+  --color-chalk: oklch(100% 0 0);
+  --color-ink: oklch(0% 0 0);
+  --color-ink-soft: oklch(38% 0 0);
 
   /* dark panels */
-  --color-carbon: oklch(20% 0.006 270);
-  --color-carbon-2: oklch(26% 0.007 270);
+  --color-carbon: oklch(0% 0 0);
+  --color-carbon-2: oklch(16% 0 0);
 
   /* rules + hairlines */
-  --color-line: oklch(76% 0.005 95);
-  --color-line-dark: oklch(34% 0.006 270);
+  --color-line: oklch(86% 0 0);
+  --color-line-dark: oklch(30% 0 0);
 
   /* monochrome palette — black and white typography and accents */
-  --color-accent: oklch(17% 0.006 270);
+  --color-accent: oklch(0% 0 0);
   --color-accent-deep: oklch(0% 0 0);
 
   /* type roles */

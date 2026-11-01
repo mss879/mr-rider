@@ -104,17 +104,17 @@ body {
 }
 
 .hatch-light {
-  background-color: oklch(93% 0.003 95);
+  background-color: oklch(100% 0 0);
   background-image: repeating-linear-gradient(
     135deg,
-    oklch(20% 0.006 270 / 0.07) 0 1px,
+    oklch(0% 0 0 / 0.07) 0 1px,
     transparent 1px 12px
   );
 }
 
 /* Oversized ghost type (outline-only) — the shop-reference DNA */
 .ghost {
-  -webkit-text-stroke: 1px oklch(20% 0.006 270 / 0.22);
+  -webkit-text-stroke: 1px oklch(0% 0 0 / 0.22);
   color: transparent;
 }
 
@@ -444,7 +444,7 @@ body {
   font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: oklch(97.5% 0.002 95 / 0.6);
+  color: oklch(100% 0 0 / 0.6);
 }
 
 /* An animated custom property feeding a counter — the only way to get a

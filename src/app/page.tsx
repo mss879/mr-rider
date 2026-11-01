@@ -397,7 +397,7 @@ export default async function Home() {
               its own trigger would cost that. */}
           <div
             data-reveal
-            className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4"
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2"
           >
             {featuredItems.map((p) => (
               <ProductCard key={p.id} p={p} />

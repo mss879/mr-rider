@@ -36,7 +36,7 @@ export default async function ClearancePage() {
       <InquiryNotice />
       <section className="mx-auto max-w-7xl px-6 py-14 md:py-16">
         {clearanceItems.length > 0 ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             {clearanceItems.map((p) => (
               <ProductCard key={p.id} p={p} />
             ))}

@@ -346,7 +346,7 @@ export default function SiteHeader({
                  masthead. A hairline ink shadow puts an edge back under it
                  without boxing the logo in or altering the artwork. The dark
                  footer and drawer need none of this. */
-              className="h-12 w-auto [filter:drop-shadow(0_1px_1px_oklch(17%_0.006_270/0.55))] md:h-14"
+              className="h-12 w-auto [filter:drop-shadow(0_1px_1px_oklch(0%_0_0/0.55))] md:h-14"
             />
           </Link>
 

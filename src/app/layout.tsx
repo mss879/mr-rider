@@ -124,7 +124,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   // --color-carbon from tokens.css, so the browser chrome on Android and the
   // manifest's theme_color agree with the site's own dark bands.
-  themeColor: "#151619",
+  themeColor: "#000000",
   colorScheme: "light",
 };
 
