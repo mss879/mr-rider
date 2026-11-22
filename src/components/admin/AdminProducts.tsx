@@ -1,7 +1,12 @@
 "use client";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import AdminCrud, { type FieldDef, type RowData, type SortOption } from "./AdminCrud";
+import AdminCrud, {
+  type FieldDef,
+  type RowData,
+  type SortOption,
+} from "./AdminCrud";
+import { htmlToPlain } from "@/lib/description";
 import { MAX_PRODUCT_IMAGES, PRODUCT_IMAGE_BUCKET } from "@/lib/images";
 import {
   brandName,
@@ -12,6 +17,17 @@ import {
 } from "@/lib/taxonomy";
 
 const today = () => new Date().toISOString().slice(0, 10);
+
+/** Any size row at all, even one still being typed. */
+const hasSizes = (r: RowData) => Array.isArray(r.variants) && r.variants.length > 0;
+
+const sizesSummary = (r: RowData): string | null => {
+  if (!Array.isArray(r.variants) || r.variants.length === 0) return null;
+  const list = (r.variants as { size?: string; stock?: number }[])
+    .map((v) => `${v.size}${Number(v.stock) > 0 ? "" : " (0)"}`)
+    .join(", ");
+  return `sizes ${list}`;
+};
 
 /* BE-01 — the products log carries 1,400+ rows, so it is searched, ordered and
    paged in Postgres rather than rendered whole. */
@@ -98,8 +114,15 @@ const fields: FieldDef[] = [
     key: "description",
     label: "Description",
     type: "textarea",
+    rows: 10,
     placeholder:
       "Spec, condition, fit, what's included — the copy a rider reads before asking about it.",
+    hint:
+      "Just type — no code needed. Leave a blank line to start a new paragraph. A short line on its own becomes a heading. Start a line with - for a bullet point. Write \"Frame: Carbon\" and the label shows in bold. Shown on the product's own page.",
+    // Imported products carry supplier HTML. Show it as plain text so nobody
+    // is ever looking at tags; Save then stores the plain-text version, which
+    // the product page renders the same way (lib/description.ts).
+    toEdit: (v) => htmlToPlain(String(v ?? "")),
   },
   {
     key: "images",
@@ -120,6 +143,20 @@ const fields: FieldDef[] = [
     ],
   },
   {
+    key: "variants",
+    label: "Sizes (optional — each size with its own stock)",
+    type: "variants",
+    totalInto: "stock",
+    presets: [
+      { label: "S · M · L", sizes: ["Small", "Medium", "Large"] },
+      { label: "XS – XXL", sizes: ["XS", "S", "M", "L", "XL", "XXL"] },
+      { label: "Bike 49 – 61", sizes: ["49", "52", "54", "56", "58", "61"] },
+      { label: "Shoes 38 – 47", sizes: ["38", "39", "40", "41", "42", "43", "44", "45", "46", "47"] },
+    ],
+    hint:
+      "Riders see each size on the product page, with sold-out sizes crossed out, and pick one when they ask about it. Set a size to 0 when it sells out rather than removing it.",
+  },
+  {
     key: "stock",
     label: "Stock on hand",
     type: "number",
@@ -127,7 +164,9 @@ const fields: FieldDef[] = [
     // Pre-owned stock is one of one — the question only means something for
     // something the club can reorder. Hidden fields skip the required check,
     // so a pre-owned product saves on whatever number it already carries.
-    showIf: (r: RowData) => String(r.condition ?? "new") === "new",
+    // With sizes, the total is worked out from them (the Sizes field writes it).
+    showIf: (r: RowData) =>
+      String(r.condition ?? "new") === "new" && !hasSizes(r),
   },
   { key: "listed_at", label: "Listed on", type: "date", required: true },
   {
@@ -180,6 +219,7 @@ export default function AdminProducts({ sb }: { sb: SupabaseClient }) {
           brandName(String(r.brand ?? "")),
           subcategoryName(String(r.subcategory ?? "")),
           String(r.condition ?? "new") === "new" ? `stock ${r.stock}` : "pre-owned",
+          sizesSummary(r),
           `listed ${r.listed_at}`,
           r.sort_position == null ? null : `order ${r.sort_position}`,
         ]

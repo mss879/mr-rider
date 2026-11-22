@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MR.RIDER — Back Office Guide</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  /* Print layout for the client's back-office manual. Rendered to PDF with
+     headless Chrome — see build.sh beside this file. Black and white, in the
+     site's own three typefaces. */
+  :root {
+    --ink: #0a0a0a;
+    --soft: #5c5c5c;
+    --line: #d9d9d9;
+    --wash: #f4f4f4;
+    --paper: #ffffff;
+    --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+
+  @page {
+    size: A4;
+    margin: 20mm 18mm 22mm 18mm;
+    @bottom-left {
+      content: "MR.RIDER  ·  BACK OFFICE GUIDE";
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 7pt;
+      letter-spacing: 0.14em;
+      color: #8a8a8a;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 8pt;
+      font-weight: 600;
+      color: #0a0a0a;
+    }
+  }
+  @page cover {
+    margin: 0;
+    @bottom-left { content: none; }
+    @bottom-right { content: none; }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: var(--body);
+    font-size: 10.2pt;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--paper);
+  }
+
+  /* ---------- cover ---------- */
+  .cover {
+    page: cover;
+    break-after: page;
+    height: 297mm;
+    width: 210mm;
+    background: #000;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 22mm 20mm 20mm;
+  }
+  .cover .stripe {
+    position: absolute; left: 0; right: 0; top: 0;
+    height: 9mm; border-bottom: 1px solid #333;
+    font-family: var(--mono); font-size: 7pt; letter-spacing: 0.24em;
+    display: flex; align-items: center; justify-content: center; color: #bdbdbd;
+  }
+  .cover .logo { width: 118mm; margin: 22mm auto 0; display: block; }
+  .cover .eyebrow {
+    margin-top: auto;
+    font-family: var(--mono); font-size: 8.5pt; letter-spacing: 0.26em;
+    text-transform: uppercase; color: #bdbdbd;
+  }
+  .cover h1 {
+    font-family: var(--display); font-weight: 800; text-transform: uppercase;
+    font-size: 64pt; line-height: 0.9; letter-spacing: 0.01em; margin: 4mm 0 6mm;
+  }
+  .cover .sub { font-size: 12pt; line-height: 1.5; color: #e6e6e6; max-width: 135mm; margin: 0; }
+  .cover .meta {
+    margin-top: 12mm; padding-top: 5mm; border-top: 1px solid #3a3a3a;
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 7.5pt; letter-spacing: 0.16em; text-transform: uppercase; color: #bdbdbd;
+  }
+
+  /* ---------- running type ---------- */
+  .page { break-before: page; }
+  .kicker {
+    font-family: var(--mono); font-size: 7.5pt; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--soft); margin: 0 0 2mm;
+  }
+  h2 {
+    font-family: var(--display); font-weight: 800; text-transform: uppercase;
+    font-size: 30pt; line-height: 0.95; letter-spacing: 0.01em; margin: 0 0 5mm;
+    display: flex; align-items: baseline; gap: 4mm;
+  }
+  h2 .num {
+    font-family: var(--mono); font-weight: 600; font-size: 10pt; letter-spacing: 0.1em;
+    background: var(--ink); color: #fff; padding: 1.2mm 2.4mm; position: relative; top: -2.5mm;
+  }
+  .lead { font-size: 11.5pt; line-height: 1.5; margin: 0 0 5mm; max-width: 160mm; }
+  h3 {
+    font-family: var(--mono); font-weight: 600; font-size: 8.5pt; letter-spacing: 0.18em;
+    text-transform: uppercase; margin: 6mm 0 3mm; padding-bottom: 1.5mm; border-bottom: 1.5px solid var(--ink);
+    break-after: avoid;
+  }
+  p { margin: 0 0 3mm; }
+  b, strong { font-weight: 700; }
+  code, .k {
+    font-family: var(--mono); font-size: 8.8pt; background: var(--wash); border: 1px solid var(--line);
+    padding: 0 1.2mm; white-space: nowrap;
+  }
+  .btn {
+    display: inline-block; font-family: var(--mono); font-size: 7.6pt; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; background: var(--ink); color: #fff; padding: 0.4mm 2mm; white-space: nowrap;
+    line-height: 1.6;
+  }
+  .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--ink); }
+
+  /* ---------- numbered steps ---------- */
+  ol.steps { list-style: none; counter-reset: step; padding: 0; margin: 0 0 4mm; }
+  ol.steps > li {
+    counter-increment: step; position: relative; padding: 1.2mm 0 1.2mm 11mm; min-height: 8mm;
+    break-inside: avoid;
+  }
+  ol.steps > li::before {
+    content: counter(step); position: absolute; left: 0; top: 1mm;
+    width: 7mm; height: 7mm; border-radius: 50%; background: var(--ink); color: #fff;
+    font-family: var(--mono); font-weight: 600; font-size: 8.5pt;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  ul.ticks { padding-left: 0; list-style: none; margin: 0 0 4mm; }
+  ul.ticks li { position: relative; padding-left: 6mm; margin-bottom: 1.5mm; break-inside: avoid; }
+  ul.ticks li::before { content: ""; position: absolute; left: 0.5mm; top: 2.1mm; width: 2.2mm; height: 2.2mm; background: var(--ink); }
+
+  /* ---------- tables ---------- */
+  table { width: 100%; border-collapse: collapse; margin: 1mm 0 5mm; font-size: 9.3pt; break-inside: auto; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  th {
+    background: var(--ink); color: #fff; text-align: left; font-family: var(--mono); font-weight: 600;
+    font-size: 7.5pt; letter-spacing: 0.14em; text-transform: uppercase; padding: 2mm 3mm;
+  }
+  td { padding: 1.7mm 3mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: #fafafa; }
+  td:first-child { font-weight: 600; }
+  table.narrow { width: auto; min-width: 70mm; }
+  .req { font-family: var(--mono); font-weight: 600; }
+
+  /* ---------- callouts ---------- */
+  .note, .warn, .tip {
+    border-left: 4px solid var(--ink); background: var(--wash); padding: 3mm 4mm; margin: 2mm 0 5mm;
+    break-inside: avoid;
+  }
+  .note .label, .warn .label, .tip .label {
+    display: block; font-family: var(--mono); font-weight: 600; font-size: 7.5pt; letter-spacing: 0.2em;
+    text-transform: uppercase; margin-bottom: 1mm;
+  }
+  .warn { background: #fff; border: 1.5px solid var(--ink); border-left-width: 6px; }
+  .note p:last-child, .warn p:last-child, .tip p:last-child { margin: 0; }
+
+  /* ---------- golden rules ---------- */
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 4mm 0 6mm; }
+  .rule { border: 1.5px solid var(--ink); padding: 4mm; break-inside: avoid; }
+  .rule .n { font-family: var(--display); font-weight: 800; font-size: 26pt; line-height: 1; }
+  .rule .t { font-weight: 700; font-size: 10.5pt; margin: 2mm 0 1mm; }
+  .rule p { font-size: 9.2pt; color: #333; margin: 0; }
+
+  /* ---------- contents ---------- */
+  .toc { list-style: none; padding: 0; margin: 2mm 0 0; }
+  .toc li {
+    display: flex; align-items: baseline; gap: 3mm; padding: 2.4mm 0; border-bottom: 1px solid var(--line);
+    font-size: 11pt;
+  }
+  .toc .n { font-family: var(--mono); font-weight: 600; font-size: 8.5pt; width: 9mm; }
+  .toc .t { font-weight: 600; }
+  .toc .d { color: var(--soft); font-size: 9pt; flex: 1; }
+  .toc .p { font-family: var(--mono); font-weight: 600; font-size: 9pt; min-width: 8mm; text-align: right; }
+
+  /* ---------- UI drawings ---------- */
+  .ui {
+    border: 1.5px solid var(--ink); background: #fff; padding: 4mm; margin: 2mm 0 2mm;
+    font-family: var(--body); font-size: 9pt; break-inside: avoid;
+  }
+  .ui-caption { font-family: var(--mono); font-size: 7pt; letter-spacing: 0.14em; text-transform: uppercase; color: var(--soft); margin: 0 0 5mm; }
+  .ui .lbl { font-family: var(--mono); font-size: 6.6pt; letter-spacing: 0.2em; text-transform: uppercase; color: var(--soft); margin-bottom: 1mm; display: block; }
+  .ui .field { border: 1px solid #bdbdbd; padding: 1.8mm 2.5mm; min-height: 7.5mm; margin-bottom: 3mm; color: #222; }
+  .ui .field.ph { color: #9a9a9a; }
+  .ui .row { display: grid; gap: 2mm; align-items: center; margin-bottom: 2mm; }
+  .ui.sizes .row { grid-template-columns: 1fr 22mm 18mm; }
+  .ui.sizes .row .field { margin: 0; min-height: 0; padding: 1.4mm 2.2mm; }
+  .ui.sizes .row .mini { padding: 1.4mm 1mm; }
+  .ui .mini { font-family: var(--mono); font-size: 6.8pt; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 1.6mm 2.4mm; border: 1px solid #bdbdbd; text-align: center; }
+  .ui .mini.dark { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .ui .btns { display: flex; flex-wrap: wrap; gap: 2mm; margin-top: 2mm; }
+  .ui .total { font-family: var(--mono); font-size: 7pt; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 3mm; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1.5px solid var(--ink); }
+  .tabs span { font-family: var(--mono); font-size: 6.8pt; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 2mm 2.4mm; border: 1px solid var(--line); border-bottom: none; margin-right: -1px; }
+  .tabs span.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .photos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2mm; }
+  .photo { border: 1px solid #bdbdbd; padding: 1.5mm; }
+  .photo .img { height: 13mm; background: repeating-linear-gradient(135deg, #f1f1f1 0 3px, #e4e4e4 3px 6px); position: relative; }
+  .photo .img .main { position: absolute; left: 0; top: 0; background: var(--ink); color: #fff; font-family: var(--mono); font-size: 5.6pt; font-weight: 600; letter-spacing: 0.14em; padding: 0.6mm 1.2mm; }
+  .photo .ctl { display: flex; gap: 1mm; margin-top: 1.5mm; align-items: center; font-family: var(--mono); font-size: 6pt; }
+  .photo .ctl span { border: 1px solid #bdbdbd; padding: 0 1.3mm; }
+  .photo .ctl u { margin-left: auto; letter-spacing: 0.08em; }
+
+  /* type this → riders see */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 2mm 0 5mm; break-inside: avoid; }
+  .split .pane { border: 1.5px solid var(--ink); }
+  .split .head { background: var(--ink); color: #fff; font-family: var(--mono); font-size: 7pt; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; padding: 1.8mm 3mm; }
+  .split pre { margin: 0; padding: 3mm; font-family: var(--mono); font-size: 7.9pt; line-height: 1.55; white-space: pre-wrap; }
+  .split .render { padding: 3mm 3.5mm; font-size: 9pt; line-height: 1.5; color: #333; }
+  .split .render .h { font-family: var(--display); font-weight: 800; text-transform: uppercase; font-size: 12pt; color: var(--ink); margin: 2.5mm 0 1mm; }
+  .split .render ul { margin: 0 0 1mm; padding-left: 4.5mm; list-style: square; }
+  .split .render p { margin: 0 0 1.5mm; }
+
+  /* size chips as riders see them */
+  .chips { display: flex; gap: 2mm; flex-wrap: wrap; margin: 1mm 0 2mm; }
+  .chip { border: 1px solid #bdbdbd; font-family: var(--mono); font-size: 7.6pt; font-weight: 600; padding: 1.4mm 2.6mm; }
+  .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chip.out { color: #a5a5a5; text-decoration: line-through; }
+  .chip small { font-weight: 400; opacity: 0.7; margin-left: 1mm; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .avoid { break-inside: avoid; }
+
+  /* quick reference */
+  .qr td { font-size: 9pt; padding: 1.8mm 2.6mm; }
+  .qr td:nth-child(2) { font-family: var(--mono); font-size: 7.8pt; font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- =============================== COVER =============================== -->
+<section class="cover">
+  <div class="stripe">MEMBERS ONLY · CLUB ADMINISTRATION</div>
+  <img class="logo" src="../../public/logo.png" alt="MR.RIDER">
+  <p class="eyebrow">The back office · step by step</p>
+  <h1>Back Office<br>Guide</h1>
+  <p class="sub">How to run the MR.RIDER website: products, photos, sizes and stock, the auction, rider inquiries and memberships. No technical knowledge needed.</p>
+  <div class="meta"><span>mr-rider.netlify.app/admin</span><span>Edition 1 · November 2026</span></div>
+</section>
+
+<!-- =============================== CONTENTS =============================== -->
+<section>
+  <p class="kicker">Start here</p>
+  <h2>Contents</h2>
+  <ol class="toc">
+    <li><span class="n">01</span><span class="t">Before you start</span><span class="d">The four golden rules</span><span class="p" data-pg="s01"></span></li>
+    <li><span class="n">02</span><span class="t">Signing in</span><span class="d">Getting into the back office</span><span class="p" data-pg="s02"></span></li>
+    <li><span class="n">03</span><span class="t">A tour of the back office</span><span class="d">The eight tabs</span><span class="p" data-pg="s03"></span></li>
+    <li><span class="n">04</span><span class="t">Adding a new product</span><span class="d">Every field, top to bottom</span><span class="p" data-pg="s04"></span></li>
+    <li><span class="n">05</span><span class="t">Writing a description</span><span class="d">Plain text, no code</span><span class="p" data-pg="s05"></span></li>
+    <li><span class="n">06</span><span class="t">Product photos</span><span class="d">Adding, ordering, removing</span><span class="p" data-pg="s06"></span></li>
+    <li><span class="n">07</span><span class="t">Stock and sizes</span><span class="d">Bikes, helmets, shoes, clothing</span><span class="p" data-pg="s07"></span></li>
+    <li><span class="n">08</span><span class="t">Finding and editing products</span><span class="d">Search, edit, delete, Daily Listings</span><span class="p" data-pg="s08"></span></li>
+    <li><span class="n">09</span><span class="t">The auction</span><span class="d">Lots, photos, LKR prices, end times</span><span class="p" data-pg="s09"></span></li>
+    <li><span class="n">10</span><span class="t">Inquiry Inbox</span><span class="d">Replying to riders with a price</span><span class="p" data-pg="s10"></span></li>
+    <li><span class="n">11</span><span class="t">Membership</span><span class="d">Applications, Clients, Accounts</span><span class="p" data-pg="s11"></span></li>
+    <li><span class="n">12</span><span class="t">Enquiries and Coaching</span><span class="d">Contact messages, programs, coaches</span><span class="p" data-pg="s12"></span></li>
+    <li><span class="n">13</span><span class="t">Common problems</span><span class="d">What to do when something goes wrong</span><span class="p" data-pg="s13"></span></li>
+    <li><span class="n">14</span><span class="t">Quick reference</span><span class="d">Every common job on one page</span><span class="p" data-pg="s14"></span></li>
+  </ol>
+</section>
+
+<!-- =============================== 01 =============================== -->
+<section class="page" id="s01">
+  <p class="kicker">Section 01</p>
+  <h2><span class="num">01</span>Before you start</h2>
+  <p class="lead">Everything on the MR.RIDER website is managed from one place: the back office at <b>mr-rider.netlify.app/admin</b>. You never need to write code. You type normal text, pick from lists and press buttons.</p>
+  <p>Each section of this guide is one job, written as numbered steps. Do the steps in order, one at a time. Words in <span class="btn">black boxes</span> are buttons you press, written exactly as they appear on screen.</p>
+
+  <h3>The four golden rules</h3>
+  <div class="rules">
+    <div class="rule"><div class="n">1</div><div class="t">Nothing is saved until you press Save.</div><p>If you close the page or press Cancel, your changes are thrown away.</p></div>
+    <div class="rule"><div class="n">2</div><div class="t">Changes show on the website straight away.</div><p>Usually within a minute. Refresh the website page to see them.</p></div>
+    <div class="rule"><div class="n">3</div><div class="t">Delete cannot be undone.</div><p>If you are not sure, set the stock to 0 or untick a box instead of deleting.</p></div>
+    <div class="rule"><div class="n">4</div><div class="t">If something looks wrong, stop.</div><p>Take a screenshot and send it to your web team with a note of what you pressed.</p></div>
+  </div>
+
+  <div class="note"><span class="label">Phone or computer?</span><p>Everything in this guide works on a phone. A computer is easier for adding lots of products or photos at once.</p></div>
+</section>
+
+<!-- =============================== 02 =============================== -->
+<section class="page" id="s02">
+  <p class="kicker">Section 02</p>
+  <h2><span class="num">02</span>Signing in</h2>
+  <p class="lead">The back office is protected by the admin email and password. Only someone with the password can change the website.</p>
+
+  <div class="two">
+    <div>
+      <h3>To sign in</h3>
+      <ol class="steps">
+        <li>Open <b>mr-rider.netlify.app/admin</b> in your browser.</li>
+        <li>You'll see a box titled <b>Admin sign-in</b>.</li>
+        <li>In <b>Email</b>, type <code>admin@mrrider.lk</code>.</li>
+        <li>In <b>Password</b>, type the admin password your web team gave you.</li>
+        <li>Press <span class="btn">Sign in</span>.</li>
+        <li>At the top you'll see <b>Signed in as admin@mrrider.lk · superadmin</b> and a row of tabs. You're in.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="ui">
+        <span class="lbl" style="font-size:7.4pt;color:#0a0a0a;font-weight:600">🔒 Admin sign-in</span>
+        <div style="height:2mm"></div>
+        <span class="lbl">Email</span><div class="field">admin@mrrider.lk</div>
+        <span class="lbl">Password</span><div class="field">••••••••</div>
+        <div class="mini dark" style="display:inline-block">Sign in</div>
+      </div>
+      <p class="ui-caption">What the sign-in box looks like</p>
+    </div>
+  </div>
+
+  <h3>To sign out</h3>
+  <p>Press <span class="btn ghost">Sign out</span> at the top of the back office. Always sign out on a shared or public computer.</p>
+
+  <div class="tip"><span class="label">Seeing “Members door.”?</span><p>You are signed in with a different account, not the admin. Press <span class="btn ghost">Sign out</span>, then sign in again with <code>admin@mrrider.lk</code>.</p></div>
+  <div class="warn"><span class="label">Keep the password private</span><p>Anyone with it can change or delete everything on the website. Never send it by text or email to anyone outside the club.</p></div>
+</section>
+
+<!-- =============================== 03 =============================== -->
+<section class="page" id="s03">
+  <p class="kicker">Section 03</p>
+  <h2><span class="num">03</span>A tour of the back office</h2>
+  <p class="lead">The back office has eight tabs along the top. A number in brackets means something is waiting for you, for example <b>Inquiry Inbox (3)</b>.</p>
+
+  <div class="ui" style="padding:3mm">
+    <div class="tabs"><span class="on">Inquiry Inbox (3)</span><span>Applications (1)</span><span>Clients</span><span>Enquiries</span><span>Products</span><span>Coaching</span><span>Auction</span><span>Accounts</span></div>
+  </div>
+  <p class="ui-caption">The tab row. The back office opens on Inquiry Inbox</p>
+
+  <table>
+    <thead><tr><th style="width:27%">Tab</th><th>What it's for</th><th style="width:24%">How often</th></tr></thead>
+    <tbody>
+      <tr><td>Inquiry Inbox</td><td>Riders asking about a product. You reply and send prices here</td><td>Every day</td></tr>
+      <tr><td>Applications</td><td>People applying for membership. You approve or reject them</td><td>When the number shows</td></tr>
+      <tr><td>Clients</td><td>Approved members. You can suspend or reactivate them</td><td>Now and then</td></tr>
+      <tr><td>Enquiries</td><td>Messages from the website's Contact page. Read only</td><td>Every day</td></tr>
+      <tr><td>Products</td><td>Everything in the shop: add, edit, photos, stock, sizes</td><td>Whenever stock changes</td></tr>
+      <tr><td>Coaching</td><td>Training programs and the coaches list</td><td>Now and then</td></tr>
+      <tr><td>Auction</td><td>Auction lots: photos, bids, end times</td><td>While an auction runs</td></tr>
+      <tr><td>Accounts</td><td>Everyone who has signed up on the website</td><td>Now and then</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note"><span class="label">The Refresh button</span><p><span class="btn ghost">Refresh</span> at the top reloads the Enquiries and Accounts lists and the numbers on the tabs. The other tabs refresh themselves when you click on them.</p></div>
+</section>
+
+<!-- =============================== 04 =============================== -->
+<section class="page" id="s04">
+  <p class="kicker">Section 04</p>
+  <h2><span class="num">04</span>Adding a new product</h2>
+  <p class="lead">A new product takes about two minutes: fill in the form from top to bottom, add photos and press Save.</p>
+
+  <ol class="steps">
+    <li>Sign in and open the <b>Products</b> tab.</li>
+    <li>Press <span class="btn">+ Add new</span>. An empty form opens above the list.</li>
+    <li>Fill in the form from top to bottom, using the table below. Fields marked <b>*</b> must be filled in; if one is missed, a message such as “Name is required” appears.</li>
+    <li>Press <span class="btn">Save</span>.</li>
+    <li>Check it: open the website, find the product in the shop and tap it. Its page should show all the photos and the description.</li>
+  </ol>
+
+  <table>
+    <thead><tr><th style="width:30%">Field</th><th>What to enter</th></tr></thead>
+    <tbody>
+      <tr><td>Name <span class="req">*</span></td><td>The name riders see, for example <code>S-Works Tarmac SL9 — Red</code>. Put the colour in the name.</td></tr>
+      <tr><td>Brand <span class="req">*</span></td><td>Pick the brand from the list.</td></tr>
+      <tr><td>Category <span class="req">*</span></td><td>Pick the aisle, for example Road Bikes or Helmets.</td></tr>
+      <tr><td>Product type <span class="req">*</span></td><td>Pick the type. This list changes to match the Category, so choose the Category first.</td></tr>
+      <tr><td>Description</td><td>The text riders read. See section 05.</td></tr>
+      <tr><td>Product images</td><td>Up to 5 photos. See section 06.</td></tr>
+      <tr><td>Condition</td><td>New or Pre-owned.</td></tr>
+      <tr><td>Sizes</td><td>Only for products that come in sizes. See section 07.</td></tr>
+      <tr><td>Stock on hand <span class="req">*</span></td><td>How many you have. Hidden for pre-owned products and for products with sizes.</td></tr>
+      <tr><td>Listed on <span class="req">*</span></td><td>The date it went on sale. Today's date is filled in for you.</td></tr>
+      <tr><td>Include in Daily Listings</td><td>Ticked for you. Shows it on Daily Listings as a new arrival.</td></tr>
+      <tr><td>Running order</td><td>Leave blank. Only used to pin a product to the top. See section 08.</td></tr>
+      <tr><td>Featured on homepage</td><td>Tick to show it in the homepage featured grid.</td></tr>
+      <tr><td>In the Clearance Market / Sale</td><td>Tick to show it on the Clearance page.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- =============================== 05 =============================== -->
+<section class="page" id="s05">
+  <p class="kicker">Section 05</p>
+  <h2><span class="num">05</span>Writing a description</h2>
+  <p class="lead">Type the description as normal text. <b>Do not type HTML or any code.</b> The website lays it out for you using four simple rules.</p>
+
+  <table>
+    <thead><tr><th style="width:52%">What you type</th><th>What riders see</th></tr></thead>
+    <tbody>
+      <tr><td>An empty line between two pieces of text</td><td>A new paragraph</td></tr>
+      <tr><td>A short line on its own, with no full stop, like <code>Specifications</code></td><td>A bold heading</td></tr>
+      <tr><td>A line that starts with <code>- </code> (a dash and a space)</td><td>A bullet point</td></tr>
+      <tr><td><code>Label: value</code>, like <code>Frame: FACT 12r Carbon</code></td><td>The label in bold, then the value</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Example</h3>
+  <div class="split">
+    <div class="pane">
+      <div class="head">You type this</div>
+<pre>Race-ready carbon bike in excellent
+condition.
+
+Key features
+
+- Shimano 105 Di2 wireless shifting
+- Fits tyres up to 35mm
+- Serviced by our workshop
+
+Specifications
+
+Frame: Synapse Carbon
+Wheels: DT Swiss R470
+Weight: 8.6kg</pre>
+    </div>
+    <div class="pane">
+      <div class="head">Riders see this</div>
+      <div class="render">
+        <p>Race-ready carbon bike in excellent condition.</p>
+        <div class="h">Key features</div>
+        <ul><li>Shimano 105 Di2 wireless shifting</li><li>Fits tyres up to 35mm</li><li>Serviced by our workshop</li></ul>
+        <div class="h">Specifications</div>
+        <p><b style="color:#0a0a0a">Frame:</b> Synapse Carbon<br><b style="color:#0a0a0a">Wheels:</b> DT Swiss R470<br><b style="color:#0a0a0a">Weight:</b> 8.6kg</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Where riders see it</h3>
+  <p>On the product's own page. Riders get there by tapping the product's photo or name anywhere in the shop.</p>
+
+  <div class="note"><span class="label">Older imported products</span><p>Products that came from the supplier imports had their text stored as code. When you open one to edit, the box now shows it as plain text. Press Save and it is stored as plain text from then on. Nothing changes on the website.</p></div>
+</section>
+
+<!-- =============================== 06 =============================== -->
+<section class="page" id="s06">
+  <p class="kicker">Section 06</p>
+  <h2><span class="num">06</span>Product photos</h2>
+  <p class="lead">Every product can have up to <b>5 photos</b>. The first one is the main photo shown in the shop.</p>
+
+  <h3>To add photos</h3>
+  <ol class="steps">
+    <li>Open the product (section 04 for a new one, section 08 for an existing one).</li>
+    <li>Scroll to <b>Product images</b>.</li>
+    <li>Press <span class="btn">Choose files</span>. On a phone, pick from your photo library. On a computer, hold Ctrl (Windows) or Cmd (Mac) to pick several at once.</li>
+    <li>Wait until the photos appear and “Uploading…” has gone.</li>
+    <li>Press <span class="btn">Save</span> at the bottom of the form.</li>
+  </ol>
+
+  <div class="ui">
+    <span class="lbl">Product images (pick several at once — up to 5) — 3/5</span>
+    <div class="photos">
+      <div class="photo"><div class="img"><span class="main">MAIN</span></div><div class="ctl"><span>←</span><span>→</span><u>REMOVE</u></div></div>
+      <div class="photo"><div class="img"></div><div class="ctl"><span>←</span><span>→</span><u>REMOVE</u></div></div>
+      <div class="photo"><div class="img"></div><div class="ctl"><span>←</span><span>→</span><u>REMOVE</u></div></div>
+    </div>
+    <div class="btns"><span class="mini dark">Choose files</span></div>
+  </div>
+  <p class="ui-caption">The photo box, with three photos added</p>
+
+  <div class="two">
+    <div>
+      <h3>To change the order</h3>
+      <p>Use the <b>←</b> and <b>→</b> buttons under each photo. The photo marked <b>MAIN</b> (the first one) is shown in the shop.</p>
+    </div>
+    <div>
+      <h3>To remove a photo</h3>
+      <p>Press <b>Remove</b> under it, then <span class="btn">Save</span>. It is only deleted when you save. Press Cancel instead and it stays.</p>
+    </div>
+  </div>
+
+  <h3>Rules</h3>
+  <ul class="ticks">
+    <li>Up to 5 photos per product. At 5, the Choose files button greys out. Remove one to add another.</li>
+    <li>Each photo must be under 5MB and a JPEG, PNG, WebP or AVIF file. Normal phone photos are fine.</li>
+    <li>Square or landscape photos on a white background look best.</li>
+  </ul>
+
+  <div class="note"><span class="label">Where riders see them</span><p>The shop shows the main photo, and the second when a rider moves their mouse over it. <b>All 5 photos</b> are on the product's own page, where riders flick through them with arrows or tap the small pictures underneath.</p></div>
+</section>
+
+<!-- =============================== 07 =============================== -->
+<section class="page" id="s07">
+  <p class="kicker">Section 07</p>
+  <h2><span class="num">07</span>Stock and sizes</h2>
+  <p class="lead">A product has its stock entered one of two ways. Use sizes for bikes, helmets, shoes and clothing.</p>
+
+  <table>
+    <thead><tr><th style="width:24%">The product…</th><th style="width:38%">Use</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>Has no sizes</td><td>The <b>Stock on hand</b> box</td><td>Chain lube — Stock on hand: 12</td></tr>
+      <tr><td>Comes in sizes</td><td>The <b>Sizes</b> list, with a stock number for each size</td><td>Road bike — 54: 1, 56: 2, 58: 1</td></tr>
+    </tbody>
+  </table>
+
+  <div class="two">
+    <div>
+      <h3>To add sizes</h3>
+      <ol class="steps">
+        <li>Open the product and scroll to <b>Sizes</b>.</li>
+        <li>Press <span class="btn">+ Add a size</span>. A row appears with a <b>Size</b> box and an <b>In stock</b> box.</li>
+        <li>In <b>Size</b>, type the size as riders should see it: <code>54</code>, <code>Medium</code> or <code>42</code>.</li>
+        <li>In <b>In stock</b>, type how many you have in that size.</li>
+        <li>Repeat for every size.</li>
+        <li>Press <span class="btn">Save</span>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="ui sizes">
+        <span class="lbl">Sizes (optional — each size with its own stock)</span>
+        <div class="row" style="font-family:var(--mono);font-size:6.4pt;letter-spacing:.18em;color:#5c5c5c"><span>SIZE</span><span>IN STOCK</span><span></span></div>
+        <div class="row"><div class="field">54</div><div class="field">1</div><div class="mini">Remove</div></div>
+        <div class="row"><div class="field">56</div><div class="field">2</div><div class="mini">Remove</div></div>
+        <div class="row"><div class="field">58</div><div class="field">1</div><div class="mini">Remove</div></div>
+        <div class="btns"><span class="mini dark">+ Add a size</span><span class="mini">+ S · M · L</span><span class="mini">+ Bike 49 – 61</span></div>
+        <div class="total">Total in stock: 4 · worked out from the sizes</div>
+      </div>
+      <p class="ui-caption">The Sizes box for a road bike</p>
+    </div>
+  </div>
+
+  <h3>Shortcut buttons</h3>
+  <p>These add a whole run of sizes in one tap, each starting at 0. Then type the stock for each one, and remove the sizes you don't carry.</p>
+  <table>
+    <thead><tr><th style="width:30%">Button</th><th>Adds</th><th style="width:24%">Use for</th></tr></thead>
+    <tbody>
+      <tr><td>+ S · M · L</td><td>Small, Medium, Large</td><td>Helmets</td></tr>
+      <tr><td>+ XS – XXL</td><td>XS, S, M, L, XL, XXL</td><td>Clothing</td></tr>
+      <tr><td>+ Bike 49 – 61</td><td>49, 52, 54, 56, 58, 61</td><td>Road bikes</td></tr>
+      <tr><td>+ Shoes 38 – 47</td><td>38 to 47</td><td>Shoes</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page">
+  <p class="kicker">Section 07 · Stock and sizes, continued</p>
+
+  <div class="two">
+    <div class="avoid">
+      <h3>Example 1 · S-Works Tarmac SL9</h3>
+      <p>One 54, two 56s and one 58:</p>
+      <table class="narrow"><thead><tr><th>Size</th><th>In stock</th></tr></thead>
+        <tbody><tr><td>54</td><td>1</td></tr><tr><td>56</td><td>2</td></tr><tr><td>58</td><td>1</td></tr></tbody></table>
+    </div>
+    <div class="avoid">
+      <h3>Example 2 · MET Trenta helmet</h3>
+      <p>Put the colour in the name, <code>MET Trenta — Black</code>, then add:</p>
+      <table class="narrow"><thead><tr><th>Size</th><th>In stock</th></tr></thead>
+        <tbody><tr><td>Small</td><td>2</td></tr><tr><td>Medium</td><td>3</td></tr><tr><td>Large</td><td>1</td></tr></tbody></table>
+    </div>
+  </div>
+  <p>If the same helmet also comes in white, add it as its own product, <code>MET Trenta — White</code>, with its own photos.</p>
+
+  <h3>What riders see</h3>
+  <p>On the product page riders choose a size before pressing <span class="btn">Club price</span>. Sold-out sizes are crossed out:</p>
+  <div class="ui" style="display:inline-block;padding:3mm 4mm">
+    <span class="lbl">Size — 56</span>
+    <div class="chips"><span class="chip">54<small>1 left</small></span><span class="chip on">56<small>2 left</small></span><span class="chip out">58</span></div>
+  </div>
+  <p style="margin-top:3mm">The size they pick appears at the top of their message in your Inquiry Inbox, for example <b>Size: 56</b>.</p>
+
+  <h3>What happens automatically</h3>
+  <ul class="ticks">
+    <li>Once a product has sizes, the <b>Stock on hand</b> box disappears. The total is worked out from the sizes and shown under the list.</li>
+    <li>When a size sells out, change its number to <b>0</b>. Don't remove it. Riders still see it crossed out, so they know you carry it.</li>
+    <li>When every size is at 0, the product shows <b>Out of stock</b>.</li>
+    <li>To stop using sizes on a product, remove every size row. The Stock on hand box comes back. Type the number and Save.</li>
+  </ul>
+</section>
+
+<!-- =============================== 08 =============================== -->
+<section class="page" id="s08">
+  <p class="kicker">Section 08</p>
+  <h2><span class="num">08</span>Finding and editing products</h2>
+  <p class="lead">The Products tab lists every product, 50 at a time. Search finds any product in a second.</p>
+
+  <div class="two">
+    <div>
+      <h3>To find a product</h3>
+      <ol class="steps">
+        <li>Open the <b>Products</b> tab.</li>
+        <li>Type part of the name or the brand in the search box. The list updates as you type.</li>
+        <li>Press <b>✕</b> to clear the search.</li>
+      </ol>
+      <p>Use <b>Next →</b> and <b>← Previous</b> at the bottom to see more. <b>Sort</b> changes the order.</p>
+    </div>
+    <div>
+      <h3>To edit a product</h3>
+      <ol class="steps">
+        <li>Press <span class="btn ghost">Edit</span> on its row. The form opens at the top.</li>
+        <li>Change what you need.</li>
+        <li>Press <span class="btn">Save</span>, or <span class="btn ghost">Cancel</span> to change nothing.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="warn"><span class="label">Deleting a product</span><p>Press <span class="btn ghost">Delete</span> on its row, then <b>OK</b> when asked “Delete …? This cannot be undone.” The product and all its photos are removed for good. To take something off sale for a while, set its stock to 0 instead.</p></div>
+
+  <h3>Where a product shows on the website</h3>
+  <table>
+    <thead><tr><th style="width:36%">You want it…</th><th>Do this</th></tr></thead>
+    <tbody>
+      <tr><td>On Daily Listings as a new arrival</td><td>Press <span class="btn ghost">List today</span> on its row. This sets today's date and ticks Daily Listings in one tap.</td></tr>
+      <tr><td>On the homepage</td><td>Edit, tick <b>Featured on homepage</b>, Save.</td></tr>
+      <tr><td>On the Clearance / Sale page</td><td>Edit, tick <b>In the Clearance Market / Sale</b>, Save.</td></tr>
+      <tr><td>Pinned to the top of the shop</td><td>Edit, type <code>1</code> in <b>Running order</b>, Save. Use 2, 3… for the next ones. Leave it blank for every other product.</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><span class="label">Daily Listings</span><p>Daily Listings shows products listed today or yesterday. Press <b>List today</b> each day on the products you want in that day's drop.</p></div>
+  <p>The line under each product name shows its brand, type, stock, sizes (a size marked “(0)” is sold out) and listing date. The tags <b>DAILY</b>, <b>FEATURED</b> and <b>CLEARANCE</b> show where it appears.</p>
+</section>
+
+<!-- =============================== 09 =============================== -->
+<section class="page" id="s09">
+  <p class="kicker">Section 09</p>
+  <h2><span class="num">09</span>The auction</h2>
+  <p class="lead">Auction lots show on the Auction page and the homepage, with their photos, current bid and a countdown to the end time. Prices show in Sri Lankan rupees (LKR) unless you choose another currency.</p>
+
+  <h3>To add a lot</h3>
+  <ol class="steps">
+    <li>Open the <b>Auction</b> tab and press <span class="btn">+ Add new</span>.</li>
+    <li>Fill in the form using the table below.</li>
+    <li>Press <span class="btn">Save</span>.</li>
+  </ol>
+
+  <table>
+    <thead><tr><th style="width:23%">Field</th><th>What to enter</th><th style="width:25%">Example</th></tr></thead>
+    <tbody>
+      <tr><td>Lot number <span class="req">*</span></td><td>The lot's number. Lots are listed in this order</td><td><code>06</code></td></tr>
+      <tr><td>Lot name <span class="req">*</span></td><td>What it is</td><td>Team-Issue SL9 Frameset</td></tr>
+      <tr><td>Condition</td><td>New, Race-used or Pre-owned</td><td>Race-used</td></tr>
+      <tr><td>Currency</td><td><b>LKR is already selected.</b> Change it only for a lot priced in another currency</td><td>LKR — Sri Lankan rupee</td></tr>
+      <tr><td>Current bid <span class="req">*</span></td><td>The highest bid so far, as a plain number: no commas, no “Rs”</td><td><code>250000</code></td></tr>
+      <tr><td>Bid count <span class="req">*</span></td><td>How many bids so far. Start at 0</td><td><code>0</code></td></tr>
+      <tr><td>Ends at <span class="req">*</span></td><td>The date and time bidding closes</td><td>30 Nov 2026, 8:00 PM</td></tr>
+      <tr><td>Spec line</td><td>One line of detail shown under the name</td><td>54cm · workshop inspected</td></tr>
+      <tr><td>Lot photos</td><td>Up to 5 photos, the same way as product photos (section 06). The Auction page shows them all; the homepage shows the first</td><td></td></tr>
+    </tbody>
+  </table>
+  <p>The example above shows on the website as <b>LKR 250,000</b>.</p>
+
+  <table>
+    <thead><tr><th style="width:36%">When…</th><th>Do this</th></tr></thead>
+    <tbody>
+      <tr><td>A new bid comes in</td><td>Edit the lot, change <b>Current bid</b> and <b>Bid count</b>, Save.</td></tr>
+      <tr><td>You want to extend a lot</td><td>Edit the lot, set <b>Ends at</b> to a later date and time, Save.</td></tr>
+      <tr><td>The time runs out</td><td>The lot shows <b>Bidding closed</b>. It stays on the page until you delete it, so delete lots once they are sold.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- =============================== 10 =============================== -->
+<section class="page" id="s10">
+  <p class="kicker">Section 10</p>
+  <h2><span class="num">10</span>Inquiry Inbox</h2>
+  <p class="lead">There are no prices on the shop. When a rider presses <b>Club price</b> on a product, a conversation opens here and you reply with the price.</p>
+
+  <h3>To answer a rider</h3>
+  <ol class="steps">
+    <li>Open the <b>Inquiry Inbox</b> tab. <b>Needs reply</b> is selected, showing only riders waiting for an answer.</li>
+    <li>Tap a conversation on the left. It opens on the right and leaves the Needs reply list.</li>
+    <li>Read the rider's message. If they chose a size, the message starts with it, for example <b>Size: 56</b>.</li>
+    <li>Type your answer in the <b>Message</b> box.</li>
+    <li>Optionally press <span class="btn ghost">+ Attach image / PDF</span> to add a quote, spec sheet or photos.</li>
+    <li>Press <span class="btn">Send reply</span>.</li>
+  </ol>
+  <p>The rider reads your answer on the website, under <b>My inquiries</b>. If email alerts are switched on for the site, they also get an email saying you replied.</p>
+
+  <h3>Useful extras</h3>
+  <ul class="ticks">
+    <li>A thread marked <b>Sinhala — answer in Sinhala</b> means the rider chose Sinhala. Please reply in Sinhala.</li>
+    <li>Tap the product name (with ↗) to open the product in a new tab.</li>
+    <li>Tap the rider's email address to email them directly.</li>
+    <li>When a sale is done, press <span class="btn ghost">Close thread</span>. If the rider writes again, it reopens by itself.</li>
+    <li>The <b>Open</b> and <b>All</b> buttons show older conversations.</li>
+  </ul>
+
+  <div class="note"><span class="label">Attachments</span><p>Up to 5 files per message, 10MB each. Photos (JPEG, PNG, WebP, AVIF, GIF) or PDFs.</p></div>
+</section>
+
+<!-- =============================== 11 =============================== -->
+<section class="page" id="s11">
+  <p class="kicker">Section 11</p>
+  <h2><span class="num">11</span>Membership</h2>
+  <p class="lead">People apply to join the club on the website's Apply page. Each application arrives in the <b>Applications</b> tab. Approving one creates a member in <b>Clients</b>.</p>
+
+  <h3>To approve or reject an application</h3>
+  <ol class="steps">
+    <li>Open the <b>Applications</b> tab. New applications are at the top, marked <b>new</b>.</li>
+    <li>Read the card: name, email, phone, what they're interested in, why they want to join, and their address.</li>
+    <li>Press <span class="btn">Approve → create client</span> to accept them. The card then says “Client profile created — see the Clients tab”.</li>
+    <li>Or press <span class="btn ghost">Reject</span> to turn them down.</li>
+  </ol>
+  <div class="warn"><span class="label">No “are you sure?”</span><p>These buttons act straight away. If you reject someone by mistake, press <b>Reopen</b> on their card to put it back to new.</p></div>
+
+  <h3>Clients</h3>
+  <ul class="ticks">
+    <li>Lists every approved member. Search by name, email, phone, city or country.</li>
+    <li>To stop a member's access, press <span class="btn ghost">Suspend</span>. Press <span class="btn ghost">Reactivate</span> to bring them back.</li>
+    <li>Rejecting an application after approving it does not remove the client. Suspend them in Clients instead.</li>
+  </ul>
+
+  <h3>Accounts</h3>
+  <p>Lists everyone who has created a login on the website, including riders who only signed up to ask about products. A new sign-up shows as <b>pending</b>.</p>
+  <table>
+    <thead><tr><th style="width:30%">Button</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>Approve</td><td>Sets the account to active</td></tr>
+      <tr><td>Reject</td><td>Blocks the account</td></tr>
+      <tr><td>Reset</td><td>Puts it back to pending</td></tr>
+    </tbody>
+  </table>
+  <p>The admin's own account is marked <b>ADMIN</b> and has no buttons.</p>
+</section>
+
+<!-- =============================== 12 =============================== -->
+<section class="page" id="s12">
+  <p class="kicker">Section 12</p>
+  <h2><span class="num">12</span>Enquiries and Coaching</h2>
+
+  <h3>Enquiries</h3>
+  <p>Shows the latest 50 messages sent from the website's <b>Contact</b> page: topic, date, name, email and message. You can't reply from here. Reply from your own email to the address shown. Press <span class="btn ghost">Refresh</span> at the top to check for new ones.</p>
+  <div class="note"><span class="label">Enquiries or Inquiry Inbox?</span><p><b>Enquiries</b> come from the Contact page. The <b>Inquiry Inbox</b> holds conversations about a specific product.</p></div>
+
+  <h3>Coaching</h3>
+  <p>The Coaching tab has two lists, each with its own <span class="btn">+ Add new</span> button.</p>
+  <table>
+    <thead><tr><th style="width:28%">List</th><th>Fields</th></tr></thead>
+    <tbody>
+      <tr><td>Training programs</td><td>Program name, Weeks, Level, Price (USD), Focus (shown on the card)</td></tr>
+      <tr><td>Coaching pool</td><td>Name, Country, Country code (3 letters, for example <code>LKA</code>), Discipline, Languages, Open slots (0 = waitlist)</td></tr>
+    </tbody>
+  </table>
+  <p>Adding, editing and deleting work the same way as products: <b>+ Add new</b> or <b>Edit</b>, fill in, <b>Save</b>.</p>
+</section>
+
+<!-- =============================== 13 =============================== -->
+<section class="page" id="s13">
+  <p class="kicker">Section 13</p>
+  <h2><span class="num">13</span>Common problems</h2>
+  <p class="lead">Find your problem in the left column. If it isn't here, take a screenshot and send it to your web team with a short note of what you were trying to do.</p>
+  <table>
+    <thead><tr><th style="width:40%">Problem</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td>“… is required” appears when I press Save</td><td>A field marked * is empty. Fill it in and press Save again.</td></tr>
+      <tr><td>The website still shows the old version</td><td>Wait a minute, then refresh the website page. On a phone, pull down to refresh.</td></tr>
+      <tr><td>The Choose files button is grey</td><td>The product already has 5 photos. Remove one first.</td></tr>
+      <tr><td>A photo won't upload</td><td>It must be under 5MB and a JPEG, PNG, WebP or AVIF. Screenshot the photo on your phone and upload the screenshot instead.</td></tr>
+      <tr><td>I pressed Cancel and my new photos have gone</td><td>Cancel throws away everything from that visit to the form. Upload them again and press Save.</td></tr>
+      <tr><td>Search can't find a product</td><td>Search by a word in the name, or the brand. Search does not look inside descriptions.</td></tr>
+      <tr><td>The Product type I want isn't in the list</td><td>Pick the right Category first. Product types change to match it.</td></tr>
+      <tr><td>The Stock on hand box has disappeared</td><td>The product has sizes, or is set to Pre-owned. Set stock per size.</td></tr>
+      <tr><td>A product shows Out of stock</td><td>Its stock, or every one of its sizes, is 0. Edit it and enter the stock.</td></tr>
+      <tr><td>An aisle has vanished from the website menu</td><td>The website hides aisles with nothing in stock. Add stock to a product in that aisle and it comes back.</td></tr>
+      <tr><td>I deleted something by mistake</td><td>Deleting cannot be undone from the back office. Contact your web team straight away.</td></tr>
+      <tr><td>I'm signed in but see “Members door.”</td><td>You're signed in with the wrong account. Press Sign out and sign in with admin@mrrider.lk.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- =============================== 14 =============================== -->
+<section class="page" id="s14">
+  <p class="kicker">Section 14</p>
+  <h2><span class="num">14</span>Quick reference</h2>
+  <p class="lead">Every common job on one page. Print it and keep it by the computer.</p>
+  <table class="qr">
+    <thead><tr><th style="width:44%">I want to…</th><th style="width:22%">Tab</th><th>Press</th></tr></thead>
+    <tbody>
+      <tr><td>Add a new product</td><td>Products</td><td>+ Add new → fill in → Save</td></tr>
+      <tr><td>Change a product's text, photos or stock</td><td>Products</td><td>Search → Edit → change → Save</td></tr>
+      <tr><td>Add sizes to a product</td><td>Products</td><td>Edit → Sizes → + Add a size → Save</td></tr>
+      <tr><td>Mark a size as sold out</td><td>Products</td><td>Edit → set that size to 0 → Save</td></tr>
+      <tr><td>Put a product in today's Daily Listings</td><td>Products</td><td>List today (on its row)</td></tr>
+      <tr><td>Feature a product on the homepage</td><td>Products</td><td>Edit → tick Featured → Save</td></tr>
+      <tr><td>Put a product on sale</td><td>Products</td><td>Edit → tick Clearance → Save</td></tr>
+      <tr><td>Remove a product for good</td><td>Products</td><td>Delete → OK</td></tr>
+      <tr><td>Add an auction lot</td><td>Auction</td><td>+ Add new → fill in → Save</td></tr>
+      <tr><td>Update a bid</td><td>Auction</td><td>Edit → Current bid + Bid count → Save</td></tr>
+      <tr><td>Extend an auction</td><td>Auction</td><td>Edit → Ends at → Save</td></tr>
+      <tr><td>Reply to a rider with a price</td><td>Inquiry Inbox</td><td>Tap thread → type → Send reply</td></tr>
+      <tr><td>Finish a conversation</td><td>Inquiry Inbox</td><td>Close thread</td></tr>
+      <tr><td>Approve a new member</td><td>Applications</td><td>Approve → create client</td></tr>
+      <tr><td>Block a member</td><td>Clients</td><td>Suspend</td></tr>
+      <tr><td>Read Contact page messages</td><td>Enquiries</td><td>Refresh (top of page)</td></tr>
+      <tr><td>Add a coach or program</td><td>Coaching</td><td>+ Add new → fill in → Save</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><span class="label">Remember</span><p>Nothing is saved until you press <b>Save</b>. Delete cannot be undone. When in doubt, take a screenshot and ask.</p></div>
+</section>
+
+</body>
+</html>

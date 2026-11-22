@@ -1,7 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import ArrowCta from "@/components/ArrowCta";
 import SectionHead from "@/components/SectionHead";
-import type { Lot } from "@/lib/data";
+import { money, type Lot } from "@/lib/data";
+import { productImageUrl } from "@/lib/images";
 
 /* The auction floor, with the actual lots on it.
 
@@ -43,6 +45,17 @@ export default function AuctionFloor({ lots }: { lots: Lot[] }) {
                   href="/auction"
                   className="group flex h-full flex-col gap-4 p-6 transition-colors duration-200 ease-out hover:bg-carbon-2"
                 >
+                  {l.images?.[0] && productImageUrl(l.images[0]) && (
+                    <div className="relative aspect-[16/10] w-full overflow-clip bg-white">
+                      <Image
+                        src={productImageUrl(l.images[0])}
+                        alt={l.name}
+                        fill
+                        sizes="(min-width: 640px) 40vw, 90vw"
+                        className="object-contain p-3"
+                      />
+                    </div>
+                  )}
                   <div className="flex items-start justify-between gap-4">
                     <span className="headline text-4xl text-chalk">
                       {l.lot}
@@ -70,10 +83,10 @@ export default function AuctionFloor({ lots }: { lots: Lot[] }) {
                       {l.bids} bid{l.bids === 1 ? "" : "s"} · current
                     </span>
                     <span className="font-display text-lg font-bold tracking-wide">
-                      {l.currentBid.toLocaleString("en-GB")}
+                      {money(l.currentBid, l.currency)}
                     </span>
                     <span className="w-full font-mono text-[10px] uppercase tracking-[0.16em] text-chalk/70">
-                      Ends in {l.endsIn}
+                      {l.endsIn === "ENDED" ? "Bidding closed" : `Ends in ${l.endsIn}`}
                     </span>
                   </div>
                 </Link>

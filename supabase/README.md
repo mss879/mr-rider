@@ -34,6 +34,7 @@ Run them **in numeric order** in the Supabase dashboard → **SQL Editor**
 | 22 | `22_road_bikes_frameset_refile.sql` | QA BUG-03: eleven products moved between Road Bikes and Framesets | 12, 16, 17 |
 | 23 | `23_specialized_catalogue_import.sql` | The Specialized NZ range — 367 products and four new bike aisles (Mountain, E-Bikes, City & Active, Kids). Adds only; deletes nothing | 12, 13, 15, 16, 17, 20 |
 | 24 | `24_specialized_stock_floor.sql` | Every product from 23 starts at 10+ in stock (it arrived with Specialized NZ's warehouse numbers) | 23 |
+| 25 | `25_sizes_and_auction_photos.sql` | Sizes with their own stock on products (`variants`), photos on auction lots, and a currency per lot (LKR by default) | 04, 13, 20 |
 
 Every file is idempotent (`if not exists` / `on conflict do nothing`), so
 re-running one is safe on its own. Two ordering caveats:
@@ -101,6 +102,16 @@ server console.
   `'{specialized}'` on an S-Works item) instead of duplicating the row. SQL
   only — the admin form's picker for this was removed in QA round 2 (BUG-02);
   stored values still drive the shop's brand rail and the mega-menu.
+- **Sizes**: bikes, helmets, shoes and clothing can carry sizes, each with
+  its own stock, from /admin → Products → Edit → Sizes. Stored in
+  `products.variants` as `[{"size": "54", "stock": 1}, …]`; when a product
+  has sizes, a trigger (migration 25) sets `products.stock` to their total,
+  so "In stock / N left / Out of stock" and the menu keep working. The
+  product page shows the sizes and the rider's pick goes into their inquiry.
+- **Product descriptions** are plain text — no HTML. A blank line starts a
+  paragraph, a short line on its own is a heading, `- ` makes a bullet and
+  `Label: value` bolds the label (`src/lib/description.ts`). The imported
+  supplier HTML is converted the same way on display and in the admin form.
 - **Product photos**: up to 5 per product, uploaded from /admin → Products →
   Edit. `images[1]` is the card shot; `images[2]` swaps in on hover. Files live
   in the public `product-images` bucket and are stored as object paths — an
@@ -114,7 +125,9 @@ server console.
   answered from /admin → Inquiry Inbox. Attachments sit in the private
   `inquiry-files` bucket, keyed `<inquiry-id>/<uuid>.<ext>`. Nothing here is
   deleted by the app — the conversation is the record.
-- **Auction**: insert into `auction_lots`; countdowns render from `ends_at`.
+- **Auction**: managed from /admin → Auction; countdowns render from
+  `ends_at`. Each lot has up to 5 photos (in the `product-images` bucket under
+  `auction-<lot id>/`) and a `currency` — LKR unless another is picked.
 - **Contact messages**: read them in Table Editor → `contact_messages`
   (write-only from the site; no public read access).
 - **Membership approvals**: handled by the superadmin. Create the admin

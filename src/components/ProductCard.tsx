@@ -32,13 +32,13 @@ const CARD_IMAGE = "object-contain p-3";
 const CARD_QUALITY = 90;
 
 /* No price on the card. The club quotes in the thread, so the card's job is
-   to identify the product and hand the rider the inquiry button. */
+   to identify the product, lead to its page (all photos, the description)
+   and hand the rider the inquiry button. */
 
 export default function ProductCard({ p }: { p: Product }) {
   const typeLabel = subcategoryName(p.subcategory) || categoryName(p.category);
-  const href = p.subcategory
-    ? `/shop?cat=${p.category}&sub=${p.subcategory}`
-    : `/shop?cat=${p.category}`;
+  // The product page carries every photo and the description.
+  const href = `/shop/${encodeURIComponent(p.id)}`;
 
   // Real photography when it exists; the second shot swaps in on hover.
   const primary = productImageUrl(p.images?.[0]);
@@ -49,7 +49,7 @@ export default function ProductCard({ p }: { p: Product }) {
       <Link
         href={href}
         className="relative block aspect-[4/3] overflow-clip bg-white"
-        aria-label={`${p.name} — browse ${typeLabel}`}
+        aria-label={`${p.name} — photos and details`}
       >
         {primary ? (
           <>
@@ -100,7 +100,9 @@ export default function ProductCard({ p }: { p: Product }) {
           {brandName(p.brand)}
         </span>
         <h3 className="font-display text-xl font-bold uppercase leading-tight tracking-wide">
-          {p.name}
+          <Link href={href} className="hover:underline hover:underline-offset-4">
+            {p.name}
+          </Link>
         </h3>
         <span className="mb-3 mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft">
           {p.stock > 0 ? (
@@ -113,6 +115,19 @@ export default function ProductCard({ p }: { p: Product }) {
             "Out of stock — ask about the next drop"
           )}
         </span>
+        {p.variants?.length ? (
+          <span className="-mt-2 mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft">
+            Sizes{" "}
+            {p.variants.map((v, i) => (
+              <span key={v.size}>
+                {i > 0 && " · "}
+                <span className={v.stock > 0 ? "text-ink" : "line-through opacity-60"}>
+                  {v.size}
+                </span>
+              </span>
+            ))}
+          </span>
+        ) : null}
         <RequestInquiryButton
           product={{
             id: p.id,

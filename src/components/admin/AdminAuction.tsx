@@ -2,7 +2,8 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import AdminCrud, { type FieldDef, type RowData } from "./AdminCrud";
-import { usd } from "@/lib/data";
+import { AUCTION_CURRENCIES, DEFAULT_AUCTION_CURRENCY, money } from "@/lib/data";
+import { MAX_PRODUCT_IMAGES, PRODUCT_IMAGE_BUCKET } from "@/lib/images";
 
 function localInput(msFromNow: number): string {
   const d = new Date(Date.now() + msFromNow);
@@ -23,10 +24,34 @@ const fields: FieldDef[] = [
       { value: "PRE-OWNED", label: "Pre-owned" },
     ],
   },
-  { key: "current_bid", label: "Current bid (USD)", type: "number", required: true, step: "0.01" },
+  {
+    key: "currency",
+    label: "Currency",
+    type: "select",
+    options: AUCTION_CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} — ${c.name}` })),
+  },
+  {
+    key: "current_bid",
+    label: "Current bid (in the currency above)",
+    type: "number",
+    required: true,
+    step: "1",
+    placeholder: "e.g. 250000",
+  },
   { key: "bids_count", label: "Bid count", type: "number", required: true },
   { key: "ends_at", label: "Ends at", type: "datetime", required: true },
   { key: "spec", label: "Spec line (shown under the name)", type: "textarea" },
+  {
+    key: "images",
+    label: `Lot photos (pick several at once — up to ${MAX_PRODUCT_IMAGES})`,
+    type: "images",
+    // Same public bucket as products, in a folder per lot (auction-<id>/…) —
+    // see migration 25.
+    bucket: PRODUCT_IMAGE_BUCKET,
+    max: MAX_PRODUCT_IMAGES,
+    pathPrefix: "auction-",
+    hint: "The first photo is the main one. Use the arrows to change the order.",
+  },
 ];
 
 export default function AdminAuction({ sb }: { sb: SupabaseClient }) {
@@ -41,13 +66,15 @@ export default function AdminAuction({ sb }: { sb: SupabaseClient }) {
       newRow={() => ({
         id: `lot-${Date.now().toString(36)}`,
         condition: "PRE-OWNED",
+        currency: DEFAULT_AUCTION_CURRENCY,
         current_bid: 0,
+        images: [],
         bids_count: 0,
         ends_at: localInput(86_400_000),
       })}
       summary={(r: RowData) => ({
         title: `LOT ${r.lot_no} — ${r.name}`,
-        meta: `${r.condition} · bid ${usd(Number(r.current_bid ?? 0))} · ${r.bids_count} bids · ends ${new Date(String(r.ends_at)).toLocaleString()}`,
+        meta: `${r.condition} · bid ${money(Number(r.current_bid ?? 0), String(r.currency ?? DEFAULT_AUCTION_CURRENCY))} · ${r.bids_count} bids · ends ${new Date(String(r.ends_at)).toLocaleString()}`,
       })}
     />
   );

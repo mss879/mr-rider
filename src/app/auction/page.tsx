@@ -6,7 +6,8 @@ import Marquee from "@/components/Marquee";
 import PageHero from "@/components/PageHero";
 import { IMAGERY } from "@/lib/imagery";
 import Ph from "@/components/Ph";
-import { usd } from "@/lib/data";
+import ProductGallery from "@/components/ProductGallery";
+import { money } from "@/lib/data";
 import { getLots } from "@/lib/db";
 import { getMembershipStatus, isApproved } from "@/lib/membership";
 
@@ -50,14 +51,22 @@ export default async function AuctionPage() {
               className="flex flex-col border border-line-dark bg-carbon text-chalk transition-transform duration-200 ease-out hover:-translate-y-1"
             >
               <div className="relative">
-                <Ph
-                  tone="dark"
-                  label={l.condition}
-                  ghost={`LOT ${l.lot}`}
-                  className="aspect-[16/8]"
-                />
-                <span className="absolute left-0 top-3 bg-carbon-2 border border-line-dark px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.14em] text-chalk">
-                  ENDS IN {l.endsIn}
+                {l.images?.length ? (
+                  /* Every photo the admin added, with arrows and thumbnails —
+                     the same gallery as a product page. */
+                  <div className="bg-chalk p-3 text-ink">
+                    <ProductGallery images={l.images} name={l.name} fallbackLabel={l.condition} />
+                  </div>
+                ) : (
+                  <Ph
+                    tone="dark"
+                    label={l.condition}
+                    ghost={`LOT ${l.lot}`}
+                    className="aspect-[16/8]"
+                  />
+                )}
+                <span className="pointer-events-none absolute left-0 top-3 z-10 bg-carbon-2 border border-line-dark px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.14em] text-chalk">
+                  {l.endsIn === "ENDED" ? "BIDDING CLOSED" : `ENDS IN ${l.endsIn}`}
                 </span>
               </div>
               <div className="flex flex-1 flex-col gap-3 border-t border-line-dark p-6">
@@ -71,7 +80,7 @@ export default async function AuctionPage() {
                       Current bid · {l.bids} bids
                     </p>
                     <p className="headline mt-1 text-4xl text-chalk">
-                      {usd(l.currentBid)}
+                      {money(l.currentBid, l.currency)}
                     </p>
                   </div>
                   {locked ? (

@@ -25,10 +25,14 @@ export type Product = {
   subcategory: string;
   /** Extra brand/collection slugs the product also belongs to (no duplicate records). */
   collections?: string[];
-  /** Supplier copy as a sanitised HTML subset — see migration 17. Undefined on demo rows. */
+  /** Plain text from the admin, or imported supplier HTML — lib/description.ts renders both. */
   description?: string;
   /** Up to five photos — storage paths or URLs. images[0] is the primary shot. */
   images?: string[];
+  /** Sizes the admin listed, each with its own stock (migration 25). Empty or
+      undefined = the product has no sizes and `stock` stands alone. When
+      present, `stock` is their total. */
+  variants?: Variant[];
   /* No price. The floor carries no pricing — riders open an inquiry on a
      product and the club answers in the thread (see lib/inquiries.ts). */
   condition: "new" | "pre-owned";
@@ -40,6 +44,8 @@ export type Product = {
   featured?: boolean;
   clearance?: boolean;
 };
+
+export type Variant = { size: string; stock: number };
 
 export const products: Product[] = [
   // ROAD BIKES · FRAMESETS
@@ -179,9 +185,31 @@ export function matchesBrand(p: Product, brandSlug: string): boolean {
   return p.brand === brandSlug || (p.collections?.includes(brandSlug) ?? false);
 }
 
-/** Money formatter — coaching programs and auction bids only; stock has no price. */
+/** Money formatter — coaching programs only; stock has no price. */
 export function usd(n: number): string {
   return "$" + n.toLocaleString("en-US");
+}
+
+/** Currencies an auction lot can be shown in. LKR first: it is the default. */
+export const AUCTION_CURRENCIES = [
+  { code: "LKR", name: "Sri Lankan rupee" },
+  { code: "USD", name: "US dollar" },
+  { code: "EUR", name: "Euro" },
+  { code: "GBP", name: "British pound" },
+  { code: "AUD", name: "Australian dollar" },
+  { code: "NZD", name: "New Zealand dollar" },
+  { code: "INR", name: "Indian rupee" },
+  { code: "AED", name: "UAE dirham" },
+  { code: "SGD", name: "Singapore dollar" },
+] as const;
+
+export const DEFAULT_AUCTION_CURRENCY = "LKR";
+
+/** An auction amount with its currency code in front — "LKR 1,250,000".
+    The code rather than a symbol: "Rs" and "$" both mean several currencies. */
+export function money(n: number, currency: string = DEFAULT_AUCTION_CURRENCY): string {
+  const code = /^[A-Z]{3}$/.test(currency) ? currency : DEFAULT_AUCTION_CURRENCY;
+  return `${code} ${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 }
 
 export type Coach = {
@@ -228,14 +256,18 @@ export type Lot = {
   spec: string;
   condition: string;
   currentBid: number;
+  /** ISO code the bid is shown in — LKR unless the admin picked another. */
+  currency: string;
   bids: number;
   endsIn: string;
+  /** Up to five photos — paths in the product-images bucket, or URLs. */
+  images?: string[];
 };
 
 export const auctionLots: Lot[] = [
-  { id: "l1", lot: "01", name: "Team-Issue SL9 Frameset", spec: "54cm · race-used one season · workshop inspected", condition: "RACE-USED", currentBid: 1240, bids: 18, endsIn: "6H 24M" },
-  { id: "l2", lot: "02", name: "1989 Steel Classic Racer", spec: "Columbus SLX tubing · original chrome fork · collector grade", condition: "PRE-OWNED", currentBid: 890, bids: 31, endsIn: "2H 08M" },
-  { id: "l3", lot: "03", name: "50mm Carbon Wheelset", spec: "Rim brake · new bearings fitted · true and tensioned", condition: "RACE-USED", currentBid: 410, bids: 12, endsIn: "1D 04H" },
-  { id: "l4", lot: "04", name: "Dual-Side Power Crank", spec: "172.5mm · fresh battery seals · calibration verified", condition: "PRE-OWNED", currentBid: 305, bids: 9, endsIn: "2D 12H" },
-  { id: "l5", lot: "05", name: "Founders Club Jersey #001", spec: "Size M · first run · numbered 1 of 1", condition: "NEW", currentBid: 150, bids: 22, endsIn: "5H 40M" },
+  { id: "l1", lot: "01", name: "Team-Issue SL9 Frameset", spec: "54cm · race-used one season · workshop inspected", condition: "RACE-USED", currentBid: 1240, currency: "USD", bids: 18, endsIn: "6H 24M" },
+  { id: "l2", lot: "02", name: "1989 Steel Classic Racer", spec: "Columbus SLX tubing · original chrome fork · collector grade", condition: "PRE-OWNED", currentBid: 890, currency: "USD", bids: 31, endsIn: "2H 08M" },
+  { id: "l3", lot: "03", name: "50mm Carbon Wheelset", spec: "Rim brake · new bearings fitted · true and tensioned", condition: "RACE-USED", currentBid: 410, currency: "USD", bids: 12, endsIn: "1D 04H" },
+  { id: "l4", lot: "04", name: "Dual-Side Power Crank", spec: "172.5mm · fresh battery seals · calibration verified", condition: "PRE-OWNED", currentBid: 305, currency: "USD", bids: 9, endsIn: "2D 12H" },
+  { id: "l5", lot: "05", name: "Founders Club Jersey #001", spec: "Size M · first run · numbered 1 of 1", condition: "NEW", currentBid: 150, currency: "USD", bids: 22, endsIn: "5H 40M" },
 ];

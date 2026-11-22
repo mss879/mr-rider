@@ -32,6 +32,9 @@ export type InquiryProduct = {
   category: string;
   subcategory: string;
   image?: string;
+  /** The size the rider picked on the product page, if the product has sizes.
+      Written at the top of their first message so the club sees it. */
+  size?: string;
 };
 
 type Phase = "closed" | "signin" | "compose" | "sent";
@@ -125,7 +128,7 @@ export default function RequestInquiryButton({
       inquiryId: id,
       senderId: session.user.id,
       role: "member",
-      body,
+      body: product.size ? `Size: ${product.size}\n\n${body}` : body,
       files,
       accessToken: session.access_token,
     });
@@ -200,6 +203,11 @@ export default function RequestInquiryButton({
                   <p className="truncate font-display text-xl font-bold uppercase leading-tight tracking-wide">
                     {product.name}
                   </p>
+                  {product.size && (
+                    <p className="mt-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em]">
+                      Size {product.size}
+                    </p>
+                  )}
                 </div>
               </div>
               <button

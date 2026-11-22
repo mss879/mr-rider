@@ -26,6 +26,9 @@ export type FieldDef = {
        collections picker (or any other multi-value field) is ever wanted back. */
     | "multiselect"
     | "images"
+    /* A list of sizes, each with its own stock — products.variants
+       (migration 25). Stored as [{ size, stock }]. */
+    | "variants"
     | "checkbox"
     | "date"
     | "datetime"
@@ -39,12 +42,51 @@ export type FieldDef = {
   /** images only — Storage bucket to upload into, and how many are allowed. */
   bucket?: string;
   max?: number;
+  /** images only — folder-name prefix inside the bucket, so two tables can
+      share one bucket without their folders colliding ("auction-l1/…"). */
+  pathPrefix?: string;
   /** Hide the field unless the rest of the row calls for it — stock only
       matters on a brand-new product, say. A hidden field is also skipped
       by the required check, so it can never block a save the admin has no
       way of seeing the cause of. */
   showIf?: (row: RowData) => boolean;
+  /** textarea only — visible height in lines (default 3). */
+  rows?: number;
+  /** A line of help under the field. */
+  hint?: string;
+  /** Converts the stored value into what the form shows when a row is opened
+      for editing — e.g. imported HTML into plain text. Whatever the form then
+      holds is what Save writes back. */
+  toEdit?: (value: unknown) => unknown;
+  /** variants only — the field the sizes' total stock is written into on
+      save (the database trigger does the same; this keeps the form honest
+      before the row comes back). */
+  totalInto?: string;
+  /** variants only — one-tap size runs ("S · M · L") to fill the list. */
+  presets?: { label: string; sizes: string[] }[];
 };
+
+export type VariantRow = { size: string; stock: number | string };
+
+function asVariants(v: unknown): VariantRow[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .filter((x): x is Record<string, unknown> => !!x && typeof x === "object")
+    .map((x) => ({ size: String(x.size ?? ""), stock: (x.stock as number | string) ?? 0 }));
+}
+
+/** What gets saved: blank sizes dropped, stock a whole number of 0 or more. */
+function cleanVariants(v: unknown): { size: string; stock: number }[] {
+  return asVariants(v)
+    .map((r) => ({
+      size: r.size.trim(),
+      stock: Math.max(0, Math.floor(Number(r.stock) || 0)),
+    }))
+    .filter((r) => r.size !== "");
+}
+
+export const variantTotal = (v: unknown) =>
+  cleanVariants(v).reduce((n, r) => n + r.stock, 0);
 
 const isVisible = (f: FieldDef, row: RowData) => f.showIf?.(row) ?? true;
 
@@ -265,6 +307,7 @@ export default function AdminCrud({
       if (f.type === "datetime" && typeof v[f.key] === "string" && v[f.key]) {
         v[f.key] = toLocalInput(v[f.key] as string);
       }
+      if (f.toEdit) v[f.key] = f.toEdit(v[f.key]);
     }
     setSessionUploads([]);
     setSessionRemovals([]);
@@ -309,7 +352,7 @@ export default function AdminCrud({
         skipped.push(reason);
         continue;
       }
-      const path = newImagePath(String(editing.id ?? "product"), file);
+      const path = newImagePath(`${f.pathPrefix ?? ""}${String(editing.id ?? "product")}`, file);
       const { error: err } = await sb.storage
         .from(bucket)
         .upload(path, file, { cacheControl: "31536000", upsert: false });
@@ -352,8 +395,17 @@ export default function AdminCrud({
     if (!editing) return;
     const payload: RowData = { id: editing.id };
     for (const f of fields) {
-      if (f.type === "multiselect" || f.type === "images") {
-        payload[f.key] = asArray(editing[f.key]);
+      if (f.type === "multiselect" || f.type === "images" || f.type === "variants") {
+        const list =
+          f.type === "variants" ? cleanVariants(editing[f.key]) : asArray(editing[f.key]);
+        /* A list column the row never had, left empty: not written. That is
+           the gap before a migration adds the column, and an empty list says
+           nothing worth failing the save over. */
+        if (list.length === 0 && !(f.key in editing)) continue;
+        payload[f.key] = list;
+        if (f.type === "variants" && f.totalInto && list.length > 0) {
+          payload[f.totalInto] = variantTotal(list);
+        }
         continue;
       }
       let v: unknown =
@@ -374,6 +426,8 @@ export default function AdminCrud({
         v = new Date(v).toISOString();
       }
       if (!isVisible(f, editing)) continue;
+      // Same gap for a plain column: never set on this row, nothing typed.
+      if (!f.required && !(f.key in editing) && (v == null || v === "")) continue;
       if (f.required && (v == null || v === "" || v === false && f.type !== "checkbox")) {
         if (v !== false) {
           setError(`${f.label} is required`);
@@ -522,12 +576,19 @@ export default function AdminCrud({
                 className={
                   f.type === "textarea" ||
                   f.type === "multiselect" ||
-                  f.type === "images"
+                  f.type === "images" ||
+                  f.type === "variants"
                     ? "sm:col-span-2 lg:col-span-3"
                     : ""
                 }
               >
-                {f.type === "images" ? (
+                {f.type === "variants" ? (
+                  <VariantsEditor
+                    f={f}
+                    rows={asVariants(editing[f.key])}
+                    onChange={(next) => setEditing({ ...editing, [f.key]: next })}
+                  />
+                ) : f.type === "images" ? (
                   (() => {
                     const imgs = asArray(editing[f.key]);
                     const max = f.max ?? 5;
@@ -608,6 +669,9 @@ export default function AdminCrud({
                               ? `Maximum ${max} images reached — remove one to add another`
                               : "JPEG, PNG, WebP or AVIF · up to 5MB each · first image is the card shot"}
                         </p>
+                        {f.hint && (
+                          <p className="mt-1.5 text-xs leading-relaxed text-ink-soft">{f.hint}</p>
+                        )}
                       </fieldset>
                     );
                   })()
@@ -662,7 +726,7 @@ export default function AdminCrud({
                     {f.type === "textarea" ? (
                       <textarea
                         id={`f-${table}-${f.key}`}
-                        rows={3}
+                        rows={f.rows ?? 3}
                         value={String(editing[f.key] ?? "")}
                         onChange={(e) =>
                           setEditing({ ...editing, [f.key]: e.target.value })
@@ -705,6 +769,9 @@ export default function AdminCrud({
                         placeholder={f.placeholder}
                         className={fieldCls}
                       />
+                    )}
+                    {f.hint && (
+                      <p className="mt-1.5 text-xs leading-relaxed text-ink-soft">{f.hint}</p>
                     )}
                   </>
                 )}
@@ -875,5 +942,104 @@ export default function AdminCrud({
         </div>
       )}
     </section>
+  );
+}
+
+/* Sizes, each with its own stock. Built for people who have never seen a
+   database: one row per size, a box for the size and a box for how many, a
+   button to add a row, and ready-made size runs for the usual products. */
+function VariantsEditor({
+  f,
+  rows,
+  onChange,
+}: {
+  f: FieldDef;
+  rows: VariantRow[];
+  onChange: (next: VariantRow[]) => void;
+}) {
+  const set = (i: number, patch: Partial<VariantRow>) =>
+    onChange(rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  const total = variantTotal(rows);
+  const have = new Set(rows.map((r) => r.size.trim().toLowerCase()));
+
+  return (
+    <fieldset>
+      <legend className={labelCls}>{f.label}</legend>
+      {rows.length === 0 ? (
+        <p className="mb-3 text-xs leading-relaxed text-ink-soft">
+          No sizes — this product uses the single stock number. Add sizes for
+          bikes, helmets, shoes and clothing.
+        </p>
+      ) : (
+        <div className="mb-3 flex flex-col gap-2">
+          <div className="grid grid-cols-[minmax(0,1fr)_6.5rem_auto] gap-2 font-mono text-[9px] uppercase tracking-[0.18em] text-ink-soft">
+            <span>Size</span>
+            <span>In stock</span>
+            <span className="sr-only">Remove</span>
+          </div>
+          {rows.map((r, i) => (
+            <div key={i} className="grid grid-cols-[minmax(0,1fr)_6.5rem_auto] gap-2">
+              <input
+                type="text"
+                aria-label={`Size ${i + 1}`}
+                value={r.size}
+                onChange={(e) => set(i, { size: e.target.value })}
+                placeholder="e.g. 54, Medium, 42"
+                className={fieldCls}
+              />
+              <input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                step={1}
+                aria-label={`Stock for size ${r.size || i + 1}`}
+                value={String(r.stock)}
+                onChange={(e) => set(i, { stock: e.target.value })}
+                className={fieldCls}
+              />
+              <button
+                type="button"
+                onClick={() => onChange(rows.filter((_, j) => j !== i))}
+                className={`${btnSm} border border-line hover:border-ink`}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onChange([...rows, { size: "", stock: 1 }])}
+          className={`${btnSm} bg-ink text-chalk hover:bg-ink-soft`}
+        >
+          + Add a size
+        </button>
+        {(f.presets ?? []).map((p) => (
+          <button
+            key={p.label}
+            type="button"
+            onClick={() =>
+              onChange([
+                ...rows,
+                ...p.sizes
+                  .filter((s) => !have.has(s.toLowerCase()))
+                  .map((size) => ({ size, stock: 0 })),
+              ])
+            }
+            className={`${btnSm} border border-line hover:border-ink`}
+          >
+            + {p.label}
+          </button>
+        ))}
+      </div>
+      {rows.length > 0 && (
+        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-ink">
+          Total in stock: {total} · worked out from the sizes
+        </p>
+      )}
+      {f.hint && <p className="mt-1.5 text-xs leading-relaxed text-ink-soft">{f.hint}</p>}
+    </fieldset>
   );
 }

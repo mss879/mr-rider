@@ -13,6 +13,8 @@ import {
   type Lot,
   type Product,
   type Program,
+  type Variant,
+  DEFAULT_AUCTION_CURRENCY,
 } from "@/lib/data";
 import { MODELS_PER_BRAND, isModelNavCategory } from "@/lib/taxonomy";
 
@@ -27,6 +29,8 @@ type ProductRow = {
   collections: string[] | null;
   description: string | null;
   images: string[] | null;
+  /** Migration 25. Absent until it runs — see withoutMissingColumn. */
+  variants?: Variant[] | null;
   condition: "new" | "pre-owned";
   stock: number;
   listed_at: string;
@@ -63,6 +67,9 @@ type LotRow = {
   current_bid: number;
   bids_count: number;
   ends_at: string;
+  /** Migration 25 — absent on a database that has not run it. */
+  currency?: string | null;
+  images?: string[] | null;
 };
 
 /* ---------- mappers ---------- */
@@ -95,6 +102,7 @@ const toProduct = (r: ProductRow): Product => ({
   // A card renders the first shot and a hover shot; the other three would
   // cross the wire for all 1,400-odd products and never be looked at.
   images: r.images?.slice(0, 2) ?? undefined,
+  variants: r.variants?.length ? r.variants : undefined,
   condition: r.condition,
   stock: r.stock,
   addedDaysAgo: daysAgo(r.listed_at),
@@ -129,8 +137,10 @@ const toLot = (r: LotRow): Lot => ({
   spec: r.spec,
   condition: r.condition,
   currentBid: Number(r.current_bid),
+  currency: r.currency || DEFAULT_AUCTION_CURRENCY,
   bids: r.bids_count,
   endsIn: endsIn(r.ends_at),
+  images: r.images?.length ? r.images : undefined,
 });
 
 /* ---------- generic fetch with fallback ---------- */
@@ -159,10 +169,11 @@ async function fromTable<Row, T>(
   const clauses: OrderClause[] =
     typeof orderBy === "string" ? [{ column: orderBy }] : orderBy;
   const data: Row[] = [];
+  let cols = columns;
   for (let offset = 0; ; offset += PAGE) {
     // Paging only holds together if the sort is total and stable, so every
     // clause is applied on every page — including the tie-breaker.
-    let query = sb.from(table).select(columns);
+    let query = sb.from(table).select(cols);
     for (const c of clauses) {
       query = query.order(c.column, {
         ascending: c.ascending ?? true,
@@ -170,6 +181,13 @@ async function fromTable<Row, T>(
       });
     }
     const { data: page, error } = await query.range(offset, offset + PAGE - 1);
+    const retry = error ? withoutMissingColumn(cols, error.message) : null;
+    if (retry) {
+      console.warn(`[db] ${table}: ${error!.message} — reading without it (run the latest migration)`);
+      cols = retry;
+      offset -= PAGE;
+      continue;
+    }
     // Only an unreachable table means "not migrated yet". A live table that
     // happens to be empty is answered honestly — a quiet drop day or an empty
     // clearance rail must not resurrect the demo catalog.
@@ -201,7 +219,21 @@ async function fromTable<Row, T>(
    otherwise carry it to the browser and never render it. Ask for it per
    product with getProductDescription when a detail page needs it. */
 const CARD_COLUMNS =
-  "id,name,brand,category,subcategory,collections,images,condition,stock,listed_at,sort_position,featured,clearance";
+  "id,name,brand,category,subcategory,collections,images,variants,condition,stock,listed_at,sort_position,featured,clearance";
+
+/* A column the code asks for but the database does not have yet — the gap
+   between a deploy and the migration that goes with it. PostgREST names it
+   ("column products.variants does not exist"); the read is retried without
+   it rather than throwing the whole catalogue back to mock data. Only for a
+   named column list: "*" cannot be missing anything. */
+function withoutMissingColumn(columns: string, message: string): string | null {
+  if (columns === "*") return null;
+  const m = /column [\w.]*?\.?(\w+) does not exist/i.exec(message);
+  if (!m) return null;
+  const list = columns.split(",");
+  const next = list.filter((c) => c.trim() !== m[1]);
+  return next.length < list.length ? next.join(",") : null;
+}
 
 /* The club's running order, chosen over "newest first" so the admin can pin
    a hero product without having to number the whole catalogue: anything with
@@ -252,6 +284,30 @@ export async function getProductDescription(id: string): Promise<string> {
     return "";
   }
   return (data as { description?: string } | null)?.description ?? "";
+}
+
+/** PRODUCT PAGE — /shop/[id]. The one place a product is shown whole: every
+    photo (the grids take two) and the description. Null when there is no such
+    product, so the page can 404. */
+export async function getProduct(id: string): Promise<Product | null> {
+  const sb = getSupabase();
+  const mock = () => mockProducts.find((p) => p.id === id) ?? null;
+  if (!sb) return mock();
+  let cols = `${CARD_COLUMNS},description`;
+  let { data, error } = await sb.from("products").select(cols).eq("id", id).maybeSingle();
+  for (let next = error && withoutMissingColumn(cols, error.message); next; ) {
+    console.warn(`[db] product ${id}: ${error!.message} — reading without it`);
+    cols = next;
+    ({ data, error } = await sb.from("products").select(cols).eq("id", id).maybeSingle());
+    next = error && withoutMissingColumn(cols, error.message);
+  }
+  if (error) {
+    console.warn(`[db] product ${id}: ${error.message} — falling back to mock data`);
+    return mock();
+  }
+  if (!data) return null;
+  const row = data as unknown as ProductRow;
+  return { ...toProduct(row), images: row.images ?? undefined };
 }
 
 /** COACHING — /coaching (migration 03) */
