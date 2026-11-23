@@ -5,7 +5,10 @@ import PageHero from "@/components/PageHero";
 import { IMAGERY } from "@/lib/imagery";
 import SectionHead from "@/components/SectionHead";
 import { coaches, products } from "@/lib/data";
+import { loadBrands } from "@/lib/db";
 import { categories, directoryBrands } from "@/lib/taxonomy";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "About",
@@ -33,7 +36,9 @@ const VALUES = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  // The brand count reads the club's current list (migration 26).
+  await loadBrands();
   return (
     <>
       <PageHero

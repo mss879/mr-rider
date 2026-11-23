@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MR.RIDER — Brands Quick Guide</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="guide.css">
+<style>
+  /* Checkbox and dropdown drawings used only in this guide. */
+  .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6mm 4mm; border: 1px solid #bdbdbd; padding: 2.5mm 3mm; margin-bottom: 3mm; }
+  .cb { display: flex; align-items: center; gap: 1.8mm; font-size: 8.4pt; }
+  .cb i { width: 3.2mm; height: 3.2mm; border: 1.2px solid #0a0a0a; display: inline-block; position: relative; flex: none; }
+  .cb.on i { background: #0a0a0a; }
+  .cb.on i::after { content: ""; position: absolute; left: 0.9mm; top: 0.2mm; width: 0.9mm; height: 1.8mm; border: solid #fff; border-width: 0 0.45mm 0.45mm 0; transform: rotate(45deg); }
+  .select { border: 1px solid #bdbdbd; padding: 1.8mm 2.5mm; display: flex; justify-content: space-between; margin-bottom: 1mm; }
+  .menu { border: 1px solid #0a0a0a; border-top: none; font-size: 8.6pt; }
+  .menu div { padding: 1.2mm 2.5mm; }
+  .menu .hl { background: #0a0a0a; color: #fff; }
+  .menu .dim { color: #9a9a9a; }
+  .cover h1 { font-size: 58pt; }
+  .ask { border: 1.5px solid #0a0a0a; padding: 4mm 5mm; margin: 0 0 6mm; break-inside: avoid; }
+  .ask .label { display: block; font-family: var(--mono); font-weight: 600; font-size: 7.5pt; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1.5mm; }
+  .ask p { margin: 0 0 1.5mm; }
+  .ask p:last-child { margin: 0; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="stripe">MEMBERS ONLY · CLUB ADMINISTRATION</div>
+  <img class="logo" src="../../public/logo.png" alt="MR.RIDER">
+  <p class="eyebrow">Back office · quick guide</p>
+  <h1>Brands</h1>
+  <p class="sub">Fixing the brand on a product, adding a new brand such as Factor, and renaming one. Four short jobs, step by step.</p>
+  <div class="meta"><span>mr-rider.netlify.app/admin</span><span>November 2026</span></div>
+</section>
+
+<!-- ================= 01 ================= -->
+<section>
+  <p class="kicker">Section 01</p>
+  <h2><span class="num">01</span>Before you start</h2>
+  <p class="lead">Brands are managed in the back office's <b>Brands</b> tab, next to Products. You can add, rename and hide brands yourself. Every product that carries a brand updates at the same time.</p>
+
+  <div class="ask">
+    <span class="label">Your two questions, answered</span>
+    <p><b>“Road bike shows 100% — it's wrong and we can't edit it.”</b> That bike is the <b>Scott Addict 50</b>. It was saved with the Brand menu left on its first entry, 100%. Fix it with the steps in section 02. The Brand menu now starts blank, so it can't happen by accident again.</p>
+    <p><b>“Factor — a new road bike brand we need to add.”</b> Add it in the Brands tab (section 03), then pick it on your Factor bikes.</p>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:44%">I want to…</th><th>Go to</th></tr></thead>
+    <tbody>
+      <tr><td>Change which brand a product has</td><td>Section 02 · Products tab</td></tr>
+      <tr><td>Add a brand that isn't in the list</td><td>Section 03 · Brands tab</td></tr>
+      <tr><td>Correct a brand's name or spelling</td><td>Section 04 · Brands tab</td></tr>
+      <tr><td>Hide or delete a brand</td><td>Section 05 · Brands tab</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note"><span class="label">Signing in</span><p>Open <b>mr-rider.netlify.app/admin</b>, sign in with <code>admin@mrrider.lk</code> and the admin password, as usual.</p></div>
+</section>
+
+<!-- ================= 02 ================= -->
+<section class="page">
+  <p class="kicker">Section 02</p>
+  <h2><span class="num">02</span>Fix the brand on a product</h2>
+  <p class="lead">Example: the <b>Scott Addict 50</b> shows <b>100%</b> as its brand. It should be <b>Scott</b>.</p>
+
+  <div class="two">
+    <div>
+      <ol class="steps">
+        <li>Open the <b>Products</b> tab.</li>
+        <li>In the search box, type <code>Addict</code>.</li>
+        <li>On the <b>SCOTT ADDICT 50</b> row, press <span class="btn ghost">Edit</span>.</li>
+        <li>Tap the <b>Brand</b> menu. Type <b>S</b> to jump down the list, then choose <b>Scott</b>.</li>
+        <li>Press <span class="btn">Save</span>.</li>
+        <li>Open the bike on the website. Above its name it now says <b>SCOTT</b>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="ui">
+        <span class="lbl">Brand *</span>
+        <div class="select"><span>Scott</span><span>⌃</span></div>
+        <div class="menu">
+          <div class="dim">— Pick a brand —</div>
+          <div>Schwalbe</div>
+          <div>Scicon</div>
+          <div class="hl">Scott</div>
+          <div>SDG</div>
+        </div>
+        <p style="font-size:8pt;color:#5c5c5c;margin:2.5mm 0 0">Not in the list? Add it in the Brands tab first, then come back.</p>
+      </div>
+      <p class="ui-caption">The Brand menu on the product form</p>
+    </div>
+  </div>
+
+  <div class="tip"><span class="label">Adding a new product</span><p>The Brand menu now starts on <b>— Pick a brand —</b>. If you press Save without choosing one, you'll see “Brand is required”. Choose the brand and press Save again.</p></div>
+</section>
+
+<!-- ================= 03 ================= -->
+<section class="page">
+  <p class="kicker">Section 03</p>
+  <h2><span class="num">03</span>Add a new brand</h2>
+  <p class="lead">Example: <b>Factor</b>, a new road bike brand. Add the brand once, then give it to each Factor product.</p>
+
+  <h3>Part A · Add the brand</h3>
+  <div class="two">
+    <div>
+      <ol class="steps">
+        <li>Open the <b>Brands</b> tab.</li>
+        <li>Search for <code>Factor</code> first, in case it's already there.</li>
+        <li>Press <span class="btn">+ Add new</span>.</li>
+        <li>In <b>Brand name</b>, type <code>Factor</code>, with the capitals exactly as riders should see them.</li>
+        <li>Under <b>Aisles it belongs in</b>, tick <b>Road Bikes</b>. Tick <b>Framesets</b> too if you'll sell Factor frames.</li>
+        <li>Leave <b>Show on the Brands page</b> ticked.</li>
+        <li>Press <span class="btn">Save</span>. Factor now appears in the list.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="ui">
+        <span class="lbl">Brand name *</span>
+        <div class="field">Factor</div>
+        <span class="lbl">Aisles it belongs in</span>
+        <div class="checks">
+          <span class="cb on"><i></i>Road Bikes</span>
+          <span class="cb on"><i></i>Framesets</span>
+          <span class="cb"><i></i>Mountain Bikes</span>
+          <span class="cb"><i></i>Helmets</span>
+          <span class="cb"><i></i>Wheels</span>
+          <span class="cb"><i></i>Components</span>
+        </div>
+        <span class="cb on" style="margin-bottom:3mm"><i></i>Show on the Brands page</span>
+        <div class="btns"><span class="mini dark">Save</span><span class="mini">Cancel</span></div>
+      </div>
+      <p class="ui-caption">The Brands form, filled in for Factor (aisles shortened)</p>
+    </div>
+  </div>
+
+  <h3>Part B · Give it to your Factor products</h3>
+  <ol class="steps">
+    <li>Open the <b>Products</b> tab.</li>
+    <li>For a new bike, press <span class="btn">+ Add new</span>. For one you've already added, search for it and press <span class="btn ghost">Edit</span>.</li>
+    <li>In the <b>Brand</b> menu, choose <b>Factor</b>. It's there straight away.</li>
+    <li>Fill in or check the other fields, then press <span class="btn">Save</span>.</li>
+  </ol>
+
+  <div class="note"><span class="label">When Factor shows on the website</span><p>Factor appears on the Brands page as soon as you save it. It appears in the <b>Road Bikes</b> menu and the shop's brand filter once a Factor bike is saved <b>with stock</b>. The menus only list brands you actually have.</p></div>
+</section>
+
+<!-- ================= 04 + 05 ================= -->
+<section class="page">
+  <p class="kicker">Section 04</p>
+  <h2><span class="num">04</span>Rename a brand</h2>
+  <p class="lead">Use this to correct a spelling or capitals, for example <code>Camelbak</code> → <code>CamelBak</code>. Every product with that brand changes at once.</p>
+  <ol class="steps">
+    <li>Open the <b>Brands</b> tab.</li>
+    <li>Search for the brand and press <span class="btn ghost">Edit</span> on its row.</li>
+    <li>Change the <b>Brand name</b>.</li>
+    <li>Press <span class="btn">Save</span>. The website shows the new name within a couple of minutes.</li>
+  </ol>
+  <div class="note"><span class="label">Renaming is safe</span><p>Renaming changes only the name riders read. Products, shop links and menus keep working. To move a product to a <b>different</b> brand, edit the product instead (section 02).</p></div>
+
+  <p class="kicker" style="margin-top:9mm">Section 05</p>
+  <h2><span class="num">05</span>Hide or delete a brand</h2>
+
+  <table>
+    <thead><tr><th style="width:34%">You want to…</th><th>Do this</th></tr></thead>
+    <tbody>
+      <tr><td>Take a brand off the Brands page, but keep it</td><td>Brands tab → <b>Edit</b> → untick <b>Show on the Brands page</b> → <b>Save</b>. Its products stay in the shop.</td></tr>
+      <tr><td>Change the aisles it's listed under</td><td>Brands tab → <b>Edit</b> → tick or untick aisles under <b>Aisles it belongs in</b> → <b>Save</b>.</td></tr>
+      <tr><td>Delete a brand completely</td><td>Brands tab → <b>Delete</b> → <b>OK</b>. This only works when no product uses the brand. Otherwise you'll see: “This brand still has products. Change those products to another brand first.”</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn"><span class="label">Before deleting</span><p>A brand added by mistake, such as a misspelling, is best renamed (section 04) rather than deleted. Delete cannot be undone.</p></div>
+
+  <h3>Good to know</h3>
+  <ul class="ticks">
+    <li>Each brand is added once. If the form says a brand is “already in the list”, search for it and press Edit instead.</li>
+    <li>The name appears exactly as you type it, so check capitals and spelling (<b>ENVE</b>, <b>CamelBak</b>, <b>100%</b>).</li>
+    <li>The club's own label, MR.RIDER, is marked <b>CLUB LABEL</b>. Leave it as it is.</li>
+  </ul>
+</section>
+
+</body>
+</html>

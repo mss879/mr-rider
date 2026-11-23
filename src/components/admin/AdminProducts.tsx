@@ -56,9 +56,18 @@ const SORTS: SortOption[] = [
   { value: "shelf", label: "Club running order", column: "sort_position", ascending: true },
 ];
 
-const brandOptions = [...brands]
-  .sort((a, b) => a.name.localeCompare(b.name))
-  .map((b) => ({ value: b.slug, label: b.name }));
+/* Read when the form draws, not when this file loads: the list is the club's
+   own (Brands tab, migration 26) and can grow while the admin is open.
+
+   It opens on a blank "Pick a brand" rather than the first brand. It used to
+   open on "100%", and a road bike saved without touching the menu went out
+   as a 100% bike; now Save stops with "Brand is required" instead. */
+const brandOptions = () => [
+  { value: "", label: "— Pick a brand —" },
+  ...[...brands]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((b) => ({ value: b.slug, label: b.name })),
+];
 
 const fields: FieldDef[] = [
   { key: "name", label: "Name", type: "text", required: true },
@@ -67,7 +76,8 @@ const fields: FieldDef[] = [
     label: "Brand",
     type: "select",
     required: true,
-    options: brandOptions,
+    optionsFor: brandOptions,
+    hint: "Not in the list? Add it in the Brands tab first, then come back.",
   },
   {
     key: "category",
@@ -90,7 +100,7 @@ const fields: FieldDef[] = [
   },
   /* BUG-02 — the "also show under (brand collections)" multiselect is off the
      product form. It rendered all 104 brand checkboxes (every entry in `brands`,
-     src/lib/taxonomy.ts, via brandOptions above) into one 160px scroll box across
+     via brandOptions above) into one 160px scroll box across
      the full form width; the club read that as clutter and asked for the block
      gone. Nothing else about the feature was touched.
 
@@ -196,7 +206,7 @@ export default function AdminProducts({ sb }: { sb: SupabaseClient }) {
       pageSize={PAGE_SIZE}
       newRow={() => ({
         id: `p-${Date.now().toString(36)}`,
-        brand: brandOptions[0].value,
+        brand: "",
         category: categories[0].slug,
         subcategory: subcategoriesOf(categories[0].slug)[0]?.slug ?? "",
         // BUG-02 — no `collections: []` seed any more. With the field def gone

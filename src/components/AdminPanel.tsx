@@ -5,6 +5,7 @@ import type { Session } from "@supabase/supabase-js";
 import Lock from "@/components/Lock";
 import AdminApplications from "@/components/admin/AdminApplications";
 import AdminAuction from "@/components/admin/AdminAuction";
+import AdminBrands from "@/components/admin/AdminBrands";
 import AdminClients from "@/components/admin/AdminClients";
 import AdminCoaching from "@/components/admin/AdminCoaching";
 import AdminInquiries from "@/components/admin/AdminInquiries";
@@ -18,6 +19,7 @@ type Tab =
   | "clients"
   | "enquiries"
   | "products"
+  | "brands"
   | "coaching"
   | "auction"
   | "accounts";
@@ -28,6 +30,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "clients", label: "Clients" },
   { id: "enquiries", label: "Enquiries" },
   { id: "products", label: "Products" },
+  { id: "brands", label: "Brands" },
   { id: "coaching", label: "Coaching" },
   { id: "auction", label: "Auction" },
   { id: "accounts", label: "Accounts" },
@@ -488,6 +491,7 @@ export default function AdminPanel() {
       )}
 
       {tab === "products" && <AdminProducts sb={sb} />}
+      {tab === "brands" && <AdminBrands sb={sb} />}
       {tab === "coaching" && <AdminCoaching sb={sb} />}
       {tab === "auction" && <AdminAuction sb={sb} />}
     </div>

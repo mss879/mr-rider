@@ -8,7 +8,8 @@ import SiteJsonLd from "@/components/SiteJsonLd";
 import MotionProvider from "@/components/motion/MotionProvider";
 import Preloader from "@/components/Preloader";
 import { CREDIT } from "@/lib/credit";
-import { getNavAvailability } from "@/lib/db";
+import BrandSync from "@/components/BrandSync";
+import { getNavAvailability, loadBrands } from "@/lib/db";
 import { MOTION_BOOT } from "@/lib/motion";
 import {
   SITE_NAME,
@@ -134,7 +135,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Drives the mega-menu: menu entries with no stock behind them stay hidden.
-  const availability = await getNavAvailability();
+  // The brand rows are the club's own list (migration 26), sent to the
+  // browser so client components name brands the way the server did.
+  const [availability, brandRows] = await Promise.all([getNavAvailability(), loadBrands()]);
 
   return (
     // The boot script below adds a class to this element before React
@@ -155,9 +158,11 @@ export default async function RootLayout({
             covers the page from the first paint. Pure CSS — see Preloader. */}
         <Preloader />
         <MotionProvider />
-        <SiteHeader availability={availability} />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
+        <BrandSync rows={brandRows}>
+          <SiteHeader availability={availability} />
+          <main className="flex-1">{children}</main>
+          <SiteFooter />
+        </BrandSync>
       </body>
     </html>
   );

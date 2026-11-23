@@ -16,7 +16,12 @@ import {
   type Variant,
   DEFAULT_AUCTION_CURRENCY,
 } from "@/lib/data";
-import { MODELS_PER_BRAND, isModelNavCategory } from "@/lib/taxonomy";
+import {
+  MODELS_PER_BRAND,
+  applyBrandRows,
+  isModelNavCategory,
+  type BrandRow,
+} from "@/lib/taxonomy";
 
 /* ---------- row shapes (snake_case, as created by the migrations) ---------- */
 
@@ -246,29 +251,73 @@ const SHELF_ORDER: OrderClause[] = [
   { column: "id", ascending: true },
 ];
 
+/** BRANDS — public.brands, edited from /admin → Brands (migration 26).
+
+    Laid over the code's brand list (applyBrandRows) before anything that
+    prints a brand name renders, and handed to <BrandSync> in the root layout
+    so the browser carries the same list. Read at most once a minute per
+    server instance: the brand list changes a few times a year, and it rides
+    along on every page. Null when the table cannot be read — the code's list
+    stands in. */
+const BRAND_TTL_MS = 60_000;
+let brandCache: { at: number; rows: Promise<BrandRow[] | null> } | null = null;
+
+export function loadBrands(): Promise<BrandRow[] | null> {
+  if (brandCache && Date.now() - brandCache.at < BRAND_TTL_MS) return brandCache.rows;
+  const rows = fetchBrandRows().then((r) => {
+    applyBrandRows(r);
+    return r;
+  });
+  brandCache = { at: Date.now(), rows };
+  return rows;
+}
+
+async function fetchBrandRows(): Promise<BrandRow[] | null> {
+  const sb = getSupabase();
+  if (!sb) return null;
+  let cols = "slug,name,categories,in_directory,house";
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data, error } = await sb.from("brands").select(cols).order("name");
+    if (!error) return (data as unknown as BrandRow[]) ?? null;
+    const next = withoutMissingColumn(cols, error.message);
+    if (!next) {
+      console.warn(`[db] brands: ${error.message} — using the brand list in the code`);
+      return null;
+    }
+    cols = next;
+  }
+  return null;
+}
+
 /** SHOP — /shop, homepage grids */
-export const getProducts = () =>
-  fromTable<ProductRow, Product>("products", toProduct, mockProducts, SHELF_ORDER, CARD_COLUMNS);
+export const getProducts = async () => {
+  await loadBrands();
+  return fromTable<ProductRow, Product>("products", toProduct, mockProducts, SHELF_ORDER, CARD_COLUMNS);
+};
 
 /** DAILY LISTINGS — /daily-listings (view from migration 02) */
-export const getDailyProducts = () =>
-  fromTable<ProductRow, Product>(
+export const getDailyProducts = async () => {
+  await loadBrands();
+  return fromTable<ProductRow, Product>(
     "daily_listings",
     toProduct,
     mockProducts.filter((p) => p.addedDaysAgo <= 1),
     SHELF_ORDER,
     CARD_COLUMNS,
   );
+};
 
 /** CLEARANCE MARKET — /clearance (view from migration 05) */
-export const getClearanceProducts = () =>
-  fromTable<ProductRow, Product>(
+export const getClearanceProducts = async () => {
+  await loadBrands();
+  return fromTable<ProductRow, Product>(
     "clearance_items",
     toProduct,
     mockClearance,
     SHELF_ORDER,
     CARD_COLUMNS,
   );
+};
 
 /** Supplier copy for one product — the column the grids deliberately skip. */
 export async function getProductDescription(id: string): Promise<string> {
@@ -290,6 +339,7 @@ export async function getProductDescription(id: string): Promise<string> {
     photo (the grids take two) and the description. Null when there is no such
     product, so the page can 404. */
 export async function getProduct(id: string): Promise<Product | null> {
+  await loadBrands();
   const sb = getSupabase();
   const mock = () => mockProducts.find((p) => p.id === id) ?? null;
   if (!sb) return mock();

@@ -1,0 +1,232 @@
+  /* Print layout for the client's back-office guides (guide.html,
+     brands.html). Rendered to PDF with headless Chrome by build.py beside
+     this file. Black and white, in the site's own three typefaces. */
+  :root {
+    --ink: #0a0a0a;
+    --soft: #5c5c5c;
+    --line: #d9d9d9;
+    --wash: #f4f4f4;
+    --paper: #ffffff;
+    --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+
+  @page {
+    size: A4;
+    margin: 20mm 18mm 22mm 18mm;
+    @bottom-left {
+      content: "MR.RIDER  ·  BACK OFFICE GUIDE";
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 7pt;
+      letter-spacing: 0.14em;
+      color: #8a8a8a;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 8pt;
+      font-weight: 600;
+      color: #0a0a0a;
+    }
+  }
+  @page cover {
+    margin: 0;
+    @bottom-left { content: none; }
+    @bottom-right { content: none; }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: var(--body);
+    font-size: 10.2pt;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--paper);
+  }
+
+  /* ---------- cover ---------- */
+  .cover {
+    page: cover;
+    break-after: page;
+    height: 297mm;
+    width: 210mm;
+    background: #000;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 22mm 20mm 20mm;
+  }
+  .cover .stripe {
+    position: absolute; left: 0; right: 0; top: 0;
+    height: 9mm; border-bottom: 1px solid #333;
+    font-family: var(--mono); font-size: 7pt; letter-spacing: 0.24em;
+    display: flex; align-items: center; justify-content: center; color: #bdbdbd;
+  }
+  .cover .logo { width: 118mm; margin: 22mm auto 0; display: block; }
+  .cover .eyebrow {
+    margin-top: auto;
+    font-family: var(--mono); font-size: 8.5pt; letter-spacing: 0.26em;
+    text-transform: uppercase; color: #bdbdbd;
+  }
+  .cover h1 {
+    font-family: var(--display); font-weight: 800; text-transform: uppercase;
+    font-size: 64pt; line-height: 0.9; letter-spacing: 0.01em; margin: 4mm 0 6mm;
+  }
+  .cover .sub { font-size: 12pt; line-height: 1.5; color: #e6e6e6; max-width: 135mm; margin: 0; }
+  .cover .meta {
+    margin-top: 12mm; padding-top: 5mm; border-top: 1px solid #3a3a3a;
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 7.5pt; letter-spacing: 0.16em; text-transform: uppercase; color: #bdbdbd;
+  }
+
+  /* ---------- running type ---------- */
+  .page { break-before: page; }
+  .kicker {
+    font-family: var(--mono); font-size: 7.5pt; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--soft); margin: 0 0 2mm;
+  }
+  h2 {
+    font-family: var(--display); font-weight: 800; text-transform: uppercase;
+    font-size: 30pt; line-height: 0.95; letter-spacing: 0.01em; margin: 0 0 5mm;
+    display: flex; align-items: baseline; gap: 4mm;
+  }
+  h2 .num {
+    font-family: var(--mono); font-weight: 600; font-size: 10pt; letter-spacing: 0.1em;
+    background: var(--ink); color: #fff; padding: 1.2mm 2.4mm; position: relative; top: -2.5mm;
+  }
+  .lead { font-size: 11.5pt; line-height: 1.5; margin: 0 0 5mm; max-width: 160mm; }
+  h3 {
+    font-family: var(--mono); font-weight: 600; font-size: 8.5pt; letter-spacing: 0.18em;
+    text-transform: uppercase; margin: 6mm 0 3mm; padding-bottom: 1.5mm; border-bottom: 1.5px solid var(--ink);
+    break-after: avoid;
+  }
+  p { margin: 0 0 3mm; }
+  b, strong { font-weight: 700; }
+  code, .k {
+    font-family: var(--mono); font-size: 8.8pt; background: var(--wash); border: 1px solid var(--line);
+    padding: 0 1.2mm; white-space: nowrap;
+  }
+  .btn {
+    display: inline-block; font-family: var(--mono); font-size: 7.6pt; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; background: var(--ink); color: #fff; padding: 0.4mm 2mm; white-space: nowrap;
+    line-height: 1.6;
+  }
+  .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--ink); }
+
+  /* ---------- numbered steps ---------- */
+  ol.steps { list-style: none; counter-reset: step; padding: 0; margin: 0 0 4mm; }
+  ol.steps > li {
+    counter-increment: step; position: relative; padding: 1.2mm 0 1.2mm 11mm; min-height: 8mm;
+    break-inside: avoid;
+  }
+  ol.steps > li::before {
+    content: counter(step); position: absolute; left: 0; top: 1mm;
+    width: 7mm; height: 7mm; border-radius: 50%; background: var(--ink); color: #fff;
+    font-family: var(--mono); font-weight: 600; font-size: 8.5pt;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  ul.ticks { padding-left: 0; list-style: none; margin: 0 0 4mm; }
+  ul.ticks li { position: relative; padding-left: 6mm; margin-bottom: 1.5mm; break-inside: avoid; }
+  ul.ticks li::before { content: ""; position: absolute; left: 0.5mm; top: 2.1mm; width: 2.2mm; height: 2.2mm; background: var(--ink); }
+
+  /* ---------- tables ---------- */
+  table { width: 100%; border-collapse: collapse; margin: 1mm 0 5mm; font-size: 9.3pt; break-inside: auto; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  th {
+    background: var(--ink); color: #fff; text-align: left; font-family: var(--mono); font-weight: 600;
+    font-size: 7.5pt; letter-spacing: 0.14em; text-transform: uppercase; padding: 2mm 3mm;
+  }
+  td { padding: 1.7mm 3mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: #fafafa; }
+  td:first-child { font-weight: 600; }
+  table.narrow { width: auto; min-width: 70mm; }
+  .req { font-family: var(--mono); font-weight: 600; }
+
+  /* ---------- callouts ---------- */
+  .note, .warn, .tip {
+    border-left: 4px solid var(--ink); background: var(--wash); padding: 3mm 4mm; margin: 2mm 0 5mm;
+    break-inside: avoid;
+  }
+  .note .label, .warn .label, .tip .label {
+    display: block; font-family: var(--mono); font-weight: 600; font-size: 7.5pt; letter-spacing: 0.2em;
+    text-transform: uppercase; margin-bottom: 1mm;
+  }
+  .warn { background: #fff; border: 1.5px solid var(--ink); border-left-width: 6px; }
+  .note p:last-child, .warn p:last-child, .tip p:last-child { margin: 0; }
+
+  /* ---------- golden rules ---------- */
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 4mm 0 6mm; }
+  .rule { border: 1.5px solid var(--ink); padding: 4mm; break-inside: avoid; }
+  .rule .n { font-family: var(--display); font-weight: 800; font-size: 26pt; line-height: 1; }
+  .rule .t { font-weight: 700; font-size: 10.5pt; margin: 2mm 0 1mm; }
+  .rule p { font-size: 9.2pt; color: #333; margin: 0; }
+
+  /* ---------- contents ---------- */
+  .toc { list-style: none; padding: 0; margin: 2mm 0 0; }
+  .toc li {
+    display: flex; align-items: baseline; gap: 3mm; padding: 2.4mm 0; border-bottom: 1px solid var(--line);
+    font-size: 11pt;
+  }
+  .toc .n { font-family: var(--mono); font-weight: 600; font-size: 8.5pt; width: 9mm; }
+  .toc .t { font-weight: 600; }
+  .toc .d { color: var(--soft); font-size: 9pt; flex: 1; }
+  .toc .p { font-family: var(--mono); font-weight: 600; font-size: 9pt; min-width: 8mm; text-align: right; }
+
+  /* ---------- UI drawings ---------- */
+  .ui {
+    border: 1.5px solid var(--ink); background: #fff; padding: 4mm; margin: 2mm 0 2mm;
+    font-family: var(--body); font-size: 9pt; break-inside: avoid;
+  }
+  .ui-caption { font-family: var(--mono); font-size: 7pt; letter-spacing: 0.14em; text-transform: uppercase; color: var(--soft); margin: 0 0 5mm; }
+  .ui .lbl { font-family: var(--mono); font-size: 6.6pt; letter-spacing: 0.2em; text-transform: uppercase; color: var(--soft); margin-bottom: 1mm; display: block; }
+  .ui .field { border: 1px solid #bdbdbd; padding: 1.8mm 2.5mm; min-height: 7.5mm; margin-bottom: 3mm; color: #222; }
+  .ui .field.ph { color: #9a9a9a; }
+  .ui .row { display: grid; gap: 2mm; align-items: center; margin-bottom: 2mm; }
+  .ui.sizes .row { grid-template-columns: 1fr 22mm 18mm; }
+  .ui.sizes .row .field { margin: 0; min-height: 0; padding: 1.4mm 2.2mm; }
+  .ui.sizes .row .mini { padding: 1.4mm 1mm; }
+  .ui .mini { font-family: var(--mono); font-size: 6.8pt; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 1.6mm 2.4mm; border: 1px solid #bdbdbd; text-align: center; }
+  .ui .mini.dark { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .ui .btns { display: flex; flex-wrap: wrap; gap: 2mm; margin-top: 2mm; }
+  .ui .total { font-family: var(--mono); font-size: 7pt; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 3mm; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1.5px solid var(--ink); }
+  .tabs span { font-family: var(--mono); font-size: 6.8pt; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 2mm 2.4mm; border: 1px solid var(--line); border-bottom: none; margin-right: -1px; }
+  .tabs span.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .photos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2mm; }
+  .photo { border: 1px solid #bdbdbd; padding: 1.5mm; }
+  .photo .img { height: 13mm; background: repeating-linear-gradient(135deg, #f1f1f1 0 3px, #e4e4e4 3px 6px); position: relative; }
+  .photo .img .main { position: absolute; left: 0; top: 0; background: var(--ink); color: #fff; font-family: var(--mono); font-size: 5.6pt; font-weight: 600; letter-spacing: 0.14em; padding: 0.6mm 1.2mm; }
+  .photo .ctl { display: flex; gap: 1mm; margin-top: 1.5mm; align-items: center; font-family: var(--mono); font-size: 6pt; }
+  .photo .ctl span { border: 1px solid #bdbdbd; padding: 0 1.3mm; }
+  .photo .ctl u { margin-left: auto; letter-spacing: 0.08em; }
+
+  /* type this → riders see */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 2mm 0 5mm; break-inside: avoid; }
+  .split .pane { border: 1.5px solid var(--ink); }
+  .split .head { background: var(--ink); color: #fff; font-family: var(--mono); font-size: 7pt; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; padding: 1.8mm 3mm; }
+  .split pre { margin: 0; padding: 3mm; font-family: var(--mono); font-size: 7.9pt; line-height: 1.55; white-space: pre-wrap; }
+  .split .render { padding: 3mm 3.5mm; font-size: 9pt; line-height: 1.5; color: #333; }
+  .split .render .h { font-family: var(--display); font-weight: 800; text-transform: uppercase; font-size: 12pt; color: var(--ink); margin: 2.5mm 0 1mm; }
+  .split .render ul { margin: 0 0 1mm; padding-left: 4.5mm; list-style: square; }
+  .split .render p { margin: 0 0 1.5mm; }
+
+  /* size chips as riders see them */
+  .chips { display: flex; gap: 2mm; flex-wrap: wrap; margin: 1mm 0 2mm; }
+  .chip { border: 1px solid #bdbdbd; font-family: var(--mono); font-size: 7.6pt; font-weight: 600; padding: 1.4mm 2.6mm; }
+  .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chip.out { color: #a5a5a5; text-decoration: line-through; }
+  .chip small { font-weight: 400; opacity: 0.7; margin-left: 1mm; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .avoid { break-inside: avoid; }
+
+  /* quick reference */
+  .qr td { font-size: 9pt; padding: 1.8mm 2.6mm; }
+  .qr td:nth-child(2) { font-family: var(--mono); font-size: 7.8pt; font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; }

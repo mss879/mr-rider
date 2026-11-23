@@ -4,240 +4,7 @@
 <meta charset="utf-8">
 <title>MR.RIDER — Back Office Guide</title>
 <link rel="stylesheet" href="fonts/fonts.css">
-<style>
-  /* Print layout for the client's back-office manual. Rendered to PDF with
-     headless Chrome — see build.sh beside this file. Black and white, in the
-     site's own three typefaces. */
-  :root {
-    --ink: #0a0a0a;
-    --soft: #5c5c5c;
-    --line: #d9d9d9;
-    --wash: #f4f4f4;
-    --paper: #ffffff;
-    --display: "Barlow Condensed", "Arial Narrow", sans-serif;
-    --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
-    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
-  }
-
-  @page {
-    size: A4;
-    margin: 20mm 18mm 22mm 18mm;
-    @bottom-left {
-      content: "MR.RIDER  ·  BACK OFFICE GUIDE";
-      font-family: "IBM Plex Mono", monospace;
-      font-size: 7pt;
-      letter-spacing: 0.14em;
-      color: #8a8a8a;
-    }
-    @bottom-right {
-      content: counter(page);
-      font-family: "IBM Plex Mono", monospace;
-      font-size: 8pt;
-      font-weight: 600;
-      color: #0a0a0a;
-    }
-  }
-  @page cover {
-    margin: 0;
-    @bottom-left { content: none; }
-    @bottom-right { content: none; }
-  }
-
-  * { box-sizing: border-box; }
-  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body {
-    margin: 0;
-    font-family: var(--body);
-    font-size: 10.2pt;
-    line-height: 1.55;
-    color: var(--ink);
-    background: var(--paper);
-  }
-
-  /* ---------- cover ---------- */
-  .cover {
-    page: cover;
-    break-after: page;
-    height: 297mm;
-    width: 210mm;
-    background: #000;
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    padding: 22mm 20mm 20mm;
-  }
-  .cover .stripe {
-    position: absolute; left: 0; right: 0; top: 0;
-    height: 9mm; border-bottom: 1px solid #333;
-    font-family: var(--mono); font-size: 7pt; letter-spacing: 0.24em;
-    display: flex; align-items: center; justify-content: center; color: #bdbdbd;
-  }
-  .cover .logo { width: 118mm; margin: 22mm auto 0; display: block; }
-  .cover .eyebrow {
-    margin-top: auto;
-    font-family: var(--mono); font-size: 8.5pt; letter-spacing: 0.26em;
-    text-transform: uppercase; color: #bdbdbd;
-  }
-  .cover h1 {
-    font-family: var(--display); font-weight: 800; text-transform: uppercase;
-    font-size: 64pt; line-height: 0.9; letter-spacing: 0.01em; margin: 4mm 0 6mm;
-  }
-  .cover .sub { font-size: 12pt; line-height: 1.5; color: #e6e6e6; max-width: 135mm; margin: 0; }
-  .cover .meta {
-    margin-top: 12mm; padding-top: 5mm; border-top: 1px solid #3a3a3a;
-    display: flex; justify-content: space-between;
-    font-family: var(--mono); font-size: 7.5pt; letter-spacing: 0.16em; text-transform: uppercase; color: #bdbdbd;
-  }
-
-  /* ---------- running type ---------- */
-  .page { break-before: page; }
-  .kicker {
-    font-family: var(--mono); font-size: 7.5pt; letter-spacing: 0.24em; text-transform: uppercase;
-    color: var(--soft); margin: 0 0 2mm;
-  }
-  h2 {
-    font-family: var(--display); font-weight: 800; text-transform: uppercase;
-    font-size: 30pt; line-height: 0.95; letter-spacing: 0.01em; margin: 0 0 5mm;
-    display: flex; align-items: baseline; gap: 4mm;
-  }
-  h2 .num {
-    font-family: var(--mono); font-weight: 600; font-size: 10pt; letter-spacing: 0.1em;
-    background: var(--ink); color: #fff; padding: 1.2mm 2.4mm; position: relative; top: -2.5mm;
-  }
-  .lead { font-size: 11.5pt; line-height: 1.5; margin: 0 0 5mm; max-width: 160mm; }
-  h3 {
-    font-family: var(--mono); font-weight: 600; font-size: 8.5pt; letter-spacing: 0.18em;
-    text-transform: uppercase; margin: 6mm 0 3mm; padding-bottom: 1.5mm; border-bottom: 1.5px solid var(--ink);
-    break-after: avoid;
-  }
-  p { margin: 0 0 3mm; }
-  b, strong { font-weight: 700; }
-  code, .k {
-    font-family: var(--mono); font-size: 8.8pt; background: var(--wash); border: 1px solid var(--line);
-    padding: 0 1.2mm; white-space: nowrap;
-  }
-  .btn {
-    display: inline-block; font-family: var(--mono); font-size: 7.6pt; font-weight: 600; letter-spacing: 0.12em;
-    text-transform: uppercase; background: var(--ink); color: #fff; padding: 0.4mm 2mm; white-space: nowrap;
-    line-height: 1.6;
-  }
-  .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--ink); }
-
-  /* ---------- numbered steps ---------- */
-  ol.steps { list-style: none; counter-reset: step; padding: 0; margin: 0 0 4mm; }
-  ol.steps > li {
-    counter-increment: step; position: relative; padding: 1.2mm 0 1.2mm 11mm; min-height: 8mm;
-    break-inside: avoid;
-  }
-  ol.steps > li::before {
-    content: counter(step); position: absolute; left: 0; top: 1mm;
-    width: 7mm; height: 7mm; border-radius: 50%; background: var(--ink); color: #fff;
-    font-family: var(--mono); font-weight: 600; font-size: 8.5pt;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  ul.ticks { padding-left: 0; list-style: none; margin: 0 0 4mm; }
-  ul.ticks li { position: relative; padding-left: 6mm; margin-bottom: 1.5mm; break-inside: avoid; }
-  ul.ticks li::before { content: ""; position: absolute; left: 0.5mm; top: 2.1mm; width: 2.2mm; height: 2.2mm; background: var(--ink); }
-
-  /* ---------- tables ---------- */
-  table { width: 100%; border-collapse: collapse; margin: 1mm 0 5mm; font-size: 9.3pt; break-inside: auto; }
-  thead { display: table-header-group; }
-  tr { break-inside: avoid; }
-  th {
-    background: var(--ink); color: #fff; text-align: left; font-family: var(--mono); font-weight: 600;
-    font-size: 7.5pt; letter-spacing: 0.14em; text-transform: uppercase; padding: 2mm 3mm;
-  }
-  td { padding: 1.7mm 3mm; border-bottom: 1px solid var(--line); vertical-align: top; }
-  tbody tr:nth-child(even) td { background: #fafafa; }
-  td:first-child { font-weight: 600; }
-  table.narrow { width: auto; min-width: 70mm; }
-  .req { font-family: var(--mono); font-weight: 600; }
-
-  /* ---------- callouts ---------- */
-  .note, .warn, .tip {
-    border-left: 4px solid var(--ink); background: var(--wash); padding: 3mm 4mm; margin: 2mm 0 5mm;
-    break-inside: avoid;
-  }
-  .note .label, .warn .label, .tip .label {
-    display: block; font-family: var(--mono); font-weight: 600; font-size: 7.5pt; letter-spacing: 0.2em;
-    text-transform: uppercase; margin-bottom: 1mm;
-  }
-  .warn { background: #fff; border: 1.5px solid var(--ink); border-left-width: 6px; }
-  .note p:last-child, .warn p:last-child, .tip p:last-child { margin: 0; }
-
-  /* ---------- golden rules ---------- */
-  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 4mm 0 6mm; }
-  .rule { border: 1.5px solid var(--ink); padding: 4mm; break-inside: avoid; }
-  .rule .n { font-family: var(--display); font-weight: 800; font-size: 26pt; line-height: 1; }
-  .rule .t { font-weight: 700; font-size: 10.5pt; margin: 2mm 0 1mm; }
-  .rule p { font-size: 9.2pt; color: #333; margin: 0; }
-
-  /* ---------- contents ---------- */
-  .toc { list-style: none; padding: 0; margin: 2mm 0 0; }
-  .toc li {
-    display: flex; align-items: baseline; gap: 3mm; padding: 2.4mm 0; border-bottom: 1px solid var(--line);
-    font-size: 11pt;
-  }
-  .toc .n { font-family: var(--mono); font-weight: 600; font-size: 8.5pt; width: 9mm; }
-  .toc .t { font-weight: 600; }
-  .toc .d { color: var(--soft); font-size: 9pt; flex: 1; }
-  .toc .p { font-family: var(--mono); font-weight: 600; font-size: 9pt; min-width: 8mm; text-align: right; }
-
-  /* ---------- UI drawings ---------- */
-  .ui {
-    border: 1.5px solid var(--ink); background: #fff; padding: 4mm; margin: 2mm 0 2mm;
-    font-family: var(--body); font-size: 9pt; break-inside: avoid;
-  }
-  .ui-caption { font-family: var(--mono); font-size: 7pt; letter-spacing: 0.14em; text-transform: uppercase; color: var(--soft); margin: 0 0 5mm; }
-  .ui .lbl { font-family: var(--mono); font-size: 6.6pt; letter-spacing: 0.2em; text-transform: uppercase; color: var(--soft); margin-bottom: 1mm; display: block; }
-  .ui .field { border: 1px solid #bdbdbd; padding: 1.8mm 2.5mm; min-height: 7.5mm; margin-bottom: 3mm; color: #222; }
-  .ui .field.ph { color: #9a9a9a; }
-  .ui .row { display: grid; gap: 2mm; align-items: center; margin-bottom: 2mm; }
-  .ui.sizes .row { grid-template-columns: 1fr 22mm 18mm; }
-  .ui.sizes .row .field { margin: 0; min-height: 0; padding: 1.4mm 2.2mm; }
-  .ui.sizes .row .mini { padding: 1.4mm 1mm; }
-  .ui .mini { font-family: var(--mono); font-size: 6.8pt; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 1.6mm 2.4mm; border: 1px solid #bdbdbd; text-align: center; }
-  .ui .mini.dark { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .ui .btns { display: flex; flex-wrap: wrap; gap: 2mm; margin-top: 2mm; }
-  .ui .total { font-family: var(--mono); font-size: 7pt; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 3mm; }
-  .tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1.5px solid var(--ink); }
-  .tabs span { font-family: var(--mono); font-size: 6.8pt; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 2mm 2.4mm; border: 1px solid var(--line); border-bottom: none; margin-right: -1px; }
-  .tabs span.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .photos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2mm; }
-  .photo { border: 1px solid #bdbdbd; padding: 1.5mm; }
-  .photo .img { height: 13mm; background: repeating-linear-gradient(135deg, #f1f1f1 0 3px, #e4e4e4 3px 6px); position: relative; }
-  .photo .img .main { position: absolute; left: 0; top: 0; background: var(--ink); color: #fff; font-family: var(--mono); font-size: 5.6pt; font-weight: 600; letter-spacing: 0.14em; padding: 0.6mm 1.2mm; }
-  .photo .ctl { display: flex; gap: 1mm; margin-top: 1.5mm; align-items: center; font-family: var(--mono); font-size: 6pt; }
-  .photo .ctl span { border: 1px solid #bdbdbd; padding: 0 1.3mm; }
-  .photo .ctl u { margin-left: auto; letter-spacing: 0.08em; }
-
-  /* type this → riders see */
-  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 2mm 0 5mm; break-inside: avoid; }
-  .split .pane { border: 1.5px solid var(--ink); }
-  .split .head { background: var(--ink); color: #fff; font-family: var(--mono); font-size: 7pt; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; padding: 1.8mm 3mm; }
-  .split pre { margin: 0; padding: 3mm; font-family: var(--mono); font-size: 7.9pt; line-height: 1.55; white-space: pre-wrap; }
-  .split .render { padding: 3mm 3.5mm; font-size: 9pt; line-height: 1.5; color: #333; }
-  .split .render .h { font-family: var(--display); font-weight: 800; text-transform: uppercase; font-size: 12pt; color: var(--ink); margin: 2.5mm 0 1mm; }
-  .split .render ul { margin: 0 0 1mm; padding-left: 4.5mm; list-style: square; }
-  .split .render p { margin: 0 0 1.5mm; }
-
-  /* size chips as riders see them */
-  .chips { display: flex; gap: 2mm; flex-wrap: wrap; margin: 1mm 0 2mm; }
-  .chip { border: 1px solid #bdbdbd; font-family: var(--mono); font-size: 7.6pt; font-weight: 600; padding: 1.4mm 2.6mm; }
-  .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .chip.out { color: #a5a5a5; text-decoration: line-through; }
-  .chip small { font-weight: 400; opacity: 0.7; margin-left: 1mm; }
-
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
-  .avoid { break-inside: avoid; }
-
-  /* quick reference */
-  .qr td { font-size: 9pt; padding: 1.8mm 2.6mm; }
-  .qr td:nth-child(2) { font-family: var(--mono); font-size: 7.8pt; font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; }
-</style>
+<link rel="stylesheet" href="guide.css">
 </head>
 <body>
 
@@ -258,18 +25,19 @@
   <ol class="toc">
     <li><span class="n">01</span><span class="t">Before you start</span><span class="d">The four golden rules</span><span class="p" data-pg="s01"></span></li>
     <li><span class="n">02</span><span class="t">Signing in</span><span class="d">Getting into the back office</span><span class="p" data-pg="s02"></span></li>
-    <li><span class="n">03</span><span class="t">A tour of the back office</span><span class="d">The eight tabs</span><span class="p" data-pg="s03"></span></li>
+    <li><span class="n">03</span><span class="t">A tour of the back office</span><span class="d">The nine tabs</span><span class="p" data-pg="s03"></span></li>
     <li><span class="n">04</span><span class="t">Adding a new product</span><span class="d">Every field, top to bottom</span><span class="p" data-pg="s04"></span></li>
     <li><span class="n">05</span><span class="t">Writing a description</span><span class="d">Plain text, no code</span><span class="p" data-pg="s05"></span></li>
     <li><span class="n">06</span><span class="t">Product photos</span><span class="d">Adding, ordering, removing</span><span class="p" data-pg="s06"></span></li>
     <li><span class="n">07</span><span class="t">Stock and sizes</span><span class="d">Bikes, helmets, shoes, clothing</span><span class="p" data-pg="s07"></span></li>
     <li><span class="n">08</span><span class="t">Finding and editing products</span><span class="d">Search, edit, delete, Daily Listings</span><span class="p" data-pg="s08"></span></li>
-    <li><span class="n">09</span><span class="t">The auction</span><span class="d">Lots, photos, LKR prices, end times</span><span class="p" data-pg="s09"></span></li>
-    <li><span class="n">10</span><span class="t">Inquiry Inbox</span><span class="d">Replying to riders with a price</span><span class="p" data-pg="s10"></span></li>
-    <li><span class="n">11</span><span class="t">Membership</span><span class="d">Applications, Clients, Accounts</span><span class="p" data-pg="s11"></span></li>
-    <li><span class="n">12</span><span class="t">Enquiries and Coaching</span><span class="d">Contact messages, programs, coaches</span><span class="p" data-pg="s12"></span></li>
-    <li><span class="n">13</span><span class="t">Common problems</span><span class="d">What to do when something goes wrong</span><span class="p" data-pg="s13"></span></li>
-    <li><span class="n">14</span><span class="t">Quick reference</span><span class="d">Every common job on one page</span><span class="p" data-pg="s14"></span></li>
+    <li><span class="n">09</span><span class="t">Brands</span><span class="d">Add, rename, fix a product's brand</span><span class="p" data-pg="s09"></span></li>
+    <li><span class="n">10</span><span class="t">The auction</span><span class="d">Lots, photos, LKR prices, end times</span><span class="p" data-pg="s10"></span></li>
+    <li><span class="n">11</span><span class="t">Inquiry Inbox</span><span class="d">Replying to riders with a price</span><span class="p" data-pg="s11"></span></li>
+    <li><span class="n">12</span><span class="t">Membership</span><span class="d">Applications, Clients, Accounts</span><span class="p" data-pg="s12"></span></li>
+    <li><span class="n">13</span><span class="t">Enquiries and Coaching</span><span class="d">Contact messages, programs, coaches</span><span class="p" data-pg="s13"></span></li>
+    <li><span class="n">14</span><span class="t">Common problems</span><span class="d">What to do when something goes wrong</span><span class="p" data-pg="s14"></span></li>
+    <li><span class="n">15</span><span class="t">Quick reference</span><span class="d">Every common job on one page</span><span class="p" data-pg="s15"></span></li>
   </ol>
 </section>
 
@@ -332,10 +100,10 @@
 <section class="page" id="s03">
   <p class="kicker">Section 03</p>
   <h2><span class="num">03</span>A tour of the back office</h2>
-  <p class="lead">The back office has eight tabs along the top. A number in brackets means something is waiting for you, for example <b>Inquiry Inbox (3)</b>.</p>
+  <p class="lead">The back office has nine tabs along the top. A number in brackets means something is waiting for you, for example <b>Inquiry Inbox (3)</b>.</p>
 
   <div class="ui" style="padding:3mm">
-    <div class="tabs"><span class="on">Inquiry Inbox (3)</span><span>Applications (1)</span><span>Clients</span><span>Enquiries</span><span>Products</span><span>Coaching</span><span>Auction</span><span>Accounts</span></div>
+    <div class="tabs"><span class="on">Inquiry Inbox (3)</span><span>Applications (1)</span><span>Clients</span><span>Enquiries</span><span>Products</span><span>Brands</span><span>Coaching</span><span>Auction</span><span>Accounts</span></div>
   </div>
   <p class="ui-caption">The tab row. The back office opens on Inquiry Inbox</p>
 
@@ -347,6 +115,7 @@
       <tr><td>Clients</td><td>Approved members. You can suspend or reactivate them</td><td>Now and then</td></tr>
       <tr><td>Enquiries</td><td>Messages from the website's Contact page. Read only</td><td>Every day</td></tr>
       <tr><td>Products</td><td>Everything in the shop: add, edit, photos, stock, sizes</td><td>Whenever stock changes</td></tr>
+      <tr><td>Brands</td><td>The brand list: add a brand, fix a name, choose its aisles</td><td>When a new brand arrives</td></tr>
       <tr><td>Coaching</td><td>Training programs and the coaches list</td><td>Now and then</td></tr>
       <tr><td>Auction</td><td>Auction lots: photos, bids, end times</td><td>While an auction runs</td></tr>
       <tr><td>Accounts</td><td>Everyone who has signed up on the website</td><td>Now and then</td></tr>
@@ -374,7 +143,7 @@
     <thead><tr><th style="width:30%">Field</th><th>What to enter</th></tr></thead>
     <tbody>
       <tr><td>Name <span class="req">*</span></td><td>The name riders see, for example <code>S-Works Tarmac SL9 — Red</code>. Put the colour in the name.</td></tr>
-      <tr><td>Brand <span class="req">*</span></td><td>Pick the brand from the list.</td></tr>
+      <tr><td>Brand <span class="req">*</span></td><td>Pick the brand from the list. Not there? Add it in the Brands tab first (section 09).</td></tr>
       <tr><td>Category <span class="req">*</span></td><td>Pick the aisle, for example Road Bikes or Helmets.</td></tr>
       <tr><td>Product type <span class="req">*</span></td><td>Pick the type. This list changes to match the Category, so choose the Category first.</td></tr>
       <tr><td>Description</td><td>The text riders read. See section 05.</td></tr>
@@ -625,7 +394,48 @@ Weight: 8.6kg</pre>
 <!-- =============================== 09 =============================== -->
 <section class="page" id="s09">
   <p class="kicker">Section 09</p>
-  <h2><span class="num">09</span>The auction</h2>
+  <h2><span class="num">09</span>Brands</h2>
+  <p class="lead">Brands live in the <b>Brands</b> tab. Add a brand there once, and it appears in the <b>Brand</b> menu on every product. Rename it there, and every product carrying it changes at once.</p>
+
+  <div class="two">
+    <div>
+      <h3>To add a brand (e.g. Factor)</h3>
+      <ol class="steps">
+        <li>Open the <b>Brands</b> tab. Search first, in case it's already there.</li>
+        <li>Press <span class="btn">+ Add new</span>.</li>
+        <li>Type the <b>Brand name</b> exactly as riders should see it.</li>
+        <li>Tick the <b>Aisles it belongs in</b>, for example Road Bikes.</li>
+        <li>Press <span class="btn">Save</span>.</li>
+      </ol>
+    </div>
+    <div>
+      <h3>To give a product its brand</h3>
+      <ol class="steps">
+        <li>Open the <b>Products</b> tab and <span class="btn ghost">Edit</span> the product.</li>
+        <li>Choose the brand in the <b>Brand</b> menu. A new product starts on <b>— Pick a brand —</b>.</li>
+        <li>Press <span class="btn">Save</span>.</li>
+      </ol>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:34%">You want to…</th><th>Do this</th></tr></thead>
+    <tbody>
+      <tr><td>Correct a brand's name</td><td>Brands → <b>Edit</b> → change <b>Brand name</b> → <b>Save</b>. Every product updates.</td></tr>
+      <tr><td>Change the aisles it's listed under</td><td>Brands → <b>Edit</b> → tick or untick aisles → <b>Save</b>.</td></tr>
+      <tr><td>Take it off the Brands page</td><td>Brands → <b>Edit</b> → untick <b>Show on the Brands page</b> → <b>Save</b>.</td></tr>
+      <tr><td>Delete it</td><td>Brands → <b>Delete</b> → <b>OK</b>. Only works once no product uses the brand.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note"><span class="label">When a new brand shows on the website</span><p>On the Brands page, as soon as you save it. In the aisle menus and the shop's brand filter, once a product with that brand is saved <b>with stock</b>. The menus only list brands you have.</p></div>
+  <p>The separate <b>Brands Quick Guide</b> walks through these with the Factor and Scott Addict 50 examples.</p>
+</section>
+
+<!-- =============================== 10 =============================== -->
+<section class="page" id="s10">
+  <p class="kicker">Section 10</p>
+  <h2><span class="num">10</span>The auction</h2>
   <p class="lead">Auction lots show on the Auction page and the homepage, with their photos, current bid and a countdown to the end time. Prices show in Sri Lankan rupees (LKR) unless you choose another currency.</p>
 
   <h3>To add a lot</h3>
@@ -661,10 +471,10 @@ Weight: 8.6kg</pre>
   </table>
 </section>
 
-<!-- =============================== 10 =============================== -->
-<section class="page" id="s10">
-  <p class="kicker">Section 10</p>
-  <h2><span class="num">10</span>Inquiry Inbox</h2>
+<!-- =============================== 11 =============================== -->
+<section class="page" id="s11">
+  <p class="kicker">Section 11</p>
+  <h2><span class="num">11</span>Inquiry Inbox</h2>
   <p class="lead">There are no prices on the shop. When a rider presses <b>Club price</b> on a product, a conversation opens here and you reply with the price.</p>
 
   <h3>To answer a rider</h3>
@@ -690,10 +500,10 @@ Weight: 8.6kg</pre>
   <div class="note"><span class="label">Attachments</span><p>Up to 5 files per message, 10MB each. Photos (JPEG, PNG, WebP, AVIF, GIF) or PDFs.</p></div>
 </section>
 
-<!-- =============================== 11 =============================== -->
-<section class="page" id="s11">
-  <p class="kicker">Section 11</p>
-  <h2><span class="num">11</span>Membership</h2>
+<!-- =============================== 12 =============================== -->
+<section class="page" id="s12">
+  <p class="kicker">Section 12</p>
+  <h2><span class="num">12</span>Membership</h2>
   <p class="lead">People apply to join the club on the website's Apply page. Each application arrives in the <b>Applications</b> tab. Approving one creates a member in <b>Clients</b>.</p>
 
   <h3>To approve or reject an application</h3>
@@ -725,10 +535,10 @@ Weight: 8.6kg</pre>
   <p>The admin's own account is marked <b>ADMIN</b> and has no buttons.</p>
 </section>
 
-<!-- =============================== 12 =============================== -->
-<section class="page" id="s12">
-  <p class="kicker">Section 12</p>
-  <h2><span class="num">12</span>Enquiries and Coaching</h2>
+<!-- =============================== 13 =============================== -->
+<section class="page" id="s13">
+  <p class="kicker">Section 13</p>
+  <h2><span class="num">13</span>Enquiries and Coaching</h2>
 
   <h3>Enquiries</h3>
   <p>Shows the latest 50 messages sent from the website's <b>Contact</b> page: topic, date, name, email and message. You can't reply from here. Reply from your own email to the address shown. Press <span class="btn ghost">Refresh</span> at the top to check for new ones.</p>
@@ -746,10 +556,10 @@ Weight: 8.6kg</pre>
   <p>Adding, editing and deleting work the same way as products: <b>+ Add new</b> or <b>Edit</b>, fill in, <b>Save</b>.</p>
 </section>
 
-<!-- =============================== 13 =============================== -->
-<section class="page" id="s13">
-  <p class="kicker">Section 13</p>
-  <h2><span class="num">13</span>Common problems</h2>
+<!-- =============================== 14 =============================== -->
+<section class="page" id="s14">
+  <p class="kicker">Section 14</p>
+  <h2><span class="num">14</span>Common problems</h2>
   <p class="lead">Find your problem in the left column. If it isn't here, take a screenshot and send it to your web team with a short note of what you were trying to do.</p>
   <table>
     <thead><tr><th style="width:40%">Problem</th><th>What to do</th></tr></thead>
@@ -760,6 +570,7 @@ Weight: 8.6kg</pre>
       <tr><td>A photo won't upload</td><td>It must be under 5MB and a JPEG, PNG, WebP or AVIF. Screenshot the photo on your phone and upload the screenshot instead.</td></tr>
       <tr><td>I pressed Cancel and my new photos have gone</td><td>Cancel throws away everything from that visit to the form. Upload them again and press Save.</td></tr>
       <tr><td>Search can't find a product</td><td>Search by a word in the name, or the brand. Search does not look inside descriptions.</td></tr>
+      <tr><td>The brand I need isn't in the Brand menu</td><td>Add it in the Brands tab (section 09), then edit the product again.</td></tr>
       <tr><td>The Product type I want isn't in the list</td><td>Pick the right Category first. Product types change to match it.</td></tr>
       <tr><td>The Stock on hand box has disappeared</td><td>The product has sizes, or is set to Pre-owned. Set stock per size.</td></tr>
       <tr><td>A product shows Out of stock</td><td>Its stock, or every one of its sizes, is 0. Edit it and enter the stock.</td></tr>
@@ -770,10 +581,10 @@ Weight: 8.6kg</pre>
   </table>
 </section>
 
-<!-- =============================== 14 =============================== -->
-<section class="page" id="s14">
-  <p class="kicker">Section 14</p>
-  <h2><span class="num">14</span>Quick reference</h2>
+<!-- =============================== 15 =============================== -->
+<section class="page" id="s15">
+  <p class="kicker">Section 15</p>
+  <h2><span class="num">15</span>Quick reference</h2>
   <p class="lead">Every common job on one page. Print it and keep it by the computer.</p>
   <table class="qr">
     <thead><tr><th style="width:44%">I want to…</th><th style="width:22%">Tab</th><th>Press</th></tr></thead>
@@ -786,6 +597,8 @@ Weight: 8.6kg</pre>
       <tr><td>Feature a product on the homepage</td><td>Products</td><td>Edit → tick Featured → Save</td></tr>
       <tr><td>Put a product on sale</td><td>Products</td><td>Edit → tick Clearance → Save</td></tr>
       <tr><td>Remove a product for good</td><td>Products</td><td>Delete → OK</td></tr>
+      <tr><td>Add a new brand</td><td>Brands</td><td>+ Add new → name → aisles → Save</td></tr>
+      <tr><td>Correct a brand's name</td><td>Brands</td><td>Search → Edit → Brand name → Save</td></tr>
       <tr><td>Add an auction lot</td><td>Auction</td><td>+ Add new → fill in → Save</td></tr>
       <tr><td>Update a bid</td><td>Auction</td><td>Edit → Current bid + Bid count → Save</td></tr>
       <tr><td>Extend an auction</td><td>Auction</td><td>Edit → Ends at → Save</td></tr>

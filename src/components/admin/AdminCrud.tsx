@@ -157,6 +157,10 @@ export default function AdminCrud({
   searchColumns,
   sortOptions,
   pageSize,
+  idColumn = "id",
+  prepareSave,
+  friendlyError,
+  onChanged,
 }: {
   sb: SupabaseClient;
   table: string;
@@ -181,7 +185,18 @@ export default function AdminCrud({
   sortOptions?: SortOption[];
   /** Rows per page. Omit to load the whole table as before. */
   pageSize?: number;
+  /** The table's primary key. Brands are keyed by `slug`, not `id`. */
+  idColumn?: string;
+  /** Last word on a save, after the field checks: return the payload to
+      write (adjusted, e.g. a new brand's slug made from its name) or a
+      sentence to show the admin instead of saving. */
+  prepareSave?: (payload: RowData, isNew: boolean) => Promise<RowData | string> | RowData | string;
+  /** Turns a database error into words the club can act on. */
+  friendlyError?: (message: string) => string;
+  /** Called after a successful save or delete. */
+  onChanged?: () => void;
 }) {
+  const say = (message: string) => (friendlyError ? friendlyError(message) : message);
   const [rows, setRows] = useState<RowData[]>([]);
   const [editing, setEditing] = useState<RowData | null>(null);
   const [isNew, setIsNew] = useState(false);
@@ -268,7 +283,7 @@ export default function AdminCrud({
       q = q.order(sortCol, { ascending: sortAsc, nullsFirst: false });
       // A stable tie-break, or two rows listed on the same day swap places
       // between pages and one of them is never shown.
-      if (sortCol !== "id") q = q.order("id", { ascending: true });
+      if (sortCol !== idColumn) q = q.order(idColumn, { ascending: true });
     } else {
       q = q.order(orderBy);
     }
@@ -294,6 +309,7 @@ export default function AdminCrud({
     searchKey,
     sortCol,
     sortAsc,
+    idColumn,
   ]);
 
   useEffect(() => {
@@ -393,7 +409,7 @@ export default function AdminCrud({
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!editing) return;
-    const payload: RowData = { id: editing.id };
+    let payload: RowData = { [idColumn]: editing[idColumn] };
     for (const f of fields) {
       if (f.type === "multiselect" || f.type === "images" || f.type === "variants") {
         const list =
@@ -438,14 +454,24 @@ export default function AdminCrud({
     }
     setBusy(true);
     setError(null);
+    if (prepareSave) {
+      const prepared = await prepareSave(payload, isNew);
+      if (typeof prepared === "string") {
+        setBusy(false);
+        setError(prepared);
+        return;
+      }
+      payload = prepared;
+    }
     const { error: err } = isNew
       ? await sb.from(table).insert(payload)
-      : await sb.from(table).update(payload).eq("id", editing.id as string);
+      : await sb.from(table).update(payload).eq(idColumn, editing[idColumn] as string);
     setBusy(false);
     if (err) {
-      setError(err.message);
+      setError(say(err.message));
       return;
     }
+    onChanged?.();
     // The row is saved — now bin the images the admin took off it.
     const removed = sessionRemovals;
     setSessionUploads([]);
@@ -461,11 +487,12 @@ export default function AdminCrud({
     const { error: err } = await sb
       .from(table)
       .delete()
-      .eq("id", r.id as string);
+      .eq(idColumn, r[idColumn] as string);
     if (err) {
-      setError(err.message);
+      setError(say(err.message));
       return;
     }
+    onChanged?.();
     // Take the product's photography with it.
     for (const f of fields) {
       if (f.type !== "images" || !f.bucket) continue;
@@ -479,7 +506,7 @@ export default function AdminCrud({
     const { error: err } = await sb
       .from(table)
       .update(patch)
-      .eq("id", r.id as string);
+      .eq(idColumn, r[idColumn] as string);
     if (err) setError(err.message);
     else load();
   }
@@ -704,6 +731,7 @@ export default function AdminCrud({
                         );
                       })}
                     </div>
+                    {f.hint && <p className="mt-1.5 text-xs leading-relaxed text-ink-soft">{f.hint}</p>}
                   </fieldset>
                 ) : f.type === "checkbox" ? (
                   <label className="flex cursor-pointer items-center gap-2.5 pt-6 text-sm">
@@ -843,7 +871,7 @@ export default function AdminCrud({
           const thumb = imageField ? asArray(r[imageField.key])[0] : undefined;
           return (
             <div
-              key={String(r.id)}
+              key={String(r[idColumn])}
               className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-line py-3.5"
             >
               {imageField &&

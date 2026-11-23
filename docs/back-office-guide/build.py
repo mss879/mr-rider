@@ -1,7 +1,10 @@
-"""Render guide.html to ../MR-RIDER-Back-Office-Guide.pdf with headless Chrome.
+"""Render the client guides to PDF with headless Chrome.
 
-Two passes: the first finds which page each section starts on, the second
-prints the contents page with those page numbers filled in.
+    guide.html  -> docs/MR-RIDER-Back-Office-Guide.pdf
+    brands.html -> docs/MR-RIDER-Brands-Quick-Guide.pdf
+
+Two passes each: the first finds which page each section starts on, the
+second prints the contents page with those page numbers filled in.
 
     python3 docs/back-office-guide/build.py
 """
@@ -9,8 +12,10 @@ import base64, pathlib, re, subprocess, sys, tempfile
 import fitz  # PyMuPDF
 
 HERE = pathlib.Path(__file__).resolve().parent
-SRC = HERE / "guide.html"
-OUT = HERE.parent / "MR-RIDER-Back-Office-Guide.pdf"
+GUIDES = {
+    "guide.html": "MR-RIDER-Back-Office-Guide.pdf",
+    "brands.html": "MR-RIDER-Brands-Quick-Guide.pdf",
+}
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 
@@ -53,8 +58,8 @@ def inline_fonts(html: str) -> str:
     return html.replace('<link rel="stylesheet" href="fonts/fonts.css">', f"<style>{css}</style>")
 
 
-def main() -> None:
-    html = inline_fonts(SRC.read_text(encoding="utf-8"))
+def build(src: pathlib.Path, out: pathlib.Path) -> None:
+    html = inline_fonts(src.read_text(encoding="utf-8"))
     tmp_html = HERE / ".guide.filled.html"  # beside the source so ../../public/logo.png resolves
     try:
         tmp_html.write_text(html, encoding="utf-8")
@@ -71,11 +76,17 @@ def main() -> None:
     )
     tmp_html.write_text(filled, encoding="utf-8")
     try:
-        render(tmp_html, OUT)
+        render(tmp_html, out)
     finally:
         tmp_html.unlink(missing_ok=True)
-    with fitz.open(OUT) as doc:
-        print(f"{OUT.relative_to(HERE.parent.parent)}: {doc.page_count} pages; sections {pages}")
+    with fitz.open(out) as doc:
+        print(f"{out.relative_to(HERE.parent.parent)}: {doc.page_count} pages; sections {pages}")
+
+
+def main() -> None:
+    for src, out in GUIDES.items():
+        if (HERE / src).exists():
+            build(HERE / src, HERE.parent / out)
 
 
 if __name__ == "__main__":

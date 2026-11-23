@@ -35,6 +35,7 @@ Run them **in numeric order** in the Supabase dashboard → **SQL Editor**
 | 23 | `23_specialized_catalogue_import.sql` | The Specialized NZ range — 367 products and four new bike aisles (Mountain, E-Bikes, City & Active, Kids). Adds only; deletes nothing | 12, 13, 15, 16, 17, 20 |
 | 24 | `24_specialized_stock_floor.sql` | Every product from 23 starts at 10+ in stock (it arrived with Specialized NZ's warehouse numbers) | 23 |
 | 25 | `25_sizes_and_auction_photos.sql` | Sizes with their own stock on products (`variants`), photos on auction lots, and a currency per lot (LKR by default) | 04, 13, 20 |
+| 26 | `26_brands_managed_in_admin.sql` | Brands are managed from /admin → Brands: `brands.categories` (aisles), five names corrected, admin write policies | 08, 12 |
 
 Every file is idempotent (`if not exists` / `on conflict do nothing`), so
 re-running one is safe on its own. Two ordering caveats:
@@ -102,6 +103,12 @@ server console.
   `'{specialized}'` on an S-Works item) instead of duplicating the row. SQL
   only — the admin form's picker for this was removed in QA round 2 (BUG-02);
   stored values still drive the shop's brand rail and the mega-menu.
+- **Brands**: added, renamed and given aisles from /admin → Brands. The site
+  reads `public.brands` (`loadBrands()` in `src/lib/db.ts`, refreshed every
+  minute) and lays it over the starting list in `src/lib/taxonomy.ts`
+  (`applyBrandRows`), so a brand added there needs no code change. A brand's
+  `slug` is made from its name once and never changes; renaming touches only
+  `name`. A brand with products cannot be deleted (`products.brand` FK).
 - **Sizes**: bikes, helmets, shoes and clothing can carry sizes, each with
   its own stock, from /admin → Products → Edit → Sizes. Stored in
   `products.variants` as `[{"size": "54", "stock": 1}, …]`; when a product

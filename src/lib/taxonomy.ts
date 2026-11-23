@@ -58,6 +58,8 @@ export type Brand = {
   subcategory?: string;
   /** MR.RIDER's own label — kept out of the client brand directory listing. */
   house?: boolean;
+  /** Unticked "Show on the Brands page" in the admin (brands.in_directory). */
+  hidden?: boolean;
   note?: string;
 };
 
@@ -1202,6 +1204,115 @@ export function subcategoriesOf(
 
 /** The client brand directory — the club's own label is listed separately. */
 export const directoryBrands = brands.filter((b) => !b.house);
+
+/* ---------------------------------------------------------------
+   BRANDS FROM THE DATABASE (migration 26)
+
+   The list above is the client-approved starting point. The live list is
+   public.brands, which the club edits from /admin → Brands: a new brand, a
+   corrected name, the aisles a brand belongs in, whether it is listed on
+   /brands. applyBrandRows() lays those rows over this module, in place, so
+   every brandName(), brandsOf(), directoryBrands and menu section in the
+   app — server and browser alike — reads the club's current list without
+   each caller having to fetch it.
+
+   Called on the server by loadBrands() (lib/db.ts) and in the browser by
+   <BrandSync> in the root layout, with the same rows, so the two render the
+   same thing. Idempotent: the same rows twice is a no-op.
+   --------------------------------------------------------------- */
+
+/** One row of public.brands, as the site reads it. */
+export type BrandRow = {
+  slug: string;
+  name: string;
+  /** Absent until migration 26 runs — the code's aisles are kept then. */
+  categories?: string[] | null;
+  in_directory?: boolean | null;
+  house?: boolean | null;
+};
+
+const BASE_BRANDS: Brand[] = brands.map((b) => ({ ...b, categories: [...b.categories] }));
+const BASE_BRAND_SECTIONS: string[][][] = categories.map((c) =>
+  c.sections.filter((s) => s.kind === "brand").map((s) => [...s.items]),
+);
+let appliedBrandRows = "";
+
+export function applyBrandRows(rows: BrandRow[] | null | undefined): void {
+  // No rows = the database was unreachable or empty; the code's list stands.
+  if (!rows || rows.length === 0) return;
+  const key = JSON.stringify(rows);
+  if (key === appliedBrandRows) return;
+  appliedBrandRows = key;
+
+  const base = new Map(BASE_BRANDS.map((b) => [b.slug, b]));
+  const next: Brand[] = rows
+    .filter((r) => r.slug && r.name)
+    .map((r) => {
+      const known = base.get(r.slug);
+      return {
+        ...(known ?? { treatment: "filter" as const }),
+        slug: r.slug,
+        name: r.name,
+        categories: Array.isArray(r.categories) ? r.categories : (known?.categories ?? []),
+        house: r.house ?? known?.house ?? undefined,
+        hidden: r.in_directory === false || undefined,
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+
+  brands.splice(0, brands.length, ...next);
+  brandBySlug.clear();
+  for (const b of brands) brandBySlug.set(b.slug, b);
+  directoryBrands.splice(
+    0,
+    directoryBrands.length,
+    ...brands.filter((b) => !b.house && !b.hidden),
+  );
+
+  /* Menu columns. The approved placements stay where the sheet put them, as
+     long as the brand still exists and still lists that aisle.
+
+     The sheet gave many brands an aisle without a menu link (Look under Road
+     Bikes, most accessory brands), so "belongs in the aisle" cannot by itself
+     mean "linked from its menu". Only what the club ADDS in the admin does:
+     a new brand's aisles, or an aisle newly ticked on an existing brand. That
+     joins the aisle's "Shop by Brand" column (its last brand column where it
+     has none by that name, e.g. Accessories → Other Brands). Aisles with no
+     brand column at all (Components, Apparel…) offer brands through the shop
+     filters only, as before. */
+  const added = (b: Brand, cat: string) => {
+    const known = base.get(b.slug);
+    return !known || !known.categories.includes(cat);
+  };
+  categories.forEach((c, ci) => {
+    const sections = c.sections.filter((s) => s.kind === "brand");
+    if (sections.length === 0) return;
+    const belongs = (slug: string) => brandBySlug.get(slug)?.categories.includes(c.slug) ?? false;
+    sections.forEach((s, si) => {
+      s.items = (BASE_BRAND_SECTIONS[ci][si] ?? []).filter(belongs);
+    });
+    const target =
+      sections.find((s) => /^shop by brand/i.test(s.title)) ?? sections[sections.length - 1];
+    const placed = new Set(sections.flatMap((s) => s.items));
+    for (const b of brands) {
+      if (b.house || placed.has(b.slug) || !b.categories.includes(c.slug)) continue;
+      if (added(b, c.slug)) target.items.push(b.slug);
+    }
+  });
+}
+
+/** Lower-case, hyphenated id for a new brand: "Factor" → "factor",
+    "100%" → "100-percent", "Muc-Off" → "muc-off". */
+export function brandSlug(name: string): string {
+  return name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/%/g, " percent ")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 /* Aisles that navigate CATEGORY → BRAND → MODEL rather than
    category → product type.
